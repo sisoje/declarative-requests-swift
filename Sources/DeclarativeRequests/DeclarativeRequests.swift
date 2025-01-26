@@ -103,7 +103,35 @@ struct RequestBuilderGroup: BuilderNode {
 
 @resultBuilder
 struct RequestBuilder {
-    static func buildBlock(_ nodes: BuilderNode...) -> [BuilderNode] {
-        nodes
+    static func buildBlock() -> [BuilderNode] {
+        []
+    }
+    
+    static func buildBlock(_ components: BuilderNode...) -> [BuilderNode] {
+        components
+    }
+    
+    static func buildExpression(_ expression: BuilderNode) -> [BuilderNode] {
+        [expression]
+    }
+    
+    static func buildEither(first component: [BuilderNode]) -> [BuilderNode] {
+        component
+    }
+    
+    static func buildBlock(_ components: [any BuilderNode]...) -> [any BuilderNode] {
+        components.flatMap { $0 }
+    }
+    
+    static func buildEither(second component: [BuilderNode]) -> [BuilderNode] {
+        component
+    }
+    
+    static func buildOptional(_ component: [BuilderNode]?) -> [BuilderNode] {
+        component ?? []
+    }
+    
+    static func buildArray(_ components: [[BuilderNode]]) -> [BuilderNode] {
+        components.flatMap { $0 }
     }
 }

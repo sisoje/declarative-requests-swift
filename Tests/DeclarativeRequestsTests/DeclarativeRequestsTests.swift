@@ -3,10 +3,21 @@ import Testing
 import Foundation
 
 @Test func example() async throws {
+    var getFirst = true
+    
     let builder = RequestBuilderGroup {
         HttpMethod(method: .GET)
-        AddQueryParams(params: ["tripId": "1"])
-        Endpoint(path: "/getTrip")
+        
+        if getFirst {
+            AddQueryParams(params: ["tripId": "1"])
+        } else {
+            AddQueryParams(params: ["tripId": "2"])
+        }
+        
+        for _ in 0...0 {
+            Endpoint(path: "/getTrip")
+        }
+        
         CreateURL()
     }
     
