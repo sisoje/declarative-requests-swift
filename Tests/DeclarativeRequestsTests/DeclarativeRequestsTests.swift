@@ -3,8 +3,15 @@ import Testing
 import Foundation
 import SwiftUI
 
+extension URLRequest {
+    init() {
+        self = URLRequest(url: .temporaryDirectory)
+        self.url = nil
+    }
+}
+
 final class RequestSourceOfTruth: Sendable {
-    init(baseUrl: URL? = nil, pathComponents: URLComponents = URLComponents(), request: URLRequest = .initial) {
+    init(baseUrl: URL? = nil, pathComponents: URLComponents = URLComponents(), request: URLRequest = .init()) {
         self.baseUrl = baseUrl
         self.request = request
         self.pathComponents = pathComponents
@@ -26,19 +33,21 @@ extension RequestSourceOfTruth {
 }
 
 @Test func example() async throws {
-    var getFirst = true
+    let getFirst = true
     
     let builder = RequestBuilderGroup {
         HttpMethod(method: .GET)
         
-        if getFirst {
-            AddQueryParams(params: ["tripId": "1"])
-        } else {
-            AddQueryParams(params: ["tripId": "2"])
-        }
-        
-        for _ in 0...0 {
-            Endpoint(path: "/getTrip")
+        RequestBuilderGroup {
+            if getFirst {
+                AddQueryParams(params: ["tripId": "1"])
+            } else {
+                AddQueryParams(params: ["tripId": "2"])
+            }
+            
+            for _ in 0...0 {
+                Endpoint(path: "/getTrip")
+            }
         }
         
         CreateURL()

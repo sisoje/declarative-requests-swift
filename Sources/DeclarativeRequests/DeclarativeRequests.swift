@@ -1,14 +1,6 @@
 import Foundation
 import SwiftUI
 
-extension URLRequest {
-    static let initial: URLRequest = {
-        var res = URLRequest(url: .temporaryDirectory)
-        res.url = nil
-        return res
-    }()
-}
-
 struct RequestState {
     var baseUrl: URL?
     @Binding var request: URLRequest
