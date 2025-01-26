@@ -38,6 +38,8 @@ extension RequestSourceOfTruth {
     let builder = RequestBuilderGroup {
         HttpMethod(method: .GET)
         
+        RequestBuilderGroup {}
+        
         RequestBuilderGroup {
             if getFirst {
                 AddQueryParams(params: ["tripId": "1"])

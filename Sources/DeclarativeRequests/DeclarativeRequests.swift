@@ -3,6 +3,7 @@ import SwiftUI
 
 struct RequestState {
     var baseUrl: URL?
+    
     @Binding var request: URLRequest
     @Binding var pathComponents: URLComponents
 }
