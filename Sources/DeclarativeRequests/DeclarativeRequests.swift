@@ -9,28 +9,6 @@ extension URLRequest {
     }()
 }
 
-final class RequestSourceOfTruth: Sendable {
-    init(baseUrl: URL? = nil, pathComponents: URLComponents = URLComponents(), request: URLRequest = .initial) {
-        self.baseUrl = baseUrl
-        self.request = request
-        self.pathComponents = pathComponents
-    }
-
-    let baseUrl: URL?
-    nonisolated(unsafe) var pathComponents: URLComponents
-    nonisolated(unsafe) var request: URLRequest
-}
-
-extension RequestSourceOfTruth {
-    var state: RequestState {
-        RequestState(
-            baseUrl: baseUrl,
-            request: Binding { self.request } set: { self.request = $0 },
-            pathComponents: Binding { self.pathComponents } set: { self.pathComponents = $0 }
-        )
-    }
-}
-
 struct RequestState {
     var baseUrl: URL?
     @Binding var request: URLRequest
