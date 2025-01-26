@@ -38,7 +38,7 @@ extension RequestSourceOfTruth {
     let builder = RequestBuilderGroup {
         HttpMethod(method: .GET)
         
-        RequestBuilderGroup {}
+        RequestBuilderGroup()
         
         RequestBuilderGroup {
             if getFirst {

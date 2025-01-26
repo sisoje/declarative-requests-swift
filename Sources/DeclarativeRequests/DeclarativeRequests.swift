@@ -63,6 +63,10 @@ struct Endpoint: BuilderNode {
 struct RequestBuilderGroup: BuilderNode {
     let nodes: [BuilderNode]
 
+    init() {
+        self.nodes = []
+    }
+    
     init(@RequestBuilder _ builder: () -> [BuilderNode]) {
         self.nodes = builder()
     }
