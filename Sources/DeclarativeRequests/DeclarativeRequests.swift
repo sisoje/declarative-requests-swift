@@ -74,7 +74,7 @@ struct RequestBuilderGroup: BuilderNode {
 
 @resultBuilder
 struct RequestBuilder {
-    /// Required to build empty result builder
+    /// Required to build empty block
     static func buildBlock() -> [BuilderNode] {
         []
     }
