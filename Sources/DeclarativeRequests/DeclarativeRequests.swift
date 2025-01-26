@@ -47,39 +47,15 @@ protocol BuilderNode {
     func modify(state: RequestState) throws
 }
 
-struct Post: BuilderNode {
-    func modify(state: RequestState) {
-        state.request.httpMethod = "POST"
+struct HttpMethod: BuilderNode {
+    enum Methods: String {
+        case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     }
-}
-
-struct Get: BuilderNode {
+    
+    let method: Methods
+    
     func modify(state: RequestState) {
-        state.request.httpMethod = "GET"
-    }
-}
-
-struct Delete: BuilderNode {
-    func modify(state: RequestState) {
-        state.request.httpMethod = "DELETE"
-    }
-}
-
-struct Put: BuilderNode {
-    func modify(state: RequestState) {
-        state.request.httpMethod = "PUT"
-    }
-}
-
-struct Head: BuilderNode {
-    func modify(state: RequestState) {
-        state.request.httpMethod = "HEAD"
-    }
-}
-
-struct Patch: BuilderNode {
-    func modify(state: RequestState) {
-        state.request.httpMethod = "PATCH"
+        state.request.httpMethod = method.rawValue
     }
 }
 

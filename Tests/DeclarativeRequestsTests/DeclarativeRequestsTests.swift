@@ -4,7 +4,7 @@ import Foundation
 
 @Test func example() async throws {
     let builder = RequestBuilderGroup {
-        Get()
+        HttpMethod(method: .GET)
         AddQueryParams(params: ["tripId": "1"])
         Endpoint(path: "/getTrip")
         CreateURL()
