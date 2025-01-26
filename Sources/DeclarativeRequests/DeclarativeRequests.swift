@@ -120,4 +120,24 @@ struct RequestBuilder {
     static func buildArray(_ components: [[BuilderNode]]) -> [BuilderNode] {
         components.flatMap { $0 }
     }
+    
+    /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
+    static func buildLimitedAvailability(_ component: [any BuilderNode]) -> [any BuilderNode] {
+        component
+    }
+    
+    /// Builds a partial result component from the first component
+    static func buildPartialBlock(first: [any BuilderNode]) -> [any BuilderNode] {
+        first
+    }
+    
+    /// Builds a partial result component by combining an accumulated component and a new component
+    static func buildPartialBlock(accumulated: [any BuilderNode], next: [any BuilderNode]) -> [any BuilderNode] {
+        accumulated + next
+    }
+    
+    /// If declared, this will be called on the partial result from the outermost block statement to produce the final returned result
+    static func buildFinalResult(_ component: [any BuilderNode]) -> [BuilderNode] {
+        component
+    }
 }
