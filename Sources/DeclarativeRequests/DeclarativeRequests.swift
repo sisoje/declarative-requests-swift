@@ -81,34 +81,42 @@ struct RequestBuilderGroup: BuilderNode {
 
 @resultBuilder
 struct RequestBuilder {
+    /// Required to build empty result builder
     static func buildBlock() -> [BuilderNode] {
         []
     }
     
+    /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: BuilderNode...) -> [BuilderNode] {
         components
     }
     
+    /// If declared, provides contextual type information for statement expressions to translate them into partial results
     static func buildExpression(_ expression: BuilderNode) -> [BuilderNode] {
         [expression]
     }
     
-    static func buildEither(first component: [BuilderNode]) -> [BuilderNode] {
-        component
-    }
-    
+    /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [any BuilderNode]...) -> [any BuilderNode] {
         components.flatMap { $0 }
     }
     
+    /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
+    static func buildEither(first component: [BuilderNode]) -> [BuilderNode] {
+        component
+    }
+    
+    /// With buildEither(second:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
     static func buildEither(second component: [BuilderNode]) -> [BuilderNode] {
         component
     }
     
+    /// Enables support for 'if' statements that do not have an 'else'
     static func buildOptional(_ component: [BuilderNode]?) -> [BuilderNode] {
         component ?? []
     }
     
+    /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
     static func buildArray(_ components: [[BuilderNode]]) -> [BuilderNode] {
         components.flatMap { $0 }
     }
