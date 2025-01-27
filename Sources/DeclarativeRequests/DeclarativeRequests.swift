@@ -40,23 +40,15 @@ protocol BuilderNode {
     func modify(state: inout RequestBuilderState) throws
 }
 
-struct HttpMethod: BuilderNode {
-    enum Methods: String {
-        case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
-    }
-    
-    private let rawValue: String
-    
-    init(_ method: Methods) {
-        rawValue = method.rawValue
-    }
-    
-    init(_ method: String) {
-        rawValue = method
-    }
-
+enum HttpMethod: String, BuilderNode {
+    case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     func modify(state: inout RequestBuilderState) {
         state.request.httpMethod = rawValue
+    }
+    static func custom(_ method: String) -> BuilderNode {
+        RequestBuilderGroup(builder: {
+            return { state in state.request.httpMethod = method }
+        })
     }
 }
 
