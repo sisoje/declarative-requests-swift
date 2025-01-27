@@ -15,18 +15,6 @@ extension Array where Element == RequestTransformer {
 }
 enum Transformer {
     static var nop: RequestTransformer { { _ in } }
-    static func oneNode(_ node: BuilderNode) -> RequestTransformer {
-        node.transformer
-    }
-
-    static func multiNode(_ nodes: [BuilderNode]) -> RequestTransformer {
-        nodes.map(\.transformer).reduced
-    }
-
-    static func merge(_ transformers: [RequestTransformer]) -> RequestTransformer {
-        transformers.reduced
-    }
-
     static func merge(_ transformers: RequestTransformer...) -> RequestTransformer {
         transformers.reduced
     }
@@ -108,22 +96,22 @@ struct RequestBuilder {
     }
 
     static func buildBlock(_ components: BuilderNode...) -> RequestTransformer {
-        Transformer.multiNode(components)
+        components.map(\.transformer).reduced
     }
 
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: RequestTransformer...) -> RequestTransformer {
-        Transformer.merge(components)
+        components.reduced
     }
 
     /// If declared, provides contextual type information for statement expressions to translate them into partial results
     static func buildExpression(_ expression: BuilderNode) -> RequestTransformer {
-        Transformer.oneNode(expression)
+        expression.transformer
     }
 
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [any BuilderNode]...) -> RequestTransformer {
-        Transformer.multiNode(components.flatMap { $0 })
+        components.flatMap { $0 }.map(\.transformer).reduced
     }
 
     /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
@@ -143,7 +131,7 @@ struct RequestBuilder {
 
     /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
     static func buildArray(_ components: [RequestTransformer]) -> RequestTransformer {
-        Transformer.merge(components)
+        components.reduced
     }
 
     /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
