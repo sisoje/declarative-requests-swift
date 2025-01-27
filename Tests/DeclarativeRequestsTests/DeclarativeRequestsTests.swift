@@ -3,9 +3,9 @@ import Foundation
 import SwiftUI
 import Testing
 
-@Test func testUrl() async throws {
-    let request = try await URL(string: "https://google.com/")?.request {
-        HttpMethod(.GET)
+@Test func testUrl() throws {
+    let request = try URL(string: "https://google.com/")?.request {
+        HttpMethod(method: .GET)
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
@@ -14,9 +14,7 @@ import Testing
 
 @Test(arguments: [true, false]) func testVarious(_ isFirst: Bool) async throws {
     let builder = RequestBuilderGroup {
-        HttpMethod(.GET)
-
-        RequestBuilderGroup()
+        HttpMethod(method: .GET)
 
         RequestBuilderGroup {
             if isFirst {
@@ -33,10 +31,10 @@ import Testing
         BaseURL(url: URL(string: "https://google.com")!)
     }
 
-    let source = RequestSourceOfTruth()
+    var source = RequestBuilderState()
 
-    try await builder.modify(state: source.state)
-    let request = await source.request
+    try builder.modify(state: &source)
+    let request = source.request
 
     if isFirst {
         #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")

@@ -1,19 +1,43 @@
 import Foundation
 import SwiftUI
 
-struct RequestState {
-    @Binding var request: URLRequest
-    @Binding var pathComponents: URLComponents
-}
+typealias RequestTransformer = (inout RequestBuilderState) throws -> Void
 
-extension RequestState {
-    func runBuilder(@RequestBuilder _ builder: () -> [BuilderNode]) throws {
-        try builder().forEach { try $0.modify(state: self) }
+enum Transformer {
+    static var nop: RequestTransformer { { _ in } }
+    static func oneNode(_ node: BuilderNode) -> RequestTransformer {
+        { state in
+            try node.modify(state: &state)
+        }
+    }
+
+    static func multiNode(_ nodes: [BuilderNode]) -> RequestTransformer {
+        { state in
+            for node in nodes {
+                try node.modify(state: &state)
+            }
+        }
+    }
+
+    static func merge(_ transformers: [RequestTransformer]) -> RequestTransformer {
+        { state in
+            for transformer in transformers {
+                try transformer(&state)
+            }
+        }
+    }
+
+    static func merge(_ transformers: RequestTransformer...) -> RequestTransformer {
+        { state in
+            for transformer in transformers {
+                try transformer(&state)
+            }
+        }
     }
 }
 
 protocol BuilderNode {
-    func modify(state: RequestState) throws
+    func modify(state: inout RequestBuilderState) throws
 }
 
 struct HttpMethod: BuilderNode {
@@ -21,32 +45,24 @@ struct HttpMethod: BuilderNode {
         case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     }
 
-    init(_ method: Methods) {
-        self.method = method.rawValue
-    }
+    let method: Methods
 
-    init(_ customMethod: String) {
-        self.method = customMethod
-    }
-    
-    let method: String
-
-    func modify(state: RequestState) {
-        state.request.httpMethod = method
+    func modify(state: inout RequestBuilderState) {
+        state.request.httpMethod = method.rawValue
     }
 }
 
 struct JSONBody<T: Encodable>: BuilderNode {
     let value: T
     var encoder = JSONEncoder()
-    func modify(state: RequestState) throws {
+    func modify(state: inout RequestBuilderState) throws {
         state.request.httpBody = try encoder.encode(value)
     }
 }
 
 struct QueryParams: BuilderNode {
     let params: [String: String?]
-    func modify(state: RequestState) {
+    func modify(state: inout RequestBuilderState) {
         let newItems = params.map(URLQueryItem.init)
         let oldItems = state.pathComponents.queryItems ?? []
         state.pathComponents.queryItems = oldItems + newItems
@@ -55,93 +71,87 @@ struct QueryParams: BuilderNode {
 
 struct BaseURL: BuilderNode {
     let url: URL
-    func modify(state: RequestState) {
+    func modify(state: inout RequestBuilderState) {
         state.request.url = state.pathComponents.url(relativeTo: url)
     }
 }
 
 struct Endpoint: BuilderNode {
     let path: String
-    func modify(state: RequestState) {
+    func modify(state: inout RequestBuilderState) {
         state.pathComponents.path = path
     }
 }
 
 struct RequestBuilderGroup: BuilderNode {
-    let nodes: [BuilderNode]
-
-    init() {
-        nodes = []
-    }
-
-    init(@RequestBuilder builder: () -> [BuilderNode]) {
-        nodes = builder()
-    }
-
-    func modify(state: RequestState) throws {
-        try nodes.forEach { try $0.modify(state: state) }
+    @RequestBuilder let builder: () -> RequestTransformer
+    func modify(state: inout RequestBuilderState) throws {
+        try builder()(&state)
     }
 }
 
 @resultBuilder
 struct RequestBuilder {
-    /// Required to build empty block
-    static func buildBlock() -> [BuilderNode] {
-        []
+    static func buildBlock() -> RequestTransformer {
+        Transformer.nop
+    }
+
+    static func buildBlock(_ components: BuilderNode...) -> RequestTransformer {
+        Transformer.multiNode(components)
     }
 
     /// Required by every result builder to build combined results from statement blocks
-    static func buildBlock(_ components: BuilderNode...) -> [BuilderNode] {
-        components
+    static func buildBlock(_ components: RequestTransformer...) -> RequestTransformer {
+        Transformer.merge(components)
     }
 
     /// If declared, provides contextual type information for statement expressions to translate them into partial results
-    static func buildExpression(_ expression: BuilderNode) -> [BuilderNode] {
-        [expression]
+    static func buildExpression(_ expression: BuilderNode) -> RequestTransformer {
+        Transformer.oneNode(expression)
     }
 
     /// Required by every result builder to build combined results from statement blocks
-    static func buildBlock(_ components: [any BuilderNode]...) -> [any BuilderNode] {
-        components.flatMap { $0 }
+    static func buildBlock(_ components: [any BuilderNode]...) -> RequestTransformer {
+        Transformer.multiNode(components.flatMap { $0 })
     }
 
     /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(first component: [BuilderNode]) -> [BuilderNode] {
+    static func buildEither(first component: @escaping RequestTransformer) -> RequestTransformer {
         component
     }
 
     /// With buildEither(second:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(second component: [BuilderNode]) -> [BuilderNode] {
+    static func buildEither(second component: @escaping RequestTransformer) -> RequestTransformer {
         component
     }
 
-    /// Enables support for 'if' statements that do not have an 'else'
-    static func buildOptional(_ component: [BuilderNode]?) -> [BuilderNode] {
-        component ?? []
+    // Enables support for 'if' statements that do not have an 'else'
+    static func buildOptional(_ component: RequestTransformer?) -> RequestTransformer {
+        component ?? Transformer.nop
     }
 
     /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
-    static func buildArray(_ components: [[BuilderNode]]) -> [BuilderNode] {
-        components.flatMap { $0 }
+    static func buildArray(_ components: [RequestTransformer]) -> RequestTransformer {
+        Transformer.merge(components)
     }
 
     /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
-    static func buildLimitedAvailability(_ component: [any BuilderNode]) -> [any BuilderNode] {
+    static func buildLimitedAvailability(_ component: @escaping RequestTransformer) -> RequestTransformer {
         component
     }
 
     /// Builds a partial result component from the first component
-    static func buildPartialBlock(first: [any BuilderNode]) -> [any BuilderNode] {
+    static func buildPartialBlock(first: @escaping RequestTransformer) -> RequestTransformer {
         first
     }
 
     /// Builds a partial result component by combining an accumulated component and a new component
-    static func buildPartialBlock(accumulated: [any BuilderNode], next: [any BuilderNode]) -> [any BuilderNode] {
-        accumulated + next
+    static func buildPartialBlock(accumulated: @escaping RequestTransformer, next: @escaping RequestTransformer) -> RequestTransformer {
+        Transformer.merge(accumulated, next)
     }
 
     /// If declared, this will be called on the partial result from the outermost block statement to produce the final returned result
-    static func buildFinalResult(_ component: [any BuilderNode]) -> [BuilderNode] {
+    static func buildFinalResult(_ component: @escaping RequestTransformer) -> RequestTransformer {
         component
     }
 }
