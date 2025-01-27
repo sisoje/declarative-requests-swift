@@ -44,11 +44,19 @@ struct HttpMethod: BuilderNode {
     enum Methods: String {
         case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     }
-
-    let method: Methods
+    
+    private let rawValue: String
+    
+    init(_ method: Methods) {
+        rawValue = method.rawValue
+    }
+    
+    init(_ method: String) {
+        rawValue = method
+    }
 
     func modify(state: inout RequestBuilderState) {
-        state.request.httpMethod = method.rawValue
+        state.request.httpMethod = rawValue
     }
 }
 
