@@ -1,63 +1,45 @@
-import Testing
 @testable import DeclarativeRequests
 import Foundation
 import SwiftUI
+import Testing
 
-extension URLRequest {
-    init() {
-        self = URLRequest(url: .temporaryDirectory)
-        self.url = nil
+@Test func testUrl() throws {
+    let request = try URL(string: "https://google.com/")?.build {
+        RequestBuilderGroup {
+            HttpMethod(method: .GET)
+            Endpoint(path: "/getTrip")
+            AddQueryParams(params: ["tripId": "1"])
+        }
     }
+    #expect(request?.url?.absoluteString == "https://google.com/getTrip?tripId=1")
 }
 
-final class RequestSourceOfTruth: Sendable {
-    init(baseUrl: URL? = nil, pathComponents: URLComponents = URLComponents(), request: URLRequest = .init()) {
-        self.baseUrl = baseUrl
-        self.request = request
-        self.pathComponents = pathComponents
-    }
-
-    let baseUrl: URL?
-    nonisolated(unsafe) var pathComponents: URLComponents
-    nonisolated(unsafe) var request: URLRequest
-}
-
-extension RequestSourceOfTruth {
-    var state: RequestState {
-        RequestState(
-            baseUrl: baseUrl,
-            request: Binding { self.request } set: { self.request = $0 },
-            pathComponents: Binding { self.pathComponents } set: { self.pathComponents = $0 }
-        )
-    }
-}
-
-@Test func example() async throws {
+@Test func testSomething() async throws {
     let getFirst = true
-    
+
     let builder = RequestBuilderGroup {
         HttpMethod(method: .GET)
-        
+
         RequestBuilderGroup()
-        
+
         RequestBuilderGroup {
             if getFirst {
                 AddQueryParams(params: ["tripId": "1"])
             } else {
                 AddQueryParams(params: ["tripId": "2"])
             }
-            
-            for _ in 0...0 {
+
+            for _ in 0 ... 0 {
                 Endpoint(path: "/getTrip")
             }
         }
-        
-        CreateURL()
+
+        BaseURL(url: URL(string: "https://google.com/")!)
     }
-    
-    let source = RequestSourceOfTruth(baseUrl: URL(string: "https://google.com/")!)
-    
-    try source.state.runBuilder(builder)
-    
+
+    let source = RequestSourceOfTruth()
+
+    try source.state.runBuilder { builder }
+
     #expect(source.request.url?.absoluteString == "https://google.com/getTrip?tripId=1")
 }
