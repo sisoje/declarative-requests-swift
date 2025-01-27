@@ -3,58 +3,63 @@ import SwiftUI
 
 typealias RequestTransformer = (inout RequestBuilderState) throws -> Void
 
+extension Array where Element == RequestTransformer {
+    var reduced: RequestTransformer {
+        reduce(Transformer.nop) { partialResult, closure in
+            return {
+                try partialResult(&$0)
+                try closure(&$0)
+            }
+        }
+    }
+}
 enum Transformer {
     static var nop: RequestTransformer { { _ in } }
     static func oneNode(_ node: BuilderNode) -> RequestTransformer {
-        { state in
-            try node.modify(state: &state)
-        }
+        node.transformer
     }
 
     static func multiNode(_ nodes: [BuilderNode]) -> RequestTransformer {
-        { state in
-            for node in nodes {
-                try node.modify(state: &state)
-            }
-        }
+        nodes.map(\.transformer).reduced
     }
 
     static func merge(_ transformers: [RequestTransformer]) -> RequestTransformer {
-        { state in
-            for transformer in transformers {
-                try transformer(&state)
-            }
-        }
+        transformers.reduced
     }
 
     static func merge(_ transformers: RequestTransformer...) -> RequestTransformer {
-        { state in
-            for transformer in transformers {
-                try transformer(&state)
-            }
-        }
+        transformers.reduced
     }
 }
 
 protocol BuilderNode {
     func modify(state: inout RequestBuilderState) throws
+    var transformer: RequestTransformer { get }
 }
 
-extension BuilderNode {
-    var transformer: RequestTransformer {
-        modify
+struct CustomTransformer: BuilderNode {
+    let transformer: RequestTransformer
+    func modify(state: inout RequestBuilderState) throws {
+        try transformer(&state)
     }
 }
 
-enum HttpMethod: String, BuilderNode {
+extension BuilderNode {
+    var transformer: RequestTransformer { modify }
+    func modify(state: inout RequestBuilderState) throws {
+        try transformer(&state)
+    }
+}
+
+enum HTTPMethod: String, BuilderNode {
     case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     func modify(state: inout RequestBuilderState) {
         state.request.httpMethod = rawValue
     }
     static func custom(_ method: String) -> BuilderNode {
-        RequestBuilderGroup(builder: {
-            return { state in state.request.httpMethod = method }
-        })
+        CustomTransformer {
+            $0.request.httpMethod = method
+        }
     }
 }
 
@@ -91,8 +96,8 @@ struct Endpoint: BuilderNode {
 
 struct RequestBuilderGroup: BuilderNode {
     @RequestBuilder let builder: () -> RequestTransformer
-    func modify(state: inout RequestBuilderState) throws {
-        try builder()(&state)
+    var transformer: RequestTransformer {
+        builder()
     }
 }
 

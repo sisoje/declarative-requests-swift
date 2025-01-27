@@ -5,7 +5,7 @@ import Testing
 
 @Test func testUrl() throws {
     let request = try URL(string: "https://google.com/")?.request {
-        HttpMethod.GET
+        HTTPMethod.GET
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
@@ -14,8 +14,8 @@ import Testing
 
 @Test(arguments: [true, false]) func testVarious(_ isFirst: Bool) async throws {
     let builder = RequestBuilderGroup {
-        HttpMethod.GET
-
+        HTTPMethod.GET
+        
         RequestBuilderGroup {
             if isFirst {
                 QueryParams(params: ["languageId": "1"])
@@ -27,18 +27,16 @@ import Testing
                 Endpoint(path: "getLanguage")
             }
         }
-
+        
         BaseURL(url: URL(string: "https://google.com")!)
     }
 
     var source = RequestBuilderState()
-
     try builder.modify(state: &source)
-    let request = source.request
-
+    let res = source.request.url?.absoluteString
     if isFirst {
-        #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+        #expect(res == "https://google.com/getLanguage?languageId=1")
     } else {
-        #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=2")
+        #expect(res == "https://google.com/getLanguage?languageId=2")
     }
 }
