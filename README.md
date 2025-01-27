@@ -1,3 +1,5 @@
+![Build](https://github.com/username/repository/actions/workflows/swift.yml/badge.svg)
+
 # Declarative Request Builders
 
 A concise and declarative way to build and modify `URLRequest` using SwiftUI-inspired state management and composable builder nodes.
