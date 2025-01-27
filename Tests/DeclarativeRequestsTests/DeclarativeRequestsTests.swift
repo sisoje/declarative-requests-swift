@@ -3,11 +3,11 @@ import Foundation
 import SwiftUI
 import Testing
 
-@Test func testUrl() throws {
-    let request = try URL(string: "https://google.com/")?.request {
+@Test func testUrl() async throws {
+    let request = try await URL(string: "https://google.com/")?.request {
         HttpMethod(method: .GET)
         Endpoint(path: "getLanguage")
-        AddQueryParams(params: ["languageId": "1"])
+        QueryParams(params: ["languageId": "1"])
     }
     #expect(request?.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
@@ -20,9 +20,9 @@ import Testing
 
         RequestBuilderGroup {
             if isFirst {
-                AddQueryParams(params: ["languageId": "1"])
+                QueryParams(params: ["languageId": "1"])
             } else {
-                AddQueryParams(params: ["languageId": "2"])
+                QueryParams(params: ["languageId": "2"])
             }
 
             for _ in 1 ... 2 {
@@ -35,11 +35,12 @@ import Testing
 
     let source = RequestSourceOfTruth()
 
-    try source.state.runBuilder { builder }
+    try await builder.modify(state: source.state)
+    let request = await source.request
 
     if isFirst {
-        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+        #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
     } else {
-        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=2")
+        #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=2")
     }
 }

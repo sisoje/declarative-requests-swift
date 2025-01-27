@@ -28,7 +28,7 @@ struct HttpMethod: BuilderNode {
     }
 }
 
-struct JsonBody<T: Encodable>: BuilderNode {
+struct JSONBody<T: Encodable>: BuilderNode {
     let value: T
     var encoder = JSONEncoder()
     func modify(state: RequestState) throws {
@@ -36,7 +36,7 @@ struct JsonBody<T: Encodable>: BuilderNode {
     }
 }
 
-struct AddQueryParams: BuilderNode {
+struct QueryParams: BuilderNode {
     let params: [String: String?]
     func modify(state: RequestState) {
         let newItems = params.map(URLQueryItem.init)

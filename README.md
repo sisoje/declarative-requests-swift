@@ -5,7 +5,7 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 ## Key Concepts
 
 - **State Management**: `RequestSourceOfTruth` maintains the source of truth for `URLRequest`, `URLComponents`, and the base URL.
-- **Builder Nodes**: Protocol-based components like `HttpMethod`, `JsonBody`, and `AddQueryParams` modify `RequestState`.
+- **Builder Nodes**: Protocol-based components like `HttpMethod`, `JSONBody`, and `QueryParams` modify `RequestState`.
 - **Result Builders**: Use `RequestBuilder` to declaratively compose multiple `BuilderNode` operations.
 
 ## Example Usage
@@ -15,7 +15,7 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
     let request = try URL(string: "https://google.com/")?.request {
         HttpMethod(method: .GET)
         Endpoint(path: "getLanguage")
-        AddQueryParams(params: ["languageId": "1"])
+        QueryParams(params: ["languageId": "1"])
     }
     #expect(request?.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
