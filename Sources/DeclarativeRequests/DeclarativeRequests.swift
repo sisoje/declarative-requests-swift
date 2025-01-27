@@ -40,6 +40,12 @@ protocol BuilderNode {
     func modify(state: inout RequestBuilderState) throws
 }
 
+extension BuilderNode {
+    var transformer: RequestTransformer {
+        modify
+    }
+}
+
 enum HttpMethod: String, BuilderNode {
     case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     func modify(state: inout RequestBuilderState) {
