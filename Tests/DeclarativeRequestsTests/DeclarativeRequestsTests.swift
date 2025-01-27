@@ -4,22 +4,23 @@ import SwiftUI
 import Testing
 
 @Test func baseUrlTest() throws {
-    let baseUrl = URL(string: "https://google.com")
-    let request = try baseUrl?.buildRequest {
-        HTTPMethod.PATCH
+    let baseUrl = URL(string: "https://google.com")!
+    let request = try baseUrl.buildRequest {
+        HTTPMethod.POST
+        JSONBody(value: 1)
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
-    #expect(request?.httpMethod == "PATCH")
-    #expect(request?.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+    #expect(request.httpBody == "1".data(using: .utf8))
+    #expect(request.httpMethod == "POST")
+    #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
 @Test func bodyTest() throws {
     let request = try URL(filePath: "").buildRequest {
         JSONBody(value: [1])
     }
-    let str = request.httpBody.map { String.init(data: $0, encoding: .utf8) }
-    #expect(str == "[1]")
+    #expect(request.httpBody == "[1]".data(using: .utf8))
 }
 
 @Test func httpMethodTest() throws {

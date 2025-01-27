@@ -54,4 +54,3 @@ struct RequestBuilderGroup: RequestBuilderNode {
         builder()
     }
 }
-
