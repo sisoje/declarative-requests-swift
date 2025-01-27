@@ -1,4 +1,4 @@
-![Build](https://github.com/username/repository/actions/workflows/swift.yml/badge.svg)
+![Build](https://github.com/sisoje/declarative-requests-swift/.github/workflows/swift.yml/badge.svg)
 
 # Declarative Request Builders
 
