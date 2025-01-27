@@ -15,7 +15,7 @@ import Testing
 @Test(arguments: [true, false]) func testVarious(_ isFirst: Bool) async throws {
     let builder = RequestBuilderGroup {
         HTTPMethod.GET
-        
+
         RequestBuilderGroup {
             if isFirst {
                 QueryParams(params: ["languageId": "1"])
@@ -27,7 +27,7 @@ import Testing
                 Endpoint(path: "getLanguage")
             }
         }
-        
+
         BaseURL(url: URL(string: "https://google.com")!)
     }
 

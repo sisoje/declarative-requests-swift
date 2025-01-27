@@ -6,13 +6,14 @@ typealias RequestTransformer = (inout RequestBuilderState) throws -> Void
 extension Array where Element == RequestTransformer {
     var reduced: RequestTransformer {
         reduce(Transformer.nop) { partialResult, closure in
-            return {
+            {
                 try partialResult(&$0)
                 try closure(&$0)
             }
         }
     }
 }
+
 enum Transformer {
     static var nop: RequestTransformer { { _ in } }
     static func merge(_ transformers: RequestTransformer...) -> RequestTransformer {
@@ -44,6 +45,7 @@ enum HTTPMethod: String, BuilderNode {
     func modify(state: inout RequestBuilderState) {
         state.request.httpMethod = rawValue
     }
+
     static func custom(_ method: String) -> BuilderNode {
         CustomTransformer {
             $0.request.httpMethod = method
