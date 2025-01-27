@@ -1,6 +1,6 @@
-[![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
-
 # Declarative Request Builders
+
+[![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
 A concise and declarative way to build and modify `URLRequest` using SwiftUI-inspired state management and composable builder nodes.
 
