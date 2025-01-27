@@ -2,9 +2,6 @@ import Foundation
 
 struct CustomTransformer: RequestBuilderNode {
     let transformer: RequestTransformer
-    func modify(state: inout RequestBuilderState) throws {
-        try transformer(&state)
-    }
 }
 
 enum HTTPMethod: String, RequestBuilderNode {

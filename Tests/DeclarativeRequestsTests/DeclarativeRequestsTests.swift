@@ -4,16 +4,32 @@ import SwiftUI
 import Testing
 
 @Test func baseUrlTest() throws {
-    let baseUrl = URL(string: "https://google.com/")
+    let baseUrl = URL(string: "https://google.com")
     let request = try baseUrl?.buildRequest {
-        HTTPMethod.GET
+        HTTPMethod.PATCH
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
+    #expect(request?.httpMethod == "PATCH")
     #expect(request?.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
-@Test(arguments: [true, false]) func testVarious(_ isFirst: Bool) async throws {
+@Test func bodyTest() throws {
+    let request = try URL(filePath: "").buildRequest {
+        JSONBody(value: [1])
+    }
+    let str = request.httpBody.map { String.init(data: $0, encoding: .utf8) }
+    #expect(str == "[1]")
+}
+
+@Test func httpMethodTest() throws {
+    let request = try URL(filePath: "").buildRequest {
+        HTTPMethod.custom("sisoje")
+    }
+    #expect(request.httpMethod == "sisoje")
+}
+
+@Test(arguments: [true, false]) func expressionsTest(_ isFirst: Bool) async throws {
     let builder = RequestBuilderGroup {
         HTTPMethod.GET
 
