@@ -6,16 +6,17 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 
 ## Key Concepts
 
-- **State Management**: `RequestSourceOfTruth` maintains the source of truth for `URLRequest`, `URLComponents`, and the base URL.
-- **Builder Nodes**: Protocol-based components like `HttpMethod`, `JSONBody`, and `QueryParams` modify `RequestState`.
-- **Result Builders**: Use `RequestBuilder` to declaratively compose multiple `BuilderNode` operations.
+- **State Management**: `RequestBuilderState` maintains the state for the `URLRequest` and `URLComponents`.
+- **Builder Nodes**: Protocol-based components like `HTTPMethod`, `JSONBody`, and `QueryParams` modify `RequestBuilderState`.
+- **Result Builders**: Use `RequestBuilder` to declaratively compose multiple `RequestBuilderNode` operations.
 
 ## Example Usage
 
 ```swift
-@Test func testUrl() throws {
-    let request = try URL(string: "https://google.com/")?.request {
-        HttpMethod(method: .GET)
+@Test func baseUrlTest() throws {
+    let baseUrl = URL(string: "https://google.com/")
+    let request = try baseUrl?.buildRequest {
+        HTTPMethod.GET
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
@@ -26,8 +27,8 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 This builds a `GET` request to `https://google.com/getLanguage?languageId=1` declaratively.
 
 ## Features
-- **Composable Nodes**: Easily add custom `BuilderNode` types.
+- **Composable Nodes**: Easily add custom `RequestBuilderNode` types.
 - **Stateless Logic**: Decouples state from mutation logic.
-- **Testable**: Validate requests through isolated `RequestState`.
+- **Testable**: Validate requests through isolated `RequestBuilderState`.
 
 Perfect for creating and managing HTTP requests in a clean, declarative style.
