@@ -21,10 +21,18 @@ struct HttpMethod: BuilderNode {
         case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     }
 
-    let method: Methods
+    init(_ method: Methods) {
+        self.method = method.rawValue
+    }
+
+    init(_ customMethod: String) {
+        self.method = customMethod
+    }
+    
+    let method: String
 
     func modify(state: RequestState) {
-        state.request.httpMethod = method.rawValue
+        state.request.httpMethod = method
     }
 }
 
