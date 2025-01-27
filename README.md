@@ -11,15 +11,17 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 ## Example Usage
 
 ```swift
-let builder = RequestBuilderGroup {
-    HttpMethod(method: .GET)
-    AddQueryParams(params: ["tripId": "1"])
-    Endpoint(path: "/getTrip")
-    CreateURL()
+@Test func testUrl() throws {
+    let request = try URL(string: "https://google.com/")?.request {
+        HttpMethod(method: .GET)
+        Endpoint(path: "getLanguage")
+        AddQueryParams(params: ["languageId": "1"])
+    }
+    #expect(request?.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 ```
 
-This builds a `GET` request to `https://google.com/getTrip?tripId=1` declaratively.
+This builds a `GET` request to `https://google.com/getLanguage?languageId=1` declaratively.
 
 ## Features
 - **Composable Nodes**: Easily add custom `BuilderNode` types.

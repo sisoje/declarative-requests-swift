@@ -1,7 +1,7 @@
 import Foundation
 
 extension URL {
-    func build(@RequestBuilder _ builder: () -> [BuilderNode]) throws -> URLRequest {
+    func request(@RequestBuilder _ builder: () -> [BuilderNode]) throws -> URLRequest {
         let initial = RequestSourceOfTruth()
         try initial.state.runBuilder {
             RequestBuilderGroup {

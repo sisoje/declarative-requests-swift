@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-final class RequestSourceOfTruth: Sendable {
+final actor RequestSourceOfTruth {
     init(pathComponents: URLComponents = .init(), request: URLRequest = .init()) {
         self.request = request
         self.pathComponents = pathComponents
@@ -12,7 +12,7 @@ final class RequestSourceOfTruth: Sendable {
 }
 
 extension RequestSourceOfTruth {
-    var state: RequestState {
+    nonisolated var state: RequestState {
         RequestState(
             request: Binding { self.request } set: { self.request = $0 },
             pathComponents: Binding { self.pathComponents } set: { self.pathComponents = $0 }
