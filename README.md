@@ -3,6 +3,24 @@
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
 A concise and declarative way to build and modify `URLRequest` using SwiftUI-inspired state management and composable builder nodes.
+```mermaid
+flowchart LR
+    RequestInit["init with empty url"] --> request
+    ComponentsInit["init default"] --> path
+    RequestBuilder -- modifies --> RequestState
+
+    subgraph RequestState
+        request
+        path
+    end
+ 
+    request -- after modifications --> FinalRequest["final request"]
+
+    subgraph RequestBuilder
+        function1 --> dots["..."]
+        dots --> functionN
+    end
+```
 
 ## Key Concepts
 
