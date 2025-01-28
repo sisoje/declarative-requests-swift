@@ -25,6 +25,16 @@ struct JSONBody<T: Encodable>: RequestBuilderNode {
     }
 }
 
+struct PostData: RequestBuilderNode {
+    let data: Data
+    init(_ data: Data) {
+        self.data = data
+    }
+    func modify(state: inout RequestBuilderState) throws {
+        state.request.httpBody = data
+    }
+}
+
 struct QueryParams: RequestBuilderNode {
     let params: [String: String?]
     func modify(state: inout RequestBuilderState) {
