@@ -27,7 +27,7 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 }
 ```
 
-This builds a `GET` request to `https://google.com/getLanguage?languageId=1` declaratively.
+This builds a `POST` request to `https://google.com/getLanguage?languageId=1` declaratively.
 
 ## Features
 - **Composable Nodes**: Easily add custom `RequestBuilderNode` types.
