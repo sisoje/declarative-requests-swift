@@ -5,16 +5,22 @@
 A concise and declarative way to build and modify `URLRequest` using SwiftUI-inspired state management and composable builder nodes.
 ```mermaid
 flowchart LR
-    RequestInit["init with empty url"] --> request
-    ComponentsInit["init default"] --> path
-    RequestBuilder -- modifies --> RequestState
+
+    RequestBuilder --- modifies ---> RequestState
 
     subgraph RequestState
+        baseUrl["base URL"]
         request
-        path
+        path["path components"]
+        BaseUrlInit["init nil"] --> baseUrl
+        RequestInit["init default"] ---> request
+        ComponentsInit["init default"] --> path
+        baseUrl --> finalUrl["final URL"]
+        path --> finalUrl
     end
  
-    request -- after modifications --> FinalRequest["final request"]
+    request --> FinalRequest["final request"]
+    finalUrl --> FinalRequest
 
     subgraph RequestBuilder
         function1 --> dots["..."]
