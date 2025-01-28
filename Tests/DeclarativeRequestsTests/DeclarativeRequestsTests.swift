@@ -10,7 +10,7 @@ import Testing
         HTTPMethod.POST
         JSONBody(value: 1)
         Endpoint("getLanguage")
-        QueryParams(params: ["languageId": "1"])
+        QueryParams(["languageId": "1"])
     }
     #expect(request.httpBody == "1".data(using: .utf8))
     #expect(request.httpMethod == "POST")
@@ -23,7 +23,7 @@ import Testing
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
         HTTPBody("{}".data(using: .utf8))
-        URLQueryItem(name: "languageId", value: "1")
+        QueryParams(["languageId": "1"])
     }
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody == "{}".data(using: .utf8))
@@ -44,23 +44,23 @@ import Testing
     #expect(request.httpMethod == "sisoje")
 }
 
-@Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
+@Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _: Int) async throws {
     let builder = Request {
         BaseURL("https://google.com")
-        
+
         HTTPMethod.GET
-        
+
         Endpoint("/getLanguage")
-        
+
         Request {
             if isFirst {
-                URLQueryItem(name: "languageId", value: "1")
+                QueryParams(["languageId": "1"])
             } else {
-                URLQueryItem(name: "languageId", value: "2")
+                QueryParams(["languageId": "2"])
             }
         }
     }
-    
+
     var source = RequestBuilderState()
     try builder.transformer(&source)
     if isFirst {

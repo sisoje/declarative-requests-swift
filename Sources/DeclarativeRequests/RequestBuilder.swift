@@ -27,7 +27,7 @@ struct RequestBuilder {
     static func buildExpression(_ expression: () -> RequestTransformer) -> RequestTransformer {
         expression()
     }
-    
+
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [RequestBuilderNode]...) -> RequestTransformer {
         components.flatMap { $0 }.map(\.transformer).reduced
