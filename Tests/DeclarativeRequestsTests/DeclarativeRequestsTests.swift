@@ -16,7 +16,7 @@ import Testing
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
-@Test func bodyTest() throws {
+@Test func jsonBodyTest() throws {
     let request = try URL(filePath: "").buildRequest {
         JSONBody(value: [1])
     }
@@ -30,7 +30,7 @@ import Testing
     #expect(request.httpMethod == "sisoje")
 }
 
-@Test(arguments: [true, false]) func expressionsTest(_ isFirst: Bool) async throws {
+@Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
     let builder = RequestBuilderGroup {
         HTTPMethod.GET
 
@@ -41,7 +41,7 @@ import Testing
                 QueryParams(params: ["languageId": "2"])
             }
 
-            for _ in 1 ... 2 {
+            for _ in 1 ... count {
                 Endpoint(path: "getLanguage")
             }
         }
