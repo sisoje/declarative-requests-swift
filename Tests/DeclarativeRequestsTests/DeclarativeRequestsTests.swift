@@ -44,21 +44,16 @@ import Testing
 }
 
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
-    let builder = RequestBuilderGroup {
-        HTTPMethod.GET
-        
+    let builder = Request {
         URL(string: "https://google.com")
+        HTTPMethod.GET
+        "/getLanguage"
 
-        RequestBuilderGroup {
+        Request {
             if isFirst {
-                [URLQueryItem(name: "languageId", value: "1")]
-                 
+                URLQueryItem(name: "languageId", value: "1")
             } else {
-                [URLQueryItem(name: "languageId", value: "2")]
-            }
-
-            for _ in 1 ... count {
-                "/getLanguage"
+                URLQueryItem(name: "languageId", value: "2")
             }
         }
     }
