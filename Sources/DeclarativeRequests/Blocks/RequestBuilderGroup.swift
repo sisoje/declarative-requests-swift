@@ -1,6 +1,7 @@
-public struct Request: RequestBuilderNode {
-    @RequestBuilder let builder: () -> RequestTransformer
-    var transformer: RequestTransformer {
-        builder()
+public struct RequestGroup: RequestBuilderNode {
+    public init(@RequestBuilder builder: () -> RequestTransformer) {
+        transformer = builder()
     }
+
+    let transformer: RequestTransformer
 }

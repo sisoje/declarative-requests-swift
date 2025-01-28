@@ -5,7 +5,7 @@ public struct JSONBody<T: Encodable>: RequestBuilderModifyNode {
         self.value = value
         self.encoder = encoder
     }
-    
+
     let value: T
     let encoder: JSONEncoder
     func modify(state: inout RequestBuilderState) throws {

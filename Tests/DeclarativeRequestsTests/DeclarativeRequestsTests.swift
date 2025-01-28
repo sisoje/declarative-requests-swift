@@ -45,14 +45,14 @@ import Testing
 }
 
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _: Int) async throws {
-    let builder = Request {
+    let builder = RequestGroup {
         BaseURL("https://google.com")
 
         HTTPMethod.GET
 
         Endpoint("/getLanguage")
 
-        Request {
+        RequestGroup {
             if isFirst {
                 QueryParams(["languageId": "1"])
             } else {
