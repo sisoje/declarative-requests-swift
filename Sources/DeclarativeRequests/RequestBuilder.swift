@@ -39,6 +39,10 @@ struct RequestBuilder {
     static func buildExpression(_ data: Data?) -> RequestTransformer {
         PostData(data: data).transformer
     }
+
+    static func buildExpression(_ item: URLQueryItem) -> RequestTransformer {
+        QueryParams(params: ([item.name: item.value])).transformer
+    }
     
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [RequestBuilderNode]...) -> RequestTransformer {
