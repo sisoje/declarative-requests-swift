@@ -44,6 +44,12 @@ struct RequestBuilder {
         QueryParams(params: ([item.name: item.value])).transformer
     }
     
+    static func buildExpression<T: Collection>(_ items: T) -> RequestTransformer where T.Element == URLQueryItem {
+        buildArray(items.map { item in
+            buildExpression(item)
+        })
+    }
+    
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [RequestBuilderNode]...) -> RequestTransformer {
         components.flatMap { $0 }.map(\.transformer).reduced
