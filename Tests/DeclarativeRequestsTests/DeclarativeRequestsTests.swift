@@ -47,7 +47,7 @@ import Testing
     let builder = RequestBuilderGroup {
         HTTPMethod.GET
         
-        "https://google.com"
+        URL(string: "https://google.com")
 
         RequestBuilderGroup {
             if isFirst {
