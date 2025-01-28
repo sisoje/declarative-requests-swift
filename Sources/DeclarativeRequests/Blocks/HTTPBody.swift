@@ -1,13 +1,17 @@
 import Foundation
 
-public struct HTTPBody: RequestBuilderModifyNode {
-    func modify(state: inout RequestBuilderState) throws {
-        state.request.httpBody = data
+public enum HTTPBody {
+    public static func json(_ value: any Encodable, encoder: JSONEncoder = .init()) -> CustomTransformer {
+        CustomTransformer {
+            $0.request.httpBody = try encoder.encode(value)
+            $0.request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
     }
 
-    let data: Data?
-
-    public init(_ data: Data?) {
-        self.data = data
+    public static func data(_ data: Data?) -> CustomTransformer {
+        CustomTransformer {
+            $0.request.httpBody = data
+            $0.request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
     }
 }
