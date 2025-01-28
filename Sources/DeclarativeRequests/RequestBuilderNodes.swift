@@ -30,6 +30,7 @@ struct PostData: RequestBuilderNode {
     init(_ data: Data) {
         self.data = data
     }
+
     func modify(state: inout RequestBuilderState) throws {
         state.request.httpBody = data
     }

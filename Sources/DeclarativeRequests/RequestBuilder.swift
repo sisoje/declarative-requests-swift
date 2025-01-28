@@ -4,6 +4,10 @@ struct RequestBuilder {
         RequestTransformerUtils.nop
     }
 
+    static func buildBlock(_ components: () -> RequestTransformer...) -> RequestTransformer {
+        components.map { $0() }.reduced
+    }
+
     static func buildBlock(_ components: RequestBuilderNode...) -> RequestTransformer {
         components.map(\.transformer).reduced
     }
@@ -16,6 +20,10 @@ struct RequestBuilder {
     /// If declared, provides contextual type information for statement expressions to translate them into partial results
     static func buildExpression(_ expression: RequestBuilderNode) -> RequestTransformer {
         expression.transformer
+    }
+
+    static func buildExpression(_ expression: () -> RequestTransformer) -> RequestTransformer {
+        expression()
     }
 
     /// Required by every result builder to build combined results from statement blocks
