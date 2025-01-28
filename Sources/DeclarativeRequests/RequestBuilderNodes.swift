@@ -46,7 +46,7 @@ struct QueryParams: RequestBuilderNode {
 }
 
 struct BaseURL: RequestBuilderNode {
-    let url: URL
+    let url: URL?
     func modify(state: inout RequestBuilderState) {
         state.baseURL = url
     }

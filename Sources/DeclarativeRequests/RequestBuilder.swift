@@ -1,3 +1,5 @@
+import Foundation
+
 @resultBuilder
 struct RequestBuilder {
     static func buildBlock() -> RequestTransformer {
@@ -24,6 +26,10 @@ struct RequestBuilder {
 
     static func buildExpression(_ expression: () -> RequestTransformer) -> RequestTransformer {
         expression()
+    }
+    
+    static func buildExpression(_ str: String) -> RequestTransformer {
+        BaseURL(url: URL(string: str)).transformer
     }
 
     /// Required by every result builder to build combined results from statement blocks

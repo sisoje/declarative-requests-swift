@@ -46,6 +46,8 @@ import Testing
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
     let builder = RequestBuilderGroup {
         HTTPMethod.GET
+        
+        "https://google.com"
 
         RequestBuilderGroup {
             if isFirst {
@@ -58,8 +60,6 @@ import Testing
                 Endpoint(path: "getLanguage")
             }
         }
-
-        BaseURL(url: URL(string: "https://google.com")!)
     }
 
     var source = RequestBuilderState()
