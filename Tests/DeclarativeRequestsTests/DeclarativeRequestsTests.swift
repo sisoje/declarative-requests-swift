@@ -18,11 +18,11 @@ import Testing
 
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
+        BaseURL(url: URL(string: "https://google.com")!)
         HTTPMethod.POST
         JSONBody(value: 1)
         Endpoint(path: "getLanguage")
         QueryParams(params: ["languageId": "1"])
-        BaseURL(url: URL(string: "https://google.com")!)
     }
     #expect(request.httpBody == "1".data(using: .utf8))
     #expect(request.httpMethod == "POST")
