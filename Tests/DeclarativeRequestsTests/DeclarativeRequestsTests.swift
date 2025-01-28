@@ -22,7 +22,7 @@ import Testing
         HTTPMethod.POST
         BaseURL("https://google.com")
         "/getLanguage"
-        Data("{}".utf8)
+        HTTPBody("{}".data(using: .utf8))
         URLQueryItem(name: "languageId", value: "1")
     }
     #expect(request.httpMethod == "POST")
