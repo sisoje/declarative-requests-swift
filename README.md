@@ -12,9 +12,6 @@ flowchart LR
         baseUrl["base URL"]
         request
         path["path components"]
-        BaseUrlInit["init nil"] --> baseUrl
-        RequestInit["init default"] ---> request
-        ComponentsInit["init default"] --> path
         baseUrl --> finalUrl["final URL"]
         path --> finalUrl
     end
