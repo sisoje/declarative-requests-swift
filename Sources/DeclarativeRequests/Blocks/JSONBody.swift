@@ -1,6 +1,6 @@
 import Foundation
 
-struct JSONBody<T: Encodable>: RequestBuilderNode {
+struct JSONBody<T: Encodable>: RequestBuilderModifyNode {
     let value: T
     var encoder = JSONEncoder()
     func modify(state: inout RequestBuilderState) throws {

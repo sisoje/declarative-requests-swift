@@ -1,4 +1,4 @@
-typealias RequestTransformer = (inout RequestBuilderState) throws -> Void
+public typealias RequestTransformer = (inout RequestBuilderState) throws -> Void
 
 extension Array where Element == RequestTransformer {
     var reduced: RequestTransformer {

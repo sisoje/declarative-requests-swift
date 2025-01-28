@@ -1,11 +1,11 @@
 protocol RequestBuilderNode {
-    func modify(state: inout RequestBuilderState) throws
     var transformer: RequestTransformer { get }
 }
 
-extension RequestBuilderNode {
+protocol RequestBuilderModifyNode: RequestBuilderNode {
+    func modify(state: inout RequestBuilderState) throws
+}
+
+extension RequestBuilderModifyNode {
     var transformer: RequestTransformer { modify }
-    func modify(state: inout RequestBuilderState) throws {
-        try transformer(&state)
-    }
 }

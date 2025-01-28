@@ -20,7 +20,7 @@ import Testing
     let request = try URLRequest {
         HTTPMethod.POST
         URL(string: "https://google.com")
-        Endpoint(path: "getLanguage")
+        "/getLanguage"
         Data("{}".utf8)
         URLQueryItem(name: "languageId", value: "1")
     }
@@ -59,7 +59,7 @@ import Testing
     }
 
     var source = RequestBuilderState()
-    try builder.modify(state: &source)
+    try builder.transformer(&source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
     } else {

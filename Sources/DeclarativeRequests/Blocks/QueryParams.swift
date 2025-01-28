@@ -1,6 +1,6 @@
 import Foundation
 
-struct QueryParams: RequestBuilderNode {
+struct QueryParams: RequestBuilderModifyNode {
     let params: [String: String?]
     func modify(state: inout RequestBuilderState) {
         let newItems = params.map(URLQueryItem.init)

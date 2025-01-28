@@ -1,4 +1,4 @@
-struct Endpoint: RequestBuilderNode {
+struct Endpoint: RequestBuilderModifyNode {
     let path: String
     func modify(state: inout RequestBuilderState) {
         state.pathComponents.path = path

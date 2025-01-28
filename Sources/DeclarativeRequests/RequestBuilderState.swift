@@ -1,6 +1,6 @@
 import Foundation
 
-struct RequestBuilderState {
+public struct RequestBuilderState {
     var baseURL: URL?
     var pathComponents: URLComponents = .init()
     private var _request: URLRequest = URLRequest(url: URL(fileURLWithPath: ""))
