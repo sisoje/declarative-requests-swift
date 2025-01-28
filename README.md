@@ -41,8 +41,8 @@ let request = try URLRequest {
     HTTPMethod.POST
     BaseURL("https://google.com")
     Endpoint("/getLanguage")
-    HTTPBody("{}".data(using: .utf8))
-    QueryParams(["languageId": "1"])
+    HTTPBody.data("{}".data(using: .utf8))
+    URLQuery("languageId", "1")
 }
 ```
 
