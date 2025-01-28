@@ -16,6 +16,19 @@ import Testing
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
+@Test func urlRequestTest() throws {
+    let request = try URLRequest {
+        HTTPMethod.POST
+        JSONBody(value: 1)
+        Endpoint(path: "getLanguage")
+        QueryParams(params: ["languageId": "1"])
+        BaseURL(url: URL(string: "https://google.com")!)
+    }
+    #expect(request.httpBody == "1".data(using: .utf8))
+    #expect(request.httpMethod == "POST")
+    #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+}
+
 @Test func jsonBodyTest() throws {
     let request = try URL(filePath: "").buildRequest {
         JSONBody(value: [1])

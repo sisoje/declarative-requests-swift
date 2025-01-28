@@ -31,17 +31,12 @@ flowchart LR
 ## Example Usage
 
 ```swift
-@Test func baseUrlTest() throws {
-    let baseUrl = URL(string: "https://google.com")!
-    let request = try baseUrl.buildRequest {
-        HTTPMethod.POST
-        JSONBody(value: 1)
-        Endpoint(path: "getLanguage")
-        QueryParams(params: ["languageId": "1"])
-    }
-    #expect(request.httpBody == "1".data(using: .utf8))
-    #expect(request.httpMethod == "POST")
-    #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+let request = try URLRequest {
+    HTTPMethod.POST
+    JSONBody(value: 1)
+    Endpoint(path: "getLanguage")
+    QueryParams(params: ["languageId": "1"])
+    BaseURL(url: URL(string: "https://google.com")!)
 }
 ```
 
