@@ -46,9 +46,11 @@ import Testing
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
     let builder = Request {
         URL(string: "https://google.com")
+        
         HTTPMethod.GET
+        
         "/getLanguage"
-
+        
         Request {
             if isFirst {
                 URLQueryItem(name: "languageId", value: "1")
@@ -57,7 +59,7 @@ import Testing
             }
         }
     }
-
+    
     var source = RequestBuilderState()
     try builder.transformer(&source)
     if isFirst {
