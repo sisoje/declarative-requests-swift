@@ -9,7 +9,7 @@ import Testing
         RequestHeader.contentType.addValue("xxx")
         HTTPMethod.POST
         JSONBody(value: 1)
-        Endpoint(path: "getLanguage")
+        Endpoint("getLanguage")
         QueryParams(params: ["languageId": "1"])
     }
     #expect(request.httpBody == "1".data(using: .utf8))
@@ -21,7 +21,7 @@ import Testing
     let request = try URLRequest {
         HTTPMethod.POST
         BaseURL("https://google.com")
-        "/getLanguage"
+        Endpoint("/getLanguage")
         HTTPBody("{}".data(using: .utf8))
         URLQueryItem(name: "languageId", value: "1")
     }
@@ -50,7 +50,7 @@ import Testing
         
         HTTPMethod.GET
         
-        "/getLanguage"
+        Endpoint("/getLanguage")
         
         Request {
             if isFirst {
