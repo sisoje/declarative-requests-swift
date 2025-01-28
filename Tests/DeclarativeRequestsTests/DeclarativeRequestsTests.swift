@@ -6,6 +6,7 @@ import Testing
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
     let request = try baseUrl.buildRequest {
+        RequestHeader.contentType.addValue("xxx")
         HTTPMethod.POST
         JSONBody(value: 1)
         Endpoint(path: "getLanguage")

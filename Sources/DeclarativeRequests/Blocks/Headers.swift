@@ -1,5 +1,16 @@
 import Foundation
 
+typealias HeaderChanger = (inout URLRequest, String) -> Void
+
+enum RequestHeader: String {
+    case contentType = "Content-Type"
+    func addValue(_ value: String) -> CustomTransformer {
+        CustomTransformer {
+            $0.request.addValue(value, forHTTPHeaderField: rawValue)
+        }
+    }
+}
+
 public struct Headers: RequestBuilderModifyNode {
     internal init(_ headers: [String : String]) {
         self.headers = headers
