@@ -51,9 +51,9 @@ import Testing
 
         RequestBuilderGroup {
             if isFirst {
-                QueryParams(params: ["languageId": "1"])
+                URLQueryItem(name: "languageId", value: "1")
             } else {
-                QueryParams(params: ["languageId": "2"])
+                URLQueryItem(name: "languageId", value: "2")
             }
 
             for _ in 1 ... count {
