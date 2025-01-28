@@ -1,6 +1,6 @@
 import Foundation
 
-public struct QueryParams: RequestBuilderModifyNode {
+public struct URLQuery: RequestBuilderModifyNode {
     public init(_ params: [String: String?]) {
         self.params = params
     }

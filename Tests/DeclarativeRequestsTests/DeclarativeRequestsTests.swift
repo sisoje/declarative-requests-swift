@@ -8,11 +8,11 @@ import Testing
     let request = try baseUrl.buildRequest {
         HTTPHeader.contentType.addValue("xxx")
         HTTPMethod.POST
-        HTTPBody.json(1)
+        HTTPBody.json([1])
         Endpoint("getLanguage")
-        QueryParams(["languageId": "1"])
+        URLQuery(["languageId": "1"])
     }
-    #expect(request.httpBody == "1".data(using: .utf8))
+    #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.httpMethod == "POST")
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
@@ -23,7 +23,7 @@ import Testing
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
         HTTPBody.data("{}".data(using: .utf8))
-        QueryParams(["languageId": "1"])
+        URLQuery(["languageId": "1"])
     }
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody == "{}".data(using: .utf8))
@@ -54,9 +54,9 @@ import Testing
 
         RequestGroup {
             if isFirst {
-                QueryParams(["languageId": "1"])
+                URLQuery(["languageId": "1"])
             } else {
-                QueryParams(["languageId": "2"])
+                URLQuery(["languageId": "2"])
             }
         }
     }
