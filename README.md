@@ -39,10 +39,10 @@ flowchart LR
 ```swift
 let request = try URLRequest {
     HTTPMethod.POST
-    URL(string: "https://google.com")
-    Endpoint(path: "getLanguage")
-    Data("{}".utf8)
-    URLQueryItem(name: "languageId", value: "1")
+    BaseURL("https://google.com")
+    Endpoint("/getLanguage")
+    HTTPBody("{}".data(using: .utf8))
+    QueryParams(["languageId": "1"])
 }
 ```
 
