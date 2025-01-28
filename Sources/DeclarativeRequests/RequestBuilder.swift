@@ -28,28 +28,6 @@ struct RequestBuilder {
         expression()
     }
     
-    static func buildExpression(_ str: String) -> RequestTransformer {
-        BaseURL(url: URL(string: str)).transformer
-    }
-
-    static func buildExpression(_ url: URL?) -> RequestTransformer {
-        BaseURL(url: url).transformer
-    }
-
-    static func buildExpression(_ data: Data?) -> RequestTransformer {
-        PostData(data: data).transformer
-    }
-
-    static func buildExpression(_ item: URLQueryItem) -> RequestTransformer {
-        QueryParams(params: ([item.name: item.value])).transformer
-    }
-    
-    static func buildExpression<T: Collection>(_ items: T) -> RequestTransformer where T.Element == URLQueryItem {
-        buildArray(items.map { item in
-            buildExpression(item)
-        })
-    }
-    
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: [RequestBuilderNode]...) -> RequestTransformer {
         components.flatMap { $0 }.map(\.transformer).reduced
