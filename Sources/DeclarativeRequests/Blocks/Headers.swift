@@ -2,7 +2,7 @@ import Foundation
 
 typealias HeaderChanger = (inout URLRequest, String) -> Void
 
-public enum RequestHeader: String {
+public enum HTTPHeader: String {
     case contentType = "Content-Type"
     public func addValue(_ value: String) -> CustomTransformer {
         CustomTransformer {

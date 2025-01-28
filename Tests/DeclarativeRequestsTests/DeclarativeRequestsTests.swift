@@ -6,9 +6,9 @@ import Testing
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
     let request = try baseUrl.buildRequest {
-        RequestHeader.contentType.addValue("xxx")
+        HTTPHeader.contentType.addValue("xxx")
         HTTPMethod.POST
-        JSONBody(value: 1)
+        JSONBody(1)
         Endpoint("getLanguage")
         QueryParams(["languageId": "1"])
     }
@@ -32,7 +32,7 @@ import Testing
 
 @Test func jsonBodyTest() throws {
     let request = try URL(filePath: "").buildRequest {
-        JSONBody(value: [1])
+        JSONBody([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
 }
