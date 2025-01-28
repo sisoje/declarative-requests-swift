@@ -1,6 +1,6 @@
 import Foundation
 
-struct PostData: RequestBuilderModifyNode {
+public struct PostData: RequestBuilderModifyNode {
     let data: Data?
     
     func modify(state: inout RequestBuilderState) throws {

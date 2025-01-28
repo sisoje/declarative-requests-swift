@@ -1,6 +1,6 @@
 import Foundation
 
-struct BaseURL: RequestBuilderModifyNode {
+public struct BaseURL: RequestBuilderModifyNode {
     let url: URL?
     func modify(state: inout RequestBuilderState) {
         state.baseURL = url

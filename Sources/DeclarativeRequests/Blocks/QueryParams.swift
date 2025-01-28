@@ -1,6 +1,6 @@
 import Foundation
 
-struct QueryParams: RequestBuilderModifyNode {
+public struct QueryParams: RequestBuilderModifyNode {
     let params: [String: String?]
     func modify(state: inout RequestBuilderState) {
         let newItems = params.map(URLQueryItem.init)
@@ -14,7 +14,7 @@ extension RequestBuilder {
         QueryParams(params: ([item.name: item.value])).transformer
     }
     
-    static func buildExpression<T: Collection>(_ items: T) -> RequestTransformer where T.Element == URLQueryItem {
+    static func buildExpression<T: Sequence>(_ items: T) -> RequestTransformer where T.Element == URLQueryItem {
         buildArray(items.map { item in
             buildExpression(item)
         })

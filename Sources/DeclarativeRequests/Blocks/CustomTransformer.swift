@@ -1,3 +1,3 @@
-struct CustomTransformer: RequestBuilderNode {
+public struct CustomTransformer: RequestBuilderNode {
     let transformer: RequestTransformer
 }

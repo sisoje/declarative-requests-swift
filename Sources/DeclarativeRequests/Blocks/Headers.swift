@@ -1,6 +1,6 @@
 import Foundation
 
-struct Headers: RequestBuilderModifyNode {
+public struct Headers: RequestBuilderModifyNode {
     internal init(_ headers: [String : String]) {
         self.headers = headers
     }
