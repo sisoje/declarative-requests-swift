@@ -58,7 +58,7 @@ import Testing
             }
 
             for _ in 1 ... count {
-                Endpoint(path: "getLanguage")
+                "/getLanguage"
             }
         }
     }

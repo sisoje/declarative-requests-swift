@@ -1,3 +1,5 @@
+import Foundation
+
 struct JSONBody<T: Encodable>: RequestBuilderNode {
     let value: T
     var encoder = JSONEncoder()
