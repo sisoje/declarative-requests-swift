@@ -39,14 +39,14 @@ flowchart LR
 ```swift
 let request = try URLRequest {
     HTTPMethod.POST
-    JSONBody(value: 1)
+    URL(string: "https://google.com")
     Endpoint(path: "getLanguage")
-    QueryParams(params: ["languageId": "1"])
-    BaseURL(url: URL(string: "https://google.com")!)
+    Data("{}".utf8)
+    URLQueryItem(name: "languageId", value: "1")
 }
 ```
 
-This builds a `POST` request to `https://google.com/getLanguage?languageId=1` declaratively.
+This builds a `POST` request to `https://google.com/getLanguage?languageId=1` with `{}` body declaratively.
 
 ## Features
 - **Composable Nodes**: Easily add custom `RequestBuilderNode` types.
