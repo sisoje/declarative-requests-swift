@@ -20,7 +20,7 @@ import Testing
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
         HTTPMethod.POST
-        URL(string: "https://google.com")
+        BaseURL("https://google.com")
         "/getLanguage"
         Data("{}".utf8)
         URLQueryItem(name: "languageId", value: "1")
@@ -46,7 +46,7 @@ import Testing
 
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _ count: Int) async throws {
     let builder = Request {
-        URL(string: "https://google.com")
+        BaseURL("https://google.com")
         
         HTTPMethod.GET
         
