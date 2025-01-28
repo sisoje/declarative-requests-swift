@@ -10,7 +10,7 @@ import Testing
         HTTPMethod.POST
         HTTPBody.json([1])
         Endpoint("getLanguage")
-        URLQuery(["languageId": "1"])
+        URLQuery("languageId", "1")
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.httpMethod == "POST")
@@ -23,7 +23,7 @@ import Testing
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
         HTTPBody.data("{}".data(using: .utf8))
-        URLQuery(["languageId": "1"])
+        URLQuery("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody == "{}".data(using: .utf8))

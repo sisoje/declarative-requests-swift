@@ -1,14 +1,25 @@
 import Foundation
 
 public struct URLQuery: RequestBuilderModifyNode {
-    public init(_ params: [String: String?]) {
-        self.params = params
+    public init(_ name: String, _ value: String?) {
+        items = [URLQueryItem(name: name, value: value)]
     }
 
-    let params: [String: String?]
+    public init(_ params: [(String, String?)]) {
+        items = params.map(URLQueryItem.init)
+    }
+
+    public init(_ params: [String: String?]) {
+        items = params.map(URLQueryItem.init)
+    }
+
+    public init(_ items: [URLQueryItem]) {
+        self.items = items
+    }
+
+    let items: [URLQueryItem]
     func modify(state: inout RequestBuilderState) {
-        let newItems = params.map(URLQueryItem.init)
         let oldItems = state.pathComponents.queryItems ?? []
-        state.pathComponents.queryItems = oldItems + newItems
+        state.pathComponents.queryItems = oldItems + items
     }
 }
