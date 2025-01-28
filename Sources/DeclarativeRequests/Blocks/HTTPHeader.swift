@@ -17,4 +17,10 @@ public extension HTTPHeader {
             $0.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
+
+    static func addCustom(header: String, value: String) -> CustomTransformer {
+        CustomTransformer {
+            $0.request.addValue(value, forHTTPHeaderField: header)
+        }
+    }
 }
