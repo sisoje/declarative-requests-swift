@@ -27,27 +27,28 @@ flowchart LR
 
 ## Key Concepts
 
-- **State Management**: `RequestBuilderState` maintains the state for the `URLRequest` and `URLComponents`.
-- **Builder Nodes**: Protocol-based components like `HTTPMethod`, `JSONBody`, and `QueryParams` modify `RequestBuilderState`.
-- **Result Builders**: Use `RequestBuilder` to declaratively compose multiple `RequestBuilderNode` operations.
+- **Builder Nodes**: Protocol-based components like `Method`, `JSONBody`, `Query`...
+- **Request Builders**: Declaratively composes node elements. **NOTE**: The request builder produces the final node with transformer function - it does **NOT** produce request.
+- **Request State**: Maintains the state for the base `URL`, `URLRequest` and `URLComponents`
+- **Final Request**: Computed by applying transformer function on a request state. Transformer function is ofcorse stateless and can be re-applied on any request state.
 
 ## Example Usage
 
 ```swift
 let request = try URLRequest {
-    HTTPMethod.POST
+    Method.POST
     BaseURL("https://google.com")
     Endpoint("/getLanguage")
-    HTTPBody.data("{}".data(using: .utf8))
-    URLQuery("languageId", "1")
+    JSONBody([1])
+    Query("languageId", "1")
 }
 ```
 
-This builds a `POST` request to `https://google.com/getLanguage?languageId=1` with `{}` body declaratively.
+This builds a `POST` request to `https://google.com/getLanguage?languageId=1` with a proper body.
 
 ## Features
-- **Composable Nodes**: Easily add custom `RequestBuilderNode` types.
+- **Composable Nodes**: Easily add custom `BuilderNode` types.
 - **Stateless Logic**: Decouples state from mutation logic.
-- **Testable**: Validate requests through isolated `RequestBuilderState`.
+- **Testable**: Validate requests through isolated `RequestState`.
 
 Perfect for creating and managing HTTP requests in a clean, declarative style.

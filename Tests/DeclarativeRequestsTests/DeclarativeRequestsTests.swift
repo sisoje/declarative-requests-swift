@@ -22,11 +22,11 @@ import Testing
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
-        RequestState[\.request.httpBody, Data()]
+        JSONBody([1])
         Query("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
-    #expect(request.httpBody == Data())
+    #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
