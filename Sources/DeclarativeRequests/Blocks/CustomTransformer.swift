@@ -1,6 +1,14 @@
 public struct CustomTransformer: RequestBuilderNode {
-    public init(transformer: @escaping RequestTransformer) {
-        self.transformer = transformer
+    public init() {
+        self.transformer = { _ in }
+    }
+    
+    public init(_ transformer: RequestTransformer...) {
+        self.transformer = transformer.reduced
+    }
+    
+    public init(_ transformers: [RequestTransformer]...) {
+        self.transformer = transformers.flatMap { $0 }.reduced
     }
 
     let transformer: RequestTransformer
