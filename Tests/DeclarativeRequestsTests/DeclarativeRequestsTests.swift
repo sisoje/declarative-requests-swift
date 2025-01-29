@@ -6,19 +6,12 @@ import Testing
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
     let request = try baseUrl.buildRequest {
-        Header.contentType.addValue("xxx")
         Method.POST
         JSONBody([1])
-        for i in 1...10 {
-            Endpoint("getLanguage")
-        }
-        if #available(iOS 2.0, *) {
-            Query("languageId", "1")
-        }
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.httpMethod == "POST")
-    #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+    #expect(request.url?.absoluteString == "https://google.com")
 }
 
 @Test func urlRequestTest() throws {
@@ -48,28 +41,43 @@ import Testing
     #expect(request.httpMethod == "sisoje")
 }
 
-@Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _: Int) async throws {
+@Test(arguments: [1, 2]) func countTest(count: Int) async throws {
     let builder = RootNode {
         BaseURL("https://google.com")
 
-        Method.GET
+        for i in 1...count {
+            Endpoint("/getLanguage")
+            Query("count", "\(i)")
+        }
+    }
 
-        Endpoint("/getLanguage")
+    var source = RequestState()
+    try builder.transformer(&source)
+    if count == 1 {
+        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1")
+    } else {
+        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1&count=2")
+    }
+}
 
-        RootNode {
-            if isFirst {
-                Query(["languageId": "1"])
-            } else {
-                Query(["languageId": "2"])
-            }
+
+@Test(arguments: [true, false]) func flagTest(isFirst: Bool) async throws {
+    let builder = RootNode {
+        BaseURL("https://google.com")
+
+        if isFirst {
+            Endpoint("/first")
+            Query("isFirst", "1")
+        } else {
+            Endpoint("/second")
         }
     }
 
     var source = RequestState()
     try builder.transformer(&source)
     if isFirst {
-        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
+        #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
     } else {
-        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=2")
+        #expect(source.request.url?.absoluteString == "https://google.com/second")
     }
 }
