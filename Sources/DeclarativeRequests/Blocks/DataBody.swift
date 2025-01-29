@@ -6,7 +6,7 @@ public struct DataBody: CompositeNode {
         case data(Data)
         case file(URL)
     }
-    
+
     public init(_ value: Data) {
         self.source = .data(value)
     }
@@ -14,13 +14,13 @@ public struct DataBody: CompositeNode {
     public init(_ value: String) {
         self.source = .string(value)
     }
-    
+
     public init(fileURL: URL) {
         self.source = .file(fileURL)
     }
-    
+
     private let source: Source
-    
+
     public var body: some BuilderNode {
         RootNode { state in
             switch source {
