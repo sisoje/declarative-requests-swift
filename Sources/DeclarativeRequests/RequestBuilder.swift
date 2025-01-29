@@ -50,12 +50,12 @@ public extension RequestBuilder {
     static func buildOptional(_ component: BuilderNode?) -> BuilderNode {
         component ?? RootNode()
     }
-//
-//    /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
-//    static func buildArray(_ components: [RequestTransformer]) -> RequestTransformer {
-//        components.reduced
-//    }
-//
+
+    /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
+    static func buildArray(_ components: [BuilderNode]) -> some BuilderNode {
+        RootNode(components.map(\.transformer))
+    }
+
 //    /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
 //    static func buildLimitedAvailability(_ component: @escaping RequestTransformer) -> RequestTransformer {
 //        component
