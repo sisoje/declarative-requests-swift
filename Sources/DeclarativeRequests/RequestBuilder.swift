@@ -52,7 +52,7 @@ public extension RequestBuilder {
     }
 
     /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
-    static func buildArray(_ components: [BuilderNode]) -> some BuilderNode {
+    static func buildArray(_ components: [BuilderNode]) -> BuilderNode {
         RootNode(components.map(\.transformer))
     }
 
