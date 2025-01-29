@@ -4,6 +4,12 @@ import Foundation
 public struct RequestBuilder {}
 
 public extension RequestBuilder {
+    typealias Expression = BuilderNode
+    
+    typealias Component = RootNode
+    
+    typealias Result = RootNode
+    
     /// Build empty block
     static func buildBlock() -> RootNode {
         RootNode()
