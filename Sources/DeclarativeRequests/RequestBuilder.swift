@@ -45,11 +45,11 @@ public extension RequestBuilder {
     static func buildEither(second component: RequestBuilderNode) -> RequestBuilderNode {
         component
     }
-//
-//    // Enables support for 'if' statements that do not have an 'else'
-//    static func buildOptional(_ component: RequestTransformer?) -> RequestTransformer {
-//        component ?? RequestTransformerUtils.nop
-//    }
+
+    // Enables support for 'if' statements that do not have an 'else'
+    static func buildOptional(_ component: RequestBuilderNode?) -> RequestBuilderNode {
+        component ?? RootNode()
+    }
 //
 //    /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
 //    static func buildArray(_ components: [RequestTransformer]) -> RequestTransformer {
