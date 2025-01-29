@@ -1,12 +1,12 @@
-protocol RequestBuilderNode {
+public protocol RequestBuilderNode {
     var transformer: RequestTransformer { get }
 }
 
-protocol RequestBuilderModifyNode: RequestBuilderNode {
+public protocol RequestBuilderModifyNode: RequestBuilderNode {
     associatedtype ChildNode: RequestBuilderNode
     var body: ChildNode { get }
 }
 
-extension RequestBuilderModifyNode {
+public extension RequestBuilderModifyNode {
     var transformer: RequestTransformer { body.transformer }
 }

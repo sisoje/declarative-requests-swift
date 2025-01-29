@@ -10,7 +10,7 @@ public struct BaseURL: RequestBuilderModifyNode {
     }
 
     let url: URL?
-    var body: some RequestBuilderNode {
+    public var body: some RequestBuilderNode {
         RequestBuilderState[\RequestBuilderState.baseURL, url]
     }
 }

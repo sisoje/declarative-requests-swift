@@ -11,5 +11,5 @@ public struct CustomTransformer: RequestBuilderNode {
         self.transformer = transformers.flatMap { $0 }.reduced
     }
 
-    let transformer: RequestTransformer
+    public let transformer: RequestTransformer
 }

@@ -1,7 +1,7 @@
 public enum HTTPMethod: String, RequestBuilderModifyNode {
     case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
 
-    var body: some RequestBuilderNode {
+    public var body: some RequestBuilderNode {
         RequestBuilderState[\.request.httpMethod, rawValue]
     }
 

@@ -1,7 +1,7 @@
 public struct RequestGroup: RequestBuilderNode {
-    public init(@RequestBuilder builder: () -> RequestTransformer) {
-        transformer = builder()
+    public init(@RequestBuilder builder: () -> RequestBuilderNode) {
+        transformer = builder().transformer
     }
 
-    let transformer: RequestTransformer
+    public let transformer: RequestTransformer
 }

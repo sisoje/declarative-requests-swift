@@ -19,7 +19,7 @@ public struct URLQuery: RequestBuilderModifyNode {
 
     let items: [URLQueryItem]
 
-    var body: some RequestBuilderNode {
+    public var body: some RequestBuilderNode {
         CustomTransformer {
             let oldItems = $0.pathComponents.queryItems ?? []
             $0.pathComponents.queryItems = oldItems + items

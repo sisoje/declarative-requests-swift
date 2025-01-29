@@ -9,7 +9,7 @@ public struct JSONBody: RequestBuilderModifyNode {
     let value: any Encodable
     let encoder: JSONEncoder
     
-    var body: some RequestBuilderNode {
+    public var body: some RequestBuilderNode {
         RequestGroup {
             RequestBuilderState[\.request.httpBody] { try encoder.encode(value) }
             HTTPHeader.contentType.addValue("application/json")
