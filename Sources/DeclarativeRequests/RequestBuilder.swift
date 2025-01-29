@@ -22,10 +22,10 @@ public extension RequestBuilder {
 //        components.reduced
 //    }
 //
-//    /// If declared, provides contextual type information for statement expressions to translate them into partial results
-//    static func buildExpression(_ expression: RequestBuilderNode) -> RequestBuilderNode {
-//        expression
-//    }
+    /// If declared, provides contextual type information for statement expressions to translate them into partial results
+    static func buildExpression(_ expression: BuilderNode) -> BuilderNode {
+        expression
+    }
 //
 //    static func buildExpression(_ expression: () -> RequestTransformer) -> RequestTransformer {
 //        expression()
@@ -56,6 +56,7 @@ public extension RequestBuilder {
         RootNode(components.map(\.transformer))
     }
 
+    
     /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
     static func buildLimitedAvailability(_ component: BuilderNode) -> BuilderNode {
         component
