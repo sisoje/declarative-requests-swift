@@ -13,15 +13,15 @@ public extension RequestBuilder {
     }
 
     static func buildEither(first component: BuilderNode) -> RootNode {
-        RootNode([component.transformer])
+        RootNode(component.transformer)
     }
 
     static func buildEither(second component: BuilderNode) -> RootNode {
-        RootNode([component.transformer])
+        RootNode(component.transformer)
     }
 
     static func buildOptional(_ component: BuilderNode?) -> RootNode {
-        RootNode([component?.transformer].compactMap { $0 })
+        RootNode(component?.transformer ?? { _ in })
     }
 
     static func buildArray(_ components: [BuilderNode]) -> RootNode {
@@ -29,7 +29,7 @@ public extension RequestBuilder {
     }
 
     static func buildLimitedAvailability(_ component: BuilderNode) -> RootNode {
-        RootNode([component.transformer])
+        RootNode(component.transformer)
     }
 }
 
