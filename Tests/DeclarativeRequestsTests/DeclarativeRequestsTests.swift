@@ -80,3 +80,15 @@ import Testing
         #expect(source.request.url?.absoluteString == "https://google.com/second")
     }
 }
+
+@Test func concreteTypesTest() throws {
+    let builder = RootNode {
+        URL(string: "https://google.com")
+        "/getLanguage"
+        URLQueryItem(name: "count", value: "1")
+    }
+
+    var source = RequestState()
+    try builder.transformer(&source)
+        #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1")
+}
