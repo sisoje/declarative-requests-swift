@@ -1,3 +1,4 @@
+@_exported import DeclarativeRequests
 import Foundation
 
 public extension RequestBuilder {

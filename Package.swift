@@ -16,13 +16,26 @@ let package = Package(
             name: "DeclarativeRequests",
             targets: ["DeclarativeRequests"]
         ),
+        .library(
+            name: "DeclarativeRequestsExt",
+            targets: ["DeclarativeRequestsExt"]
+        ),
     ],
     targets: [
         .target(
-            name: "DeclarativeRequests"),
+            name: "DeclarativeRequests"
+        ),
+        .target(
+            name: "DeclarativeRequestsExt",
+            dependencies: ["DeclarativeRequests"]
+        ),
         .testTarget(
             name: "DeclarativeRequestsTests",
             dependencies: ["DeclarativeRequests"]
+        ),
+        .testTarget(
+            name: "DeclarativeRequestsExtTests",
+            dependencies: ["DeclarativeRequestsExt"]
         ),
     ]
 )
