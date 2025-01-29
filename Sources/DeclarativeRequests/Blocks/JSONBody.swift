@@ -1,6 +1,6 @@
 import Foundation
 
-public struct JSONBody: RequestBuilderModifyNode {
+public struct JSONBody: RequestBuilderNode {
     public init(_ value: any Encodable, encoder: JSONEncoder = .init()) {
         self.value = value
         self.encoder = encoder
@@ -9,10 +9,10 @@ public struct JSONBody: RequestBuilderModifyNode {
     let value: any Encodable
     let encoder: JSONEncoder
     
-    public var body: some RequestBuilderNode {
-        RequestGroup {
+    public var body: some RequestBuilderRootNode {
+        RootNode {
             RequestBuilderState[\.request.httpBody] { try encoder.encode(value) }
-            HTTPHeader.contentType.addValue("application/json")
+            Header.contentType.addValue("application/json")
         }
     }
 }

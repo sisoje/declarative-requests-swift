@@ -1,4 +1,4 @@
-@testable import DeclarativeRequests
+import DeclarativeRequests
 import Foundation
 import SwiftUI
 import Testing
@@ -6,11 +6,11 @@ import Testing
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
     let request = try baseUrl.buildRequest {
-        HTTPHeader.contentType.addValue("xxx")
-        HTTPMethod.POST
+        Header.contentType.addValue("xxx")
+        Method.POST
         JSONBody([1])
         Endpoint("getLanguage")
-        URLQuery("languageId", "1")
+        Query("languageId", "1")
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.httpMethod == "POST")
@@ -19,14 +19,14 @@ import Testing
 
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
-        HTTPMethod.POST
+        Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
-        RequestBuilderState[\.request.httpBody, "{}".data(using: .utf8)]
-        URLQuery("languageId", "1")
+        RequestBuilderState[\.request.httpBody, Data()]
+        Query("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
-    #expect(request.httpBody == "{}".data(using: .utf8))
+    #expect(request.httpBody == Data())
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
@@ -39,24 +39,24 @@ import Testing
 
 @Test func httpMethodTest() throws {
     let request = try URL(filePath: "").buildRequest {
-        HTTPMethod.custom("sisoje")
+        Method.custom("sisoje")
     }
     #expect(request.httpMethod == "sisoje")
 }
 
 @Test(arguments: [true, false], [1, 2]) func complexRequestTest(_ isFirst: Bool, _: Int) async throws {
-    let builder = RequestGroup {
+    let builder = RootNode {
         BaseURL("https://google.com")
 
-        HTTPMethod.GET
+        Method.GET
 
         Endpoint("/getLanguage")
 
-        RequestGroup {
+        RootNode {
             if isFirst {
-                URLQuery(["languageId": "1"])
+                Query(["languageId": "1"])
             } else {
-                URLQuery(["languageId": "2"])
+                Query(["languageId": "2"])
             }
         }
     }

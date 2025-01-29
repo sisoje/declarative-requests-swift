@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HTTPHeader: String {
+public enum Header: String {
     case contentType = "Content-Type"
     case accept = "Accept"
     case authorization = "Authorization"
@@ -11,13 +11,13 @@ public enum HTTPHeader: String {
     case acceptEncoding = "Accept-Encoding"
 }
 
-public extension HTTPHeader {
-    func addValue(_ value: String) -> CustomTransformer {
+public extension Header {
+    func addValue(_ value: String) -> RootNode {
         Self.addCustom(header: rawValue, value: value)
     }
 
-    static func addCustom(header: String, value: String) -> CustomTransformer {
-        CustomTransformer {
+    static func addCustom(header: String, value: String) -> RootNode {
+        RootNode {
             $0.request.addValue(value, forHTTPHeaderField: header)
         }
     }
