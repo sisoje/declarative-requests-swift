@@ -14,6 +14,11 @@ public extension RequestBuilder {
         RootNode(components.map(\.transformer))
     }
     
+    /// If declared, provides contextual type information for statement expressions to translate them into partial results
+    static func buildExpression(_ component: BuilderNode) -> RootNode {
+        RootNode(component.transformer)
+    }
+    
     /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
     static func buildEither(first component: BuilderNode) -> RootNode {
         RootNode(component.transformer)
@@ -39,3 +44,4 @@ public extension RequestBuilder {
         RootNode(component.transformer)
     }
 }
+
