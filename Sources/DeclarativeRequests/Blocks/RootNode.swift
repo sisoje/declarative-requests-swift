@@ -1,4 +1,4 @@
-public struct RootNode: RequestBuilderRootNode {
+public struct RootNode: RequestBuilderNode {
     public init() {
         transformer = { _ in }
     }
@@ -11,7 +11,7 @@ public struct RootNode: RequestBuilderRootNode {
         transformer = transformers.flatMap { $0 }.reduced
     }
 
-    public init(@RequestBuilder builder: () -> RequestBuilderRootNode) {
+    public init(@RequestBuilder builder: () -> RequestBuilderNode) {
         transformer = builder().transformer
     }
 

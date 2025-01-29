@@ -27,13 +27,13 @@ public struct RequestBuilderState {
 }
 
 public extension RequestBuilderState {
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> some RequestBuilderRootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> some RequestBuilderNode {
         RootNode {
             $0[keyPath: keyPath] = value
         }
     }
 
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> some RequestBuilderRootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> some RequestBuilderNode {
         RootNode {
             try $0[keyPath: keyPath] = value()
         }

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct BaseURL: RequestBuilderNode {
+public struct BaseURL: RequestBuilderCompositeNode {
     public init(_ url: URL?) {
         self.url = url
     }
@@ -10,7 +10,7 @@ public struct BaseURL: RequestBuilderNode {
     }
 
     let url: URL?
-    public var body: some RequestBuilderRootNode {
+    public var body: some RequestBuilderNode {
         RequestBuilderState[\RequestBuilderState.baseURL, url]
     }
 }
