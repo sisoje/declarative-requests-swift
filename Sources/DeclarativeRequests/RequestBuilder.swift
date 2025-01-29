@@ -8,7 +8,7 @@ public extension RequestBuilder {
         RootNode()
     }
 
-    static func buildBlock(_ components: BuilderNode...) -> some BuilderNode {
+    static func buildBlock(_ components: BuilderNode...) -> BuilderNode {
         RootNode(components.map(\.transformer))
     }
 
