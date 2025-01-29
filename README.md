@@ -6,7 +6,7 @@ A concise and declarative way to build and modify `URLRequest` using SwiftUI-ins
 ```mermaid
 flowchart LR
 
-    RequestBuilder --- modifies ---> RequestState
+    RequestBuilder --- transforms ---> RequestState
 
     subgraph RequestState
         baseUrl["base URL"]
