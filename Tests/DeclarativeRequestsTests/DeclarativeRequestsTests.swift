@@ -84,6 +84,7 @@ import Testing
 @Test func concreteTypesTest() throws {
     let builder = RootNode {
         URL(string: "https://google.com")
+        Method.GET
         "/getLanguage"
         URLQueryItem(name: "count", value: "1")
     }
