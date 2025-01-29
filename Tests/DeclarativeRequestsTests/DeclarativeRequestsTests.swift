@@ -9,7 +9,7 @@ import Testing
         Method.POST
         JSONBody([1])
     }
-    #expect(request.httpBody == "[1]".data(using: .utf8))
+    #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.httpMethod == "POST")
     #expect(request.url?.absoluteString == "https://google.com")
 }
@@ -23,7 +23,7 @@ import Testing
         Query("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
-    #expect(request.httpBody == "[1]".data(using: .utf8))
+    #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
@@ -45,7 +45,7 @@ import Testing
     let builder = RootNode {
         BaseURL("https://google.com")
 
-        for i in 1...count {
+        for i in 1 ... count {
             Endpoint("/getLanguage")
             Query("count", "\(i)")
         }
@@ -59,7 +59,6 @@ import Testing
         #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1&count=2")
     }
 }
-
 
 @Test(arguments: [true, false]) func flagTest(isFirst: Bool) async throws {
     let builder = RootNode {
