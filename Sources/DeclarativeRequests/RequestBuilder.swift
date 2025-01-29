@@ -4,11 +4,11 @@ import Foundation
 public struct RequestBuilder {}
 
 public extension RequestBuilder {
-    static func buildBlock() -> RequestBuilderNode {
+    static func buildBlock() -> BuilderNode {
         RootNode()
     }
 
-    static func buildBlock(_ components: RequestBuilderNode...) -> RequestBuilderNode {
+    static func buildBlock(_ components: BuilderNode...) -> BuilderNode {
         RootNode(components.map(\.transformer))
     }
 
@@ -37,17 +37,17 @@ public extension RequestBuilder {
 //    }
 //
     /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(first component: RequestBuilderNode) -> RequestBuilderNode {
+    static func buildEither(first component: BuilderNode) -> BuilderNode {
         component
     }
 
     /// With buildEither(second:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(second component: RequestBuilderNode) -> RequestBuilderNode {
+    static func buildEither(second component: BuilderNode) -> BuilderNode {
         component
     }
 
     // Enables support for 'if' statements that do not have an 'else'
-    static func buildOptional(_ component: RequestBuilderNode?) -> RequestBuilderNode {
+    static func buildOptional(_ component: BuilderNode?) -> BuilderNode {
         component ?? RootNode()
     }
 //

@@ -1,11 +1,11 @@
-public enum Method: String, RequestBuilderCompositeNode {
+public enum Method: String, CompositeNode {
     case GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
 
-    public var body: some RequestBuilderNode {
-        RequestBuilderState[\.request.httpMethod, rawValue]
+    public var body: some BuilderNode {
+        RequestState[\.request.httpMethod, rawValue]
     }
 
-    public static func custom(_ method: String) -> some RequestBuilderNode {
-        RequestBuilderState[\.request.httpMethod, method]
+    public static func custom(_ method: String) -> some BuilderNode {
+        RequestState[\.request.httpMethod, method]
     }
 }

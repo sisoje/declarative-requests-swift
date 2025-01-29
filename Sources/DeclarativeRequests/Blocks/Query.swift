@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Query: RequestBuilderCompositeNode {
+public struct Query: CompositeNode {
     public init(_ name: String, _ value: String?) {
         items = [URLQueryItem(name: name, value: value)]
     }
@@ -19,7 +19,7 @@ public struct Query: RequestBuilderCompositeNode {
 
     let items: [URLQueryItem]
 
-    public var body: some RequestBuilderNode {
+    public var body: some BuilderNode {
         RootNode {
             let oldItems = $0.pathComponents.queryItems ?? []
             $0.pathComponents.queryItems = oldItems + items

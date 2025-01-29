@@ -1,4 +1,4 @@
-public typealias StateTransformer = (inout RequestBuilderState) throws -> Void
+public typealias StateTransformer = (inout RequestState) throws -> Void
 
 extension Sequence where Element == StateTransformer {
     var reduced: StateTransformer {

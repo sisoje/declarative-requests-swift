@@ -22,7 +22,7 @@ import Testing
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
-        RequestBuilderState[\.request.httpBody, Data()]
+        RequestState[\.request.httpBody, Data()]
         Query("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
@@ -61,7 +61,7 @@ import Testing
         }
     }
 
-    var source = RequestBuilderState()
+    var source = RequestState()
     try builder.transformer(&source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")

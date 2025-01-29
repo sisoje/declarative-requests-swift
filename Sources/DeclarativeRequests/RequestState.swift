@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RequestBuilderState {
+public struct RequestState {
     public init(
         baseURL: URL? = nil,
         pathComponents: URLComponents = .init(),
@@ -26,14 +26,14 @@ public struct RequestBuilderState {
     }
 }
 
-public extension RequestBuilderState {
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> some RequestBuilderNode {
+public extension RequestState {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> some BuilderNode {
         RootNode {
             $0[keyPath: keyPath] = value
         }
     }
 
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> some RequestBuilderNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> some BuilderNode {
         RootNode {
             try $0[keyPath: keyPath] = value()
         }

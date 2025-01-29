@@ -1,3 +1,3 @@
-public protocol RequestBuilderNode {
+public protocol BuilderNode {
     var transformer: StateTransformer { get }
 }
