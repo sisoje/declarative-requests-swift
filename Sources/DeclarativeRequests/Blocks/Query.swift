@@ -17,6 +17,16 @@ public struct Query: CompositeNode {
         self.items = items
     }
 
+    public init(_ value: some Encodable) {
+        let data = try? JSONEncoder().encode(value)
+        guard let dict = try? JSONSerialization.jsonObject(with: data ?? Data()) as? [String: Any],
+              dict.values.allSatisfy({ $0 is String || $0 is NSNumber }) else {
+            self.items = []
+            return
+        }
+        self.items = dict.map { URLQueryItem(name: $0, value: String(describing: $1)) }
+    }
+
     let items: [URLQueryItem]
 
     public var body: some BuilderNode {
