@@ -1,6 +1,8 @@
 import Foundation
 
 public struct URLEncodedBody: CompositeNode {
+    let contentType = "application/x-www-form-urlencoded"
+    
     public init(_ name: String, _ value: String?) {
         self.items = [URLQueryItem(name: name, value: value)]
     }
@@ -31,7 +33,7 @@ public struct URLEncodedBody: CompositeNode {
     
     private func parseExistingFormData(_ request: URLRequest) -> [URLQueryItem]? {
         guard let contentType = request.value(forHTTPHeaderField: "Content-Type"),
-              contentType.contains("application/x-www-form-urlencoded"),
+              contentType.contains(contentType),
               let existingData = request.httpBody,
               let query = String(data: existingData, encoding: .utf8) else {
             return nil
@@ -47,7 +49,7 @@ public struct URLEncodedBody: CompositeNode {
             components.queryItems = existingItems + items
             
             state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            state.request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         }
     }
 }
