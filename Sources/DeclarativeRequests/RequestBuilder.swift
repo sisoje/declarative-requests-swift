@@ -4,11 +4,11 @@ import Foundation
 public struct RequestBuilder {}
 
 public extension RequestBuilder {
-    static func buildBlock() -> BuilderNode {
+    static func buildBlock() -> some BuilderNode {
         RootNode()
     }
 
-    static func buildBlock(_ components: BuilderNode...) -> BuilderNode {
+    static func buildBlock(_ components: BuilderNode...) -> some BuilderNode {
         RootNode(components.map(\.transformer))
     }
 

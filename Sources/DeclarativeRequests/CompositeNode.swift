@@ -2,7 +2,7 @@ import Foundation
 
 public protocol CompositeNode: BuilderNode {
     associatedtype ChildNode: BuilderNode
-    var body: ChildNode { get }
+    @RequestBuilder var body: ChildNode { get }
 }
 
 public extension CompositeNode {
