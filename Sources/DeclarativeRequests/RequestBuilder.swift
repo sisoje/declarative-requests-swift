@@ -56,11 +56,11 @@ public extension RequestBuilder {
         RootNode(components.map(\.transformer))
     }
 
-//    /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
-//    static func buildLimitedAvailability(_ component: @escaping RequestTransformer) -> RequestTransformer {
-//        component
-//    }
-//
+    /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
+    static func buildLimitedAvailability(_ component: BuilderNode) -> BuilderNode {
+        component
+    }
+
 //    /// Builds a partial result component from the first component
 //    static func buildPartialBlock(first: @escaping RequestTransformer) -> RequestTransformer {
 //        first
