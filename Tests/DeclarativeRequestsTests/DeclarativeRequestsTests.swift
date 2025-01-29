@@ -9,8 +9,12 @@ import Testing
         Header.contentType.addValue("xxx")
         Method.POST
         JSONBody([1])
-        Endpoint("getLanguage")
-        Query("languageId", "1")
+        for i in 1...10 {
+            Endpoint("getLanguage")
+        }
+        if #available(iOS 2.0, *) {
+            Query("languageId", "1")
+        }
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.httpMethod == "POST")
