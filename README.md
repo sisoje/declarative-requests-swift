@@ -20,7 +20,8 @@ flowchart LR
     finalUrl --> FinalRequest
 
     subgraph RequestBuilder
-        function1 --> dots["..."]
+        function1 --> function2
+        function2 --> dots["..."]
         dots --> functionN
     end
 ```
