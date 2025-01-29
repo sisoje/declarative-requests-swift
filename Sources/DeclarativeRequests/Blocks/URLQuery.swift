@@ -18,8 +18,11 @@ public struct URLQuery: RequestBuilderModifyNode {
     }
 
     let items: [URLQueryItem]
-    func modify(state: inout RequestBuilderState) {
-        let oldItems = state.pathComponents.queryItems ?? []
-        state.pathComponents.queryItems = oldItems + items
+
+    var body: some RequestBuilderNode {
+        CustomTransformer {
+            let oldItems = $0.pathComponents.queryItems ?? []
+            $0.pathComponents.queryItems = oldItems + items
+        }
     }
 }

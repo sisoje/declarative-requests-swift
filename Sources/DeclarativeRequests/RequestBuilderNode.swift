@@ -3,9 +3,10 @@ protocol RequestBuilderNode {
 }
 
 protocol RequestBuilderModifyNode: RequestBuilderNode {
-    func modify(state: inout RequestBuilderState) throws
+    associatedtype ChildNode: RequestBuilderNode
+    var body: ChildNode { get }
 }
 
 extension RequestBuilderModifyNode {
-    var transformer: RequestTransformer { modify }
+    var transformer: RequestTransformer { body.transformer }
 }
