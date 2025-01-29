@@ -10,6 +10,15 @@ public extension RequestBuilder {
 
     typealias Result = RootNode
 
+    private struct UnsupportedRequestBuilderType<T> {
+        static var error: String { "Type '\(T.self)' is not supported in the request builder" }
+    }
+
+    @_disfavoredOverload
+    static func buildExpression<Unsupported>(_ value: Unsupported) -> RootNode {
+        fatalError(UnsupportedRequestBuilderType<Unsupported>.error)
+    }
+
     /// Build empty block
     static func buildBlock() -> RootNode {
         RootNode()
