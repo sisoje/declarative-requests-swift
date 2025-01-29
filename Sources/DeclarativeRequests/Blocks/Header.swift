@@ -12,11 +12,11 @@ public enum Header: String {
 }
 
 public extension Header {
-    func addValue(_ value: String) -> RootNode {
+    func addValue(_ value: String) -> some RequestBuilderRootNode {
         Self.addCustom(header: rawValue, value: value)
     }
 
-    static func addCustom(header: String, value: String) -> RootNode {
+    static func addCustom(header: String, value: String) -> some RequestBuilderRootNode {
         RootNode {
             $0.request.addValue(value, forHTTPHeaderField: header)
         }

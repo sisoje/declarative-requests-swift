@@ -8,7 +8,7 @@ public struct RequestBuilderState {
     ) {
         self.baseURL = baseURL
         self.pathComponents = pathComponents
-        self._request = request
+        _request = request
     }
 
     public var baseURL: URL?
@@ -27,13 +27,13 @@ public struct RequestBuilderState {
 }
 
 public extension RequestBuilderState {
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> RootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> some RequestBuilderRootNode {
         RootNode {
             $0[keyPath: keyPath] = value
         }
     }
 
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> RootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> some RequestBuilderRootNode {
         RootNode {
             try $0[keyPath: keyPath] = value()
         }

@@ -5,10 +5,10 @@ public struct JSONBody: RequestBuilderNode {
         self.value = value
         self.encoder = encoder
     }
-    
+
     let value: any Encodable
     let encoder: JSONEncoder
-    
+
     public var body: some RequestBuilderRootNode {
         RootNode {
             RequestBuilderState[\.request.httpBody] { try encoder.encode(value) }

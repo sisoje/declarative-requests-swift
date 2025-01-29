@@ -11,6 +11,7 @@ public extension RequestBuilder {
     static func buildBlock(_ components: RequestBuilderRootNode...) -> RequestBuilderRootNode {
         RootNode(components.map(\.transformer))
     }
+
 //
 //    static func buildBlock(_ components: RequestBuilderNode...) -> RequestTransformer {
 //        components.map(\.transformer).reduced
