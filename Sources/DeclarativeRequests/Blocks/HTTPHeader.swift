@@ -13,9 +13,7 @@ public enum HTTPHeader: String {
 
 public extension HTTPHeader {
     func addValue(_ value: String) -> CustomTransformer {
-        CustomTransformer {
-            $0.request.addValue(value, forHTTPHeaderField: rawValue)
-        }
+        Self.addCustom(header: rawValue, value: value)
     }
 
     static func addCustom(header: String, value: String) -> CustomTransformer {
