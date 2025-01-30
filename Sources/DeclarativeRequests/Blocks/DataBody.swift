@@ -23,6 +23,7 @@ public struct DataBody: CompositeNode {
                 state.request.httpBody = value
             case let .file(url):
                 state.request.httpBodyStream = InputStream(url: url)
+                assert(state.request.httpBodyStream != nil)
             }
         }
     }
