@@ -1,7 +1,11 @@
 import Foundation
 
-enum DeclarativeNetworkingError: Error {
-    case percentEncodingFailed
+extension Data {
+    static func httpBody(_ items: [URLQueryItem]) -> Data? {
+        var components = URLComponents()
+        components.queryItems = items
+        return components.percentEncodedQuery?.data(using: .utf8)
+    }
 }
 
 extension Array where Element == URLQueryItem {
@@ -47,13 +51,7 @@ public struct URLEncodedBody: CompositeNode {
     public var body: some BuilderNode {
         RequestBlock { state in
             state.encodedBodyItems += items
-            var components = URLComponents()
-            components.queryItems = state.encodedBodyItems
-            if let data = components.percentEncodedQuery?.data(using: .utf8) {
-                state.request.httpBody = data
-            } else {
-                throw DeclarativeNetworkingError.percentEncodingFailed
-            }
+            state.request.httpBody = .httpBody(state.encodedBodyItems)
         }
         Header.contentType.addValue(contentType)
     }
