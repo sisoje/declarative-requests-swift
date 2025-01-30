@@ -2,25 +2,25 @@
 import Foundation
 
 public extension RequestBuilder {
-    static func buildExpression(_ url: URL?) -> RootNode {
-        RootNode(BaseURL(url).transformer)
+    static func buildExpression(_ url: URL?) -> RequestBlock {
+        RequestBlock(BaseURL(url).transformer)
     }
 
-    static func buildExpression(_ callback: @escaping StateTransformer) -> RootNode {
-        RootNode(callback)
+    static func buildExpression(_ callback: @escaping StateTransformer) -> RequestBlock {
+        RequestBlock(callback)
     }
 
-    static func buildExpression(_ data: Data?) -> RootNode {
-        RootNode { result in
+    static func buildExpression(_ data: Data?) -> RequestBlock {
+        RequestBlock { result in
             result.request.httpBody = data
         }
     }
 
-    static func buildExpression(_ path: String) -> RootNode {
-        RootNode(Endpoint(path).transformer)
+    static func buildExpression(_ path: String) -> RequestBlock {
+        RequestBlock(Endpoint(path).transformer)
     }
 
-    static func buildExpression(_ query: URLQueryItem) -> RootNode {
-        RootNode(Query([query.name: query.value]).transformer)
+    static func buildExpression(_ query: URLQueryItem) -> RequestBlock {
+        RequestBlock(Query([query.name: query.value]).transformer)
     }
 }

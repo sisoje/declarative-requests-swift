@@ -21,7 +21,7 @@ public struct DataBody: CompositeNode {
     private let mimeType: String
 
     public var body: some BuilderNode {
-        RootNode { state in
+        RequestBlock { state in
             switch source {
             case .data(let value):
                 state.request.httpBody = value

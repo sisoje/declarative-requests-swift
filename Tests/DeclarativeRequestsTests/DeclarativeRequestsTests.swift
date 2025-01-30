@@ -42,7 +42,7 @@ import Testing
 }
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         BaseURL("https://google.com")
 
         for i in 1 ... count {
@@ -61,7 +61,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func flagTest(isFirst: Bool) async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         BaseURL("https://google.com")
 
         if isFirst {
@@ -82,7 +82,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodySingleKeyValue() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody("key", "value")
     }
     var source = RequestState()
@@ -96,7 +96,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody([
             ("color", "red"),
             ("color", "blue"),
@@ -116,7 +116,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodyDictionary() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody(["name": "john", "age": "25"])
     }
     var source = RequestState()
@@ -130,7 +130,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodyURLQueryItems() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody([
             URLQueryItem(name: "tag", value: "swift"),
             URLQueryItem(name: "tag", value: "ios")
@@ -152,7 +152,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody(User(id: 123, name: "john"))
     }
     var source = RequestState()
@@ -166,7 +166,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodyMultipleBodiesMerging() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URLEncodedBody("page", "1")
         URLEncodedBody(["sort": "desc"])
         URLEncodedBody([("filter", "active"), ("filter", "new")])
@@ -185,7 +185,7 @@ import Testing
 }
 
 @Test func testURLEncodedBodySequentialDuplicates() async throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         for i in 1...6 {
             URLEncodedBody("count", "\(i)")
         }
@@ -207,7 +207,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RootNode {
+    let builder = RequestBlock {
         Query(User(id: 123, name: "john"))
     }
     var source = RequestState()

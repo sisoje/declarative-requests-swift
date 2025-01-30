@@ -27,14 +27,14 @@ public struct RequestState {
 }
 
 public extension RequestState {
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> RootNode {
-        RootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> RequestBlock {
+        RequestBlock {
             $0[keyPath: keyPath] = value
         }
     }
 
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> RootNode {
-        RootNode {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> RequestBlock {
+        RequestBlock {
             try $0[keyPath: keyPath] = value()
         }
     }

@@ -4,7 +4,7 @@ import SwiftUI
 import Testing
 
 @Test func concreteTypesTest() throws {
-    let builder = RootNode {
+    let builder = RequestBlock {
         URL(string: "https://google.com")
         Method.GET
         "/getLanguage"
@@ -19,7 +19,7 @@ import Testing
 @Test func concreteTypesDataTest() throws {
     let testData: [UInt8] = [0x68, 0x65, 0x6C, 0x6C, 0x6F]
 
-    let builder = RootNode {
+    let builder = RequestBlock {
         Data(testData)
     }
 

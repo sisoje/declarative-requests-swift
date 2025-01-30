@@ -13,13 +13,13 @@ public enum Header: String {
 
 public extension Header {
     func addValue(_ value: String) -> some BuilderNode {
-        RootNode {
+        RequestBlock {
             $0.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
     static func addCustom(header: String, value: String) -> some BuilderNode {
-        RootNode {
+        RequestBlock {
             $0.request.addValue(value, forHTTPHeaderField: header)
         }
     }

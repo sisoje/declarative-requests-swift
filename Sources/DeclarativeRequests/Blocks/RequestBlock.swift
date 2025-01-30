@@ -1,4 +1,4 @@
-public struct RootNode: BuilderNode {
+public struct RequestBlock: BuilderNode {
     public init() {
         transformer = { _ in }
     }

@@ -43,7 +43,7 @@ public struct URLEncodedBody: CompositeNode {
     }
     
     public var body: some BuilderNode {
-        RootNode { state in
+        RequestBlock { state in
             var components = URLComponents()
             let existingItems = parseExistingFormData(state.request) ?? []
             components.queryItems = existingItems + items

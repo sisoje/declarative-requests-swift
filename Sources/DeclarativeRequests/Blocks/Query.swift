@@ -30,7 +30,7 @@ public struct Query: CompositeNode {
     let items: [URLQueryItem]
 
     public var body: some BuilderNode {
-        RootNode {
+        RequestBlock {
             let oldItems = $0.pathComponents.queryItems ?? []
             $0.pathComponents.queryItems = oldItems + items
         }
