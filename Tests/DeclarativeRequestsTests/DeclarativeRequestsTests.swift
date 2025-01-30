@@ -263,3 +263,16 @@ import Testing
     #expect(request2.httpMethod == "POST")
     #expect(request2.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"token\":\"1\"}")
 }
+
+@Test func stream() throws {
+    let data = "sisoje".data(using: .utf8)!
+    let request = try URLRequest {
+        StreamBody(InputStream(data: data))
+    }
+    let stream = request.httpBodyStream
+    #expect(stream != nil)
+    stream?.open()
+    var buffer: [UInt8] = .init(repeating: 0, count: data.count+1)
+    let count = stream?.read(&buffer, maxLength: buffer.count)
+    #expect(count == data.count)
+}
