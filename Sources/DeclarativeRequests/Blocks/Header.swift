@@ -18,6 +18,12 @@ public extension Header {
         }
     }
 
+    func setValue(_ value: String) -> some BuilderNode {
+        RequestBlock {
+            $0.request.setValue(value, forHTTPHeaderField: rawValue)
+        }
+    }
+
     static func addCustom(header: String, value: String) -> some BuilderNode {
         RequestBlock {
             $0.request.addValue(value, forHTTPHeaderField: header)

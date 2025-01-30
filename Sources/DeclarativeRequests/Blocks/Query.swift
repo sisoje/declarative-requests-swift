@@ -18,7 +18,7 @@ public struct Query: CompositeNode {
     }
 
     public init(object: Any) {
-        self.items = Array(queryItemsReflecting: object)
+        items = Array(queryItemsReflecting: object)
     }
 
     let items: [URLQueryItem]

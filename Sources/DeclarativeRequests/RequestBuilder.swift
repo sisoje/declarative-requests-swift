@@ -11,7 +11,7 @@ public extension RequestBuilder {
     typealias Result = RequestBlock
 
     @available(*, unavailable, message: "This type is not supported in request builder")
-    static func buildExpression<Unsupported>(_ value: Unsupported) -> RequestBlock {
+    static func buildExpression<Unsupported>(_: Unsupported) -> RequestBlock {
         fatalError()
     }
 

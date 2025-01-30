@@ -89,7 +89,7 @@ import Testing
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 1)
     #expect(items[0].name == "key")
     #expect(items[0].value == "value")
@@ -100,14 +100,14 @@ import Testing
         URLEncodedBody([
             ("color", "red"),
             ("color", "blue"),
-            ("size", "large")
+            ("size", "large"),
         ])
     }
     var source = RequestState()
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 3)
     #expect(items.filter { $0.name == "color" }.count == 2)
     #expect(items.contains(where: { $0.name == "color" && $0.value == "red" }))
@@ -123,7 +123,7 @@ import Testing
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 2)
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
     #expect(items.contains(where: { $0.name == "age" && $0.value == "25" }))
@@ -133,14 +133,14 @@ import Testing
     let builder = RequestBlock {
         URLEncodedBody([
             URLQueryItem(name: "tag", value: "swift"),
-            URLQueryItem(name: "tag", value: "ios")
+            URLQueryItem(name: "tag", value: "ios"),
         ])
     }
     var source = RequestState()
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 2)
     #expect(items.filter { $0.name == "tag" }.count == 2)
     #expect(items.contains(where: { $0.name == "tag" && $0.value == "swift" }))
@@ -159,7 +159,7 @@ import Testing
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 2)
     #expect(items.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
@@ -175,7 +175,7 @@ import Testing
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 4)
     #expect(items.contains(where: { $0.name == "page" && $0.value == "1" }))
     #expect(items.contains(where: { $0.name == "sort" && $0.value == "desc" }))
@@ -186,7 +186,7 @@ import Testing
 
 @Test func testURLEncodedBodySequentialDuplicates() async throws {
     let builder = RequestBlock {
-        for i in 1...6 {
+        for i in 1 ... 6 {
             URLEncodedBody("count", "\(i)")
         }
     }
@@ -194,10 +194,10 @@ import Testing
     try builder.transformer(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
-    
+
     #expect(items.count == 6)
     #expect(items.filter { $0.name == "count" }.count == 6)
-    for i in 1...6 {
+    for i in 1 ... 6 {
         #expect(items.contains(where: { $0.name == "count" && $0.value == "\(i)" }))
     }
 }
@@ -213,7 +213,7 @@ import Testing
     var source = RequestState()
     try builder.transformer(&source)
     let queryItems = source.pathComponents.queryItems ?? []
-    
+
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))
     #expect(queryItems.count == 2)

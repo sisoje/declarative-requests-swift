@@ -11,6 +11,6 @@ public struct JSONBody: CompositeNode {
 
     public var body: some BuilderNode {
         RequestState[\.request.httpBody] { try encoder.encode(value) }
-        Header.contentType.addValue("application/json")
+        ContentType.JSON
     }
 }

@@ -24,35 +24,32 @@ extension Array where Element == URLQueryItem {
 }
 
 public struct URLEncodedBody: CompositeNode {
-    let contentType = "application/x-www-form-urlencoded"
-    
     public init(_ name: String, _ value: String?) {
-        self.items = [URLQueryItem(name: name, value: value)]
+        items = [URLQueryItem(name: name, value: value)]
     }
 
     public init(_ params: [(String, String?)]) {
-        self.items = params.map(URLQueryItem.init)
+        items = params.map(URLQueryItem.init)
     }
-    
+
     public init(_ params: [String: String?]) {
-        self.items = params.map(URLQueryItem.init)
+        items = params.map(URLQueryItem.init)
     }
-    
+
     public init(_ items: [URLQueryItem]) {
         self.items = items
     }
 
     public init(object: Any) {
-        self.items = Array(queryItemsReflecting: object)
+        items = Array(queryItemsReflecting: object)
     }
-    
+
     let items: [URLQueryItem]
-    
+
     public var body: some BuilderNode {
         RequestBlock { state in
             state.encodedBodyItems += items
             state.request.httpBody = .httpBody(state.encodedBodyItems)
         }
-        Header.contentType.addValue(contentType)
     }
 }
