@@ -1,24 +1,38 @@
 import Foundation
 
-func createMultipartBody(parameters: [String: String], fileData: Data, boundary: String, fileName: String, mimeType: String) -> Data {
-    var body = Data()
+struct MultipartForm {
+    private let boundary = "Boundary-\(UUID().uuidString)"
+    private var data = Data()
     
-    // Add text parameters
-    for (key, value) in parameters {
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(value)\r\n".data(using: .utf8)!)
+    var contentType: String {
+        "multipart/form-data; boundary=\(boundary)"
     }
     
-    // Add file data
-    body.append("--\(boundary)\r\n".data(using: .utf8)!)
-    body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
-    body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
-    body.append(fileData)
-    body.append("\r\n".data(using: .utf8)!)
+    mutating func addField(named name: String, value: String) {
+        data.append("--\(boundary)\r\n")
+        data.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n")
+        data.append("\(value)\r\n")
+    }
     
-    // Closing boundary
-    body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+    mutating func addFile(named name: String, filename: String, data fileData: Data, mimeType: String) {
+        data.append("--\(boundary)\r\n")
+        data.append("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\n")
+        data.append("Content-Type: \(mimeType)\r\n\r\n")
+        data.append(fileData)
+        data.append("\r\n")
+    }
     
-    return body
+    var bodyData: Data {
+        var bodyData = data
+        bodyData.append("--\(boundary)--\r\n")
+        return bodyData
+    }
+}
+
+private extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
 }
