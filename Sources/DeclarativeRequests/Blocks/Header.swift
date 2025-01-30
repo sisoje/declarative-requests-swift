@@ -30,7 +30,7 @@ public extension Header {
             $0.request.addValue(value, forHTTPHeaderField: header)
         }
     }
-    
+
     static func setCustom(header: String, value: String) -> some BuilderNode {
         RequestBlock {
             assert($0.request.value(forHTTPHeaderField: header) == nil)

@@ -237,3 +237,29 @@ import Testing
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))
     #expect(queryItems.count == 2)
 }
+
+@Test func repositoryExample() throws {
+    struct Repository {
+        @RequestBuilder var refreshToken: (_ accessToken: String) -> BuilderNode
+        @RequestBuilder var getUser: (String) -> BuilderNode
+    }
+    let repository = Repository(
+        refreshToken: { accessToken in
+            Method.POST
+            Endpoint("/refreshToken")
+            JSONBody(["token": accessToken])
+        },
+        getUser: { userId in
+            Method.GET
+            Endpoint("/user")
+            Query("userId", userId)
+        }
+    )
+    let request = try URLRequest { repository.getUser("1") }
+    #expect(request.url?.absoluteString == "/user?userId=1")
+    #expect(request.httpMethod == "GET")
+    let request2 = try URLRequest { repository.refreshToken("1") }
+    #expect(request2.url?.absoluteString == "/refreshToken")
+    #expect(request2.httpMethod == "POST")
+    #expect(request2.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"token\":\"1\"}")
+}
