@@ -148,12 +148,12 @@ import Testing
 }
 
 @Test func testURLEncodedBodyEncodable() async throws {
-    struct User: Encodable {
+    struct User {
         let id: Int
         let name: String
     }
     let builder = RequestBlock {
-        URLEncodedBody(User(id: 123, name: "john"))
+        URLEncodedBody(object: User(id: 123, name: "john"))
     }
     var source = RequestState()
     try builder.transformer(&source)
@@ -203,12 +203,12 @@ import Testing
 }
 
 @Test func testQueryEncodable() async throws {
-    struct User: Encodable {
+    struct User {
         let id: Int
         let name: String
     }
     let builder = RequestBlock {
-        Query(User(id: 123, name: "john"))
+        Query(object: User(id: 123, name: "john"))
     }
     var source = RequestState()
     try builder.transformer(&source)

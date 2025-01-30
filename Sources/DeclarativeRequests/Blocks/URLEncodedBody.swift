@@ -1,5 +1,24 @@
 import Foundation
 
+enum DeclarativeNetworkingError: Error {
+    case percentEncodingFailed
+}
+
+extension Array where Element == URLQueryItem {
+    init(queryItemsReflecting object: Any) {
+        self = Mirror(reflecting: object).children.compactMap { child in
+            guard let name = child.label else { return nil }
+            if let num = child.value as? NSNumber {
+                return URLQueryItem(name: name, value: num.description)
+            }
+            if let str = child.value as? String {
+                return URLQueryItem(name: name, value: str)
+            }
+            return nil
+        }
+    }
+}
+
 public struct URLEncodedBody: CompositeNode {
     let contentType = "application/x-www-form-urlencoded"
     
@@ -19,37 +38,23 @@ public struct URLEncodedBody: CompositeNode {
         self.items = items
     }
 
-    public init(_ value: some Encodable) {
-        let data = try? JSONEncoder().encode(value)
-        guard let dict = try? JSONSerialization.jsonObject(with: data ?? Data()) as? [String: Any],
-              dict.values.allSatisfy({ $0 is String || $0 is NSNumber }) else {
-            self.items = []
-            return
-        }
-        self.items = dict.map { URLQueryItem(name: $0, value: String(describing: $1)) }
+    public init(object: Any) {
+        self.items = Array(queryItemsReflecting: object)
     }
     
     let items: [URLQueryItem]
     
-    private func parseExistingFormData(_ request: URLRequest) -> [URLQueryItem]? {
-        guard let contentType = request.value(forHTTPHeaderField: "Content-Type"),
-              contentType.contains(contentType),
-              let existingData = request.httpBody,
-              let query = String(data: existingData, encoding: .utf8) else {
-            return nil
-        }
-        
-        return URLComponents(string: "?" + query)?.queryItems
-    }
-    
     public var body: some BuilderNode {
         RequestBlock { state in
+            state.encodedBodyItems += items
             var components = URLComponents()
-            let existingItems = parseExistingFormData(state.request) ?? []
-            components.queryItems = existingItems + items
-            
-            state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+            components.queryItems = state.encodedBodyItems
+            if let data = components.percentEncodedQuery?.data(using: .utf8) {
+                state.request.httpBody = data
+            } else {
+                throw DeclarativeNetworkingError.percentEncodingFailed
+            }
         }
+        Header.contentType.addValue(contentType)
     }
 }
