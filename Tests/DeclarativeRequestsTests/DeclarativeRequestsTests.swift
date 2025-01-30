@@ -60,7 +60,26 @@ import Testing
     }
 }
 
-@Test(arguments: [true, false]) func flagTest(isFirst: Bool) async throws {
+@Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
+    let builder = RequestBlock {
+        BaseURL("https://google.com")
+
+        if isFirst {
+            Endpoint("/first")
+            Query("isFirst", "1")
+        }
+    }
+
+    var source = RequestState()
+    try builder.transformer(&source)
+    if isFirst {
+        #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
+    } else {
+        #expect(source.request.url?.absoluteString == "https://google.com")
+    }
+}
+
+@Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
     let builder = RequestBlock {
         BaseURL("https://google.com")
 
