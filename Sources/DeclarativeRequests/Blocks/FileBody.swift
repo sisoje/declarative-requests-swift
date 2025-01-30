@@ -1,10 +1,6 @@
 import Foundation
 
 public struct FileBody: CompositeNode {
-    public init(_ fileURL: URL) {
-        url = fileURL
-    }
-
     private let url: URL
 
     public var body: some BuilderNode {
