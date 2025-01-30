@@ -20,6 +20,7 @@ public extension Header {
 
     func setValue(_ value: String) -> some BuilderNode {
         RequestBlock {
+            assert($0.request.value(forHTTPHeaderField: rawValue) == nil)
             $0.request.setValue(value, forHTTPHeaderField: rawValue)
         }
     }
@@ -27,6 +28,13 @@ public extension Header {
     static func addCustom(header: String, value: String) -> some BuilderNode {
         RequestBlock {
             $0.request.addValue(value, forHTTPHeaderField: header)
+        }
+    }
+    
+    static func setCustom(header: String, value: String) -> some BuilderNode {
+        RequestBlock {
+            assert($0.request.value(forHTTPHeaderField: header) == nil)
+            $0.request.setValue(value, forHTTPHeaderField: header)
         }
     }
 }

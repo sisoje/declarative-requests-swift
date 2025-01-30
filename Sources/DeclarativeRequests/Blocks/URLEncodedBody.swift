@@ -50,6 +50,7 @@ public struct URLEncodedBody: CompositeNode {
         RequestBlock { state in
             state.encodedBodyItems += items
             state.request.httpBody = .httpBody(state.encodedBodyItems)
+            assert(state.request.httpBody != nil)
         }
     }
 }
