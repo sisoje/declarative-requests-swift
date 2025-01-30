@@ -13,9 +13,9 @@ public enum ContentType: String, CompositeNode {
     case MSWord = "application/msword"
     case MSExcel = "application/vnd.ms-excel"
     case MSPowerPoint = "application/vnd.ms-powerpoint"
-    case WordOpenXML = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    case ExcelOpenXML = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    case PowerPointOpenXML = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    case DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    case XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    case PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     case M3U8 = "application/x-mpegURL"
 
     // Text types
