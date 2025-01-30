@@ -1,11 +1,13 @@
 import Foundation
 
 public struct DataBody: CompositeNode {
-    private let data: Data
+    public init(_ data: Data? = nil) {
+        self.data = data
+    }
+    
+    let data: Data?
     
     public var body: some BuilderNode {
-        RequestBlock { state in
-            state.request.httpBody = data
-        }
+        RequestState[\.request.httpBody, data]
     }
 }
