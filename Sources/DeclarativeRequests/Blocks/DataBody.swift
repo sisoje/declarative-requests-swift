@@ -6,15 +6,19 @@ public struct DataBody: CompositeNode {
         case file(URL)
     }
 
-    public init(_ value: Data) {
+    public init(_ value: Data, mimeType: String = "application/octet-stream") {
         self.source = .data(value)
+        self.mimeType = mimeType
     }
 
-    public init(fileURL: URL) {
+    public init(fileURL: URL, mimeType: String = "application/octet-stream") {
         self.source = .file(fileURL)
+        self.mimeType = mimeType
     }
 
     private let source: Source
+    
+    private let mimeType: String
 
     public var body: some BuilderNode {
         RootNode { state in
@@ -24,7 +28,7 @@ public struct DataBody: CompositeNode {
             case .file(let url):
                 state.request.httpBodyStream = InputStream(url: url)
             }
-            state.request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+            state.request.setValue(mimeType, forHTTPHeaderField: "Content-Type")
         }
     }
 }
