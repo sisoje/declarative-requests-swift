@@ -11,6 +11,7 @@ flowchart LR
     subgraph RequestState
         baseUrl["base URL"]
         request
+        encodedBody["URL encoded body support"]
         path["path components"]
         baseUrl --> finalUrl["final URL"]
         path --> finalUrl
