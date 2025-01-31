@@ -6,9 +6,3 @@ swiftformat .
 
 # Add the formatted files back to staging
 git add .
-
-# If SwiftFormat failed, prevent the commit
-if [ $? -ne 0 ]; then
-    echo "SwiftFormat found errors. Commit aborted."
-    exit 1
-fi
