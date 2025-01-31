@@ -24,7 +24,6 @@ class MultipartTests {
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
         let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8080/upload")!)
-        
-        print(String(decoding: response.0, as: UTF8.self))
+        #expect(response.0 == "Success".data(using: .utf8))
     }
 }
