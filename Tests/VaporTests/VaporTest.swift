@@ -10,7 +10,10 @@ class MultipartTests: @unchecked Sendable {
     
     init() throws {
         app = Application(.testing)
-        
+
+        app.http.server.configuration.hostname = "127.0.0.1"
+        app.http.server.configuration.port = 8080
+
         app.get("upload") { [weak self] req -> String in
             self?.receivedRequest = req
             return "Success"
