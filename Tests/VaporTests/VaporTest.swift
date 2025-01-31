@@ -5,32 +5,18 @@ import Vapor
 
 @Suite("Multipart Request Tests")
 class MultipartTests: @unchecked Sendable {
-    var app: Application!
-    var receivedRequest: Request?
-    
-    init() throws {
-        app = Application(.testing)
-
-        app.http.server.configuration.hostname = "127.0.0.1"
-        app.http.server.configuration.port = 8123
-
-        app.get("upload") { [weak self] req -> String in
-            self?.receivedRequest = req
+    static let app: Application = {
+        let app = Application(.testing)
+        app.get(.catchall) { req -> String in
             return "Success"
         }
-        
-        try app.start()
-    }
-    
-    deinit {
-        app.shutdown()
-    }
+        try! app.start()
+        return app
+    }()
         
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8123/upload")!)
+        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8080/upload")!)
         #expect(response.0 == "Success".data(using: .utf8))
-        
-        // TODO: check receivedRequest
     }
 }
