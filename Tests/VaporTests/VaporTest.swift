@@ -54,11 +54,18 @@ private func getServerRequest(_ response: HTTPURLResponse) async throws -> Reque
 
 @Test("Multipart upload correctly constructs request")
 func testMultipartUpload() async throws {
-    let url = await MockServer.shared.baseUrl.appending(path: "upload")
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.setValue("multipart/form-data; boundary=test", forHTTPHeaderField: "Content-Type")
-    request.httpBody = "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(using: .utf8)
+    let url = await MockServer.shared.baseUrl
+
+    let request = try url.buildRequest {
+        Method.POST
+        Endpoint("/upload")
+        Header.setCustom(header: "Content-Type", value: "multipart/form-data; boundary=test")
+        DataBody(
+            "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(
+                using: .utf8
+            )!
+        )
+    }
 
     let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
 
