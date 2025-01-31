@@ -12,7 +12,7 @@ class MultipartTests: @unchecked Sendable {
         app = Application(.testing)
 
         app.http.server.configuration.hostname = "127.0.0.1"
-        app.http.server.configuration.port = 8080
+        app.http.server.configuration.port = 8123
 
         app.get("upload") { [weak self] req -> String in
             self?.receivedRequest = req
@@ -28,7 +28,7 @@ class MultipartTests: @unchecked Sendable {
         
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8080/upload")!)
+        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8123/upload")!)
         #expect(response.0 == "Success".data(using: .utf8))
         
         // TODO: check receivedRequest
