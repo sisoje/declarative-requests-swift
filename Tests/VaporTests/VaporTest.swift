@@ -73,4 +73,11 @@ func testMultipartUpload() async throws {
     #expect(vaporRequest?.headers.contentType?.type == "multipart")
     #expect(vaporRequest?.headers.contentType?.subType == "form-data")
     #expect(vaporRequest?.headers.contentType?.parameters["boundary"] == "test")
+
+    struct TestForm: Content {
+        let test: String
+    }
+
+    let form = try vaporRequest?.content.decode(TestForm.self)
+    #expect(form?.test == "test content")
 }
