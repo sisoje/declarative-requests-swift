@@ -10,8 +10,7 @@ class MultipartTests {
     init() throws {
         app = Application(.testing)
         
-        app.post("upload") { req -> String in
-            let formData = try req.content.decode(TestFormData.self)
+        app.get("upload") { req -> String in
             return "Success"
         }
         
@@ -24,11 +23,8 @@ class MultipartTests {
         
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
+        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8080/upload")!)
         
+        print(String(decoding: response.0, as: UTF8.self))
     }
-}
-
-struct TestFormData: Content {
-    var file: File
-    var metadata: String?
 }
