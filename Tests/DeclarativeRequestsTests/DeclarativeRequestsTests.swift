@@ -1,6 +1,5 @@
 import DeclarativeRequests
 import Foundation
-import SwiftUI
 import Testing
 
 @Test func baseUrlTest() throws {

@@ -1,6 +1,5 @@
 import DeclarativeRequestsExt
 import Foundation
-import SwiftUI
 import Testing
 
 @Test func concreteTypesTest() throws {

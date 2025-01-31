@@ -21,6 +21,9 @@ let package = Package(
             targets: ["DeclarativeRequestsExt"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.89.0")
+    ],
     targets: [
         .target(
             name: "DeclarativeRequests"
@@ -36,6 +39,10 @@ let package = Package(
         .testTarget(
             name: "DeclarativeRequestsExtTests",
             dependencies: ["DeclarativeRequestsExt"]
+        ),
+        .testTarget(
+            name: "VaporTests",
+            dependencies: ["DeclarativeRequestsExt", .product(name: "Vapor", package: "vapor")]
         ),
     ]
 )
