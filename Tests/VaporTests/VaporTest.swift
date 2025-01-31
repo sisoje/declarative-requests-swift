@@ -69,4 +69,8 @@ func testMultipartUpload() async throws {
 
     let vaporRequest = try! await getServerRequest(urlResponse)
     #expect(vaporRequest?.url.path == "/upload")
+    #expect(vaporRequest?.method == .POST)
+    #expect(vaporRequest?.headers.contentType?.type == "multipart")
+    #expect(vaporRequest?.headers.contentType?.subType == "form-data")
+    #expect(vaporRequest?.headers.contentType?.parameters["boundary"] == "test")
 }
