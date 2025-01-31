@@ -13,15 +13,20 @@ actor MockServer {
 
     let app: Application
 
-    func requestHandler(_ req: Request) async -> String {
+    func requestHandler(_ req: Request) async -> Response {
         let testId = UUID().uuidString
-        pendingRequests[testId.data(using: .utf8)!] = req
-        return testId
+        pendingRequests[testId] = req
+        return Response(
+            status: .ok,
+            version: .http1_1,
+            headers: ["X-Test-ID": testId],
+            body: "Success"
+        )
     }
 
-    private var pendingRequests: [Data: Request] = [:]
+    private var pendingRequests: [String: Request] = [:]
 
-    func get(_ id: Data) -> Request? {
+    func get(_ id: String) -> Request? {
         pendingRequests.removeValue(forKey: id)
     }
 
@@ -50,7 +55,13 @@ func testMultipartUpload() async throws {
     request.httpBody = "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(using: .utf8)
 
     let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
-    #expect((response as! HTTPURLResponse).statusCode == 200)
-    let vaporRequest = await MockServer.shared.get(data)
+
+    #expect(String(decoding: data, as: UTF8.self) == "Success")
+
+    let urlResponse = response as! HTTPURLResponse
+    #expect(urlResponse.statusCode == 200)
+
+    let testID = urlResponse.value(forHTTPHeaderField: "X-Test-ID")!
+    let vaporRequest = await MockServer.shared.get(testID)
     #expect(vaporRequest?.url.path == "/upload")
 }
