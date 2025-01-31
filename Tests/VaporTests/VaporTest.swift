@@ -6,6 +6,7 @@ import Vapor
 actor MockServer {
     init() {
         app = Application(.testing)
+        app.http.server.configuration.port = .zero
         app.get(.catchall, use: requestHandler)
         app.post(.catchall, use: requestHandler)
         try! app.start()
