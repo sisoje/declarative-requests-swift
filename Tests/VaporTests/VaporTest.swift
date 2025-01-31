@@ -46,6 +46,11 @@ actor MockServer {
     static let shared = MockServer()
 }
 
+private func getServerRequest(_ response: HTTPURLResponse) async throws -> Request? {
+    let testID = response.value(forHTTPHeaderField: "X-Test-ID")!
+    return await MockServer.shared.get(testID)
+}
+
 @Test("Multipart upload correctly constructs request")
 func testMultipartUpload() async throws {
     let url = await MockServer.shared.baseUrl.appending(path: "upload")
@@ -61,7 +66,6 @@ func testMultipartUpload() async throws {
     let urlResponse = response as! HTTPURLResponse
     #expect(urlResponse.statusCode == 200)
 
-    let testID = urlResponse.value(forHTTPHeaderField: "X-Test-ID")!
-    let vaporRequest = await MockServer.shared.get(testID)
+    let vaporRequest = try! await getServerRequest(urlResponse)
     #expect(vaporRequest?.url.path == "/upload")
 }
