@@ -22,7 +22,7 @@ class MultipartTests: @unchecked Sendable {
     
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let response = try await URLSession.shared.data(from: self.url(path: "/upload"))
+        let response = try await URLSession.shared.data(from: url(path: "/upload"))
         #expect(response.0 == "Success".data(using: .utf8))
     }
 }
