@@ -271,7 +271,7 @@ import Testing
     let stream = request.httpBodyStream
     #expect(stream != nil)
     stream?.open()
-    var buffer: [UInt8] = .init(repeating: 0, count: data.count+1)
+    var buffer: [UInt8] = .init(repeating: 0, count: data.count + 1)
     let count = stream?.read(&buffer, maxLength: buffer.count)
     #expect(count == data.count)
 }
