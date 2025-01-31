@@ -13,10 +13,16 @@ class MultipartTests: @unchecked Sendable {
         try! app.start()
         return app
     }()
-        
+    
+    private func url(path: String) -> URL {
+        let hostname = Self.app.http.server.configuration.hostname
+        let port = Self.app.http.server.configuration.port
+        return URL(string: "http://\(hostname):\(port)\(path)")!
+    }
+    
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let response = try await URLSession.shared.data(from: URL(string: "http://localhost:8080/upload")!)
+        let response = try await URLSession.shared.data(from: self.url(path: "/upload"))
         #expect(response.0 == "Success".data(using: .utf8))
     }
 }
