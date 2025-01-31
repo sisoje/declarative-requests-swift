@@ -25,10 +25,13 @@ actor MockServer {
         pendingRequests.removeValue(forKey: id)
     }
 
-    func url() -> URL {
-        let hostname = app.http.server.configuration.hostname
-        let port = app.http.server.configuration.port
-        return URL(string: "http://\(hostname):\(port)")!
+    var baseUrl: URL {
+        let config = app.http.server.configuration
+        var c = URLComponents()
+        c.scheme = "http"
+        c.host = config.hostname
+        c.port = config.port
+        return c.url!
     }
 
     deinit {
@@ -42,7 +45,7 @@ actor MockServer {
 class MultipartTests: @unchecked Sendable {
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let url = await MockServer.shared.url().appending(path: "/upload")
+        let url = await MockServer.shared.baseUrl.appending(path: "upload")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=test", forHTTPHeaderField: "Content-Type")
