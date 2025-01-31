@@ -14,14 +14,14 @@ actor MockServer {
     let app: Application
 
     func requestHandler(_ req: Request) async -> String {
-        let testId = req.headers.first(name: "X-Test-ID")!
-        pendingRequests[testId] = req
-        return "Success"
+        let testId = UUID().uuidString
+        pendingRequests[testId.data(using: .utf8)!] = req
+        return testId
     }
 
-    private var pendingRequests: [String: Request] = [:]
+    private var pendingRequests: [Data: Request] = [:]
 
-    func get(_ id: String) -> Request? {
+    func get(_ id: Data) -> Request? {
         pendingRequests.removeValue(forKey: id)
     }
 
@@ -41,23 +41,16 @@ actor MockServer {
     static let shared = MockServer()
 }
 
+@Test("Multipart upload correctly constructs request")
+func testMultipartUpload() async throws {
+    let url = await MockServer.shared.baseUrl.appending(path: "upload")
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("multipart/form-data; boundary=test", forHTTPHeaderField: "Content-Type")
+    request.httpBody = "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(using: .utf8)
 
-    @Test("Multipart upload correctly constructs request")
-    func testMultipartUpload() async throws {
-        let url = await MockServer.shared.baseUrl.appending(path: "upload")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=test", forHTTPHeaderField: "Content-Type")
-        request.httpBody = "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(using: .utf8)
-
-        let testId = UUID().uuidString
-        request.setValue(testId, forHTTPHeaderField: "X-Test-ID")
-
-        let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
-        #expect((response as! HTTPURLResponse).statusCode == 200)
-        #expect(String(decoding: data, as: UTF8.self) == "Success")
-
-        let vaporRequest = await MockServer.shared.get(testId)
-        #expect(vaporRequest?.url.path == "/upload")
-    }
-
+    let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
+    #expect((response as! HTTPURLResponse).statusCode == 200)
+    let vaporRequest = await MockServer.shared.get(data)
+    #expect(vaporRequest?.url.path == "/upload")
+}
