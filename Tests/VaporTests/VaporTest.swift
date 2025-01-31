@@ -41,8 +41,7 @@ actor MockServer {
     static let shared = MockServer()
 }
 
-@Suite("Multipart Request Tests")
-class MultipartTests: @unchecked Sendable {
+
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
         let url = await MockServer.shared.baseUrl.appending(path: "upload")
@@ -61,4 +60,4 @@ class MultipartTests: @unchecked Sendable {
         let vaporRequest = await MockServer.shared.get(testId)
         #expect(vaporRequest?.url.path == "/upload")
     }
-}
+
