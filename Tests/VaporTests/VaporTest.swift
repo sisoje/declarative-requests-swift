@@ -59,7 +59,9 @@ class MultipartTests: @unchecked Sendable {
         request.setValue(testId, forHTTPHeaderField: "X-Test-ID")
         request.httpBody = "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(using: .utf8)
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        #expect((response as! HTTPURLResponse).statusCode == 200)
+        #expect(String(decoding: data, as: UTF8.self) == "Success")
         
         let vaporRequest = try await requestTask.value
         #expect(vaporRequest.url.path == "/upload")
