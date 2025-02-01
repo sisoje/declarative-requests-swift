@@ -1,7 +1,7 @@
 import Foundation
 
 public enum Authorization: CompositeNode {
-    case basic(username: String, password: String?)
+    case basic(username: String, password: String)
     case bearer(token: String?)
     case custom(String?)
     
@@ -9,8 +9,7 @@ public enum Authorization: CompositeNode {
         RequestBlock {
             switch self {
             case .basic(let username, let password):
-                if let password = password,
-                   let authString = basic(username: username, password: password) {
+                if let authString = basic(username: username, password: password) {
                     Header.authorization.setValue(authString)
                 }
                 
