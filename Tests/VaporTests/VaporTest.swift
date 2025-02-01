@@ -59,14 +59,20 @@ func testMultipartUpload() async throws {
     let request = try url.buildRequest {
         Method.POST
         Endpoint("/upload")
-        Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
-        DataBody(
-            "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(
-                using: .utf8
-            )!
-        )
-        Cookie("Key", "Value")
-        Cookie("Key2", "Value2")
+
+        RequestBlock {
+            Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
+            DataBody(
+                "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(
+                    using: .utf8
+                )!
+            )
+        }
+
+        RequestBlock {
+            Cookie("Key", "Value")
+            Cookie("Key2", "Value2")
+        }
     }
 
     let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
