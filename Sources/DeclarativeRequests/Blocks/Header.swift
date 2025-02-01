@@ -24,15 +24,15 @@ public extension Header {
         }
     }
 
-    static func addCustom(header: String, value: String) -> some BuilderNode {
+    static func addCustom(_ name: String, _ value: String) -> some BuilderNode {
         RequestBlock {
-            $0.request.addValue(value, forHTTPHeaderField: header)
+            $0.request.addValue(value, forHTTPHeaderField: name)
         }
     }
 
-    static func setCustom(header: String, value: String) -> some BuilderNode {
+    static func setCustom(_ name: String, _: String) -> some BuilderNode {
         RequestBlock {
-            $0.request.setValue(value, forHTTPHeaderField: header)
+            $0.request.setValue(name, forHTTPHeaderField: name)
         }
     }
 }

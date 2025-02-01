@@ -59,7 +59,7 @@ func testMultipartUpload() async throws {
     let request = try url.buildRequest {
         Method.POST
         Endpoint("/upload")
-        Header.setCustom(header: "Content-Type", value: "multipart/form-data; boundary=test")
+        Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
         DataBody(
             "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(
                 using: .utf8
