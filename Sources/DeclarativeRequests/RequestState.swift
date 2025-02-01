@@ -5,7 +5,7 @@ public struct RequestState {
         baseURL: URL? = nil,
         pathComponents: URLComponents = .init(),
         encodedBodyItems: [URLQueryItem] = [],
-        cookies: [URLQueryItem] = [],
+        cookies: [String: String] = [:],
         request: URLRequest = .init(url: URL(fileURLWithPath: ""))
     ) {
         self.baseURL = baseURL
@@ -16,7 +16,7 @@ public struct RequestState {
     }
 
     public var baseURL: URL?
-    public var cookies: [URLQueryItem]
+    public var cookies: [String: String]
     public var encodedBodyItems: [URLQueryItem]
     public var pathComponents: URLComponents
     private var _request: URLRequest
