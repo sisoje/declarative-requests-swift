@@ -2,6 +2,19 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
+@Test(arguments: [true, false]) func disallow(_ isAllowed: Bool) throws {
+    let req = try URLRequest {
+        if !isAllowed {
+            DisallowAccess.Cellular
+            DisallowAccess.Constrained
+            DisallowAccess.Expensive
+        }
+    }
+    #expect(req.allowsCellularAccess == isAllowed)
+    #expect(req.allowsExpensiveNetworkAccess == isAllowed)
+    #expect(req.allowsConstrainedNetworkAccess == isAllowed)
+}
+
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
     let request = try baseUrl.buildRequest {

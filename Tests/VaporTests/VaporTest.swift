@@ -28,9 +28,7 @@ struct VaporTests {
                 Cookie("Key2", "Value2")
             }
 
-            NetworkAccess()
-                .allowCellular(false)
-                .allowExpensive(false)
+            DisallowAccess.Constrained
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
