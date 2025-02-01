@@ -1,14 +1,14 @@
-public enum DisallowAccess: CompositeNode {
-    case Cellular, Expensive, Constrained
+public enum NetworkAccess: CompositeNode {
+    case NoCellular, NoExpensive, NoConstrained
 
     public var body: some BuilderNode {
         RequestBlock {
             switch self {
-            case .Cellular:
+            case .NoCellular:
                 RequestState[\.request.allowsCellularAccess, false]
-            case .Expensive:
+            case .NoExpensive:
                 RequestState[\.request.allowsExpensiveNetworkAccess, false]
-            case .Constrained:
+            case .NoConstrained:
                 RequestState[\.request.allowsConstrainedNetworkAccess, false]
             }
         }

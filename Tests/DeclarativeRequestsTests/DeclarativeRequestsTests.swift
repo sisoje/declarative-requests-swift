@@ -5,9 +5,9 @@ import Testing
 @Test(arguments: [true, false]) func disallow(_ isAllowed: Bool) throws {
     let req = try URLRequest {
         if !isAllowed {
-            DisallowAccess.Cellular
-            DisallowAccess.Constrained
-            DisallowAccess.Expensive
+            NetworkAccess.NoCellular
+            NetworkAccess.NoConstrained
+            NetworkAccess.NoExpensive
         }
     }
     #expect(req.allowsCellularAccess == isAllowed)
