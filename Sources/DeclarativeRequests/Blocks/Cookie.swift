@@ -1,21 +1,43 @@
+import Foundation
+
 public struct Cookie: CompositeNode {
     private let items: [(String, String)]
 
     public init(_ name: String, _ value: String) {
-        items = [(name, value)]
+        items = [(Self.validateName(name), Self.encodeValue(value))]
     }
 
     public init(_ cookies: [(String, String)]) {
-        items = cookies
+        items = cookies.map { (Self.validateName($0.0), Self.encodeValue($0.1)) }
     }
 
     public init(_ cookies: [String: String]) {
-        items = cookies.map { ($0.key, $0.value) }
+        items = cookies.map { (Self.validateName($0.key), Self.encodeValue($0.value)) }
     }
 
     public init(object: Any) {
         let queryItems = Array(queryItemsReflecting: object)
-        items = queryItems.map { ($0.name, $0.value ?? "") }
+        items = queryItems.map { (Self.validateName($0.name), Self.encodeValue($0.value ?? "")) }
+    }
+
+    private static func validateName(_ name: String) -> String {
+        let invalidChars = CharacterSet(charactersIn: "()<>@,;:\\\"/[]?={} \t")
+            .union(CharacterSet.controlCharacters)
+
+        let validName = name.components(separatedBy: invalidChars).joined()
+
+        guard !validName.isEmpty else {
+            return "invalid_cookie_name"
+        }
+
+        return validName
+    }
+
+    private static func encodeValue(_ value: String) -> String {
+        let allowedCharacters = CharacterSet.alphanumerics
+            .union(CharacterSet(charactersIn: "!#$%&'()*+-./:<=>?@[]^_`{|}~"))
+
+        return value.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? ""
     }
 
     public var body: some BuilderNode {
