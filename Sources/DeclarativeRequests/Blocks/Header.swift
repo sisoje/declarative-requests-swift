@@ -30,9 +30,9 @@ public extension Header {
         }
     }
 
-    static func setCustom(_ name: String, _: String) -> some BuilderNode {
+    static func setCustom(_ name: String, _ value: String) -> some BuilderNode {
         RequestBlock {
-            $0.request.setValue(name, forHTTPHeaderField: name)
+            $0.request.setValue(value, forHTTPHeaderField: name)
         }
     }
 }
