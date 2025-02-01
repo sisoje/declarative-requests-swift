@@ -6,6 +6,7 @@ public enum Header: String {
     case authorization = "Authorization"
     case userAgent = "User-Agent"
     case origin = "Origin"
+    case cookie = "Cookie"
     case referer = "Referer"
     case acceptLanguage = "Accept-Language"
     case acceptEncoding = "Accept-Encoding"
