@@ -65,6 +65,8 @@ func testMultipartUpload() async throws {
                 using: .utf8
             )!
         )
+        Cookie("Key", "Value")
+        Cookie("Key2", "Value2")
     }
 
     let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
@@ -80,6 +82,8 @@ func testMultipartUpload() async throws {
     #expect(vaporRequest?.headers.contentType?.type == "multipart")
     #expect(vaporRequest?.headers.contentType?.subType == "form-data")
     #expect(vaporRequest?.headers.contentType?.parameters["boundary"] == "test")
+    #expect(vaporRequest?.headers.cookie!["Key"]?.string == "Value")
+    #expect(vaporRequest?.headers.cookie!["Key2"]?.string == "Value2")
 
     struct TestForm: Content {
         let test: String
