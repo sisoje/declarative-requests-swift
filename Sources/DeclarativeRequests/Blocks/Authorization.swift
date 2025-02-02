@@ -5,10 +5,6 @@ public enum Authorization {
         Header.authorization.setValue(value())
     }
 
-    public static func bearer(_ data: Data) -> some BuilderNode {
-        bearer(data.base64EncodedString())
-    }
-
     public static func bearer(_ string: String) -> some BuilderNode {
         custom { "Bearer \(string)" }
     }
