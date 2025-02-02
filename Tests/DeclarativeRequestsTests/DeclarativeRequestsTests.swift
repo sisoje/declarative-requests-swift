@@ -279,7 +279,7 @@ import Testing
 @Test func stream() throws {
     let data = "sisoje".data(using: .utf8)!
     let request = try URLRequest {
-        StreamBody(InputStream(data: data))
+        InputStream(data: data)
     }
     let stream = request.httpBodyStream
     #expect(stream != nil)
