@@ -7,10 +7,6 @@ public struct Cookie: CompositeNode {
         items = [name: value]
     }
 
-    public init(_ cookies: [(String, String)]) {
-        items = Dictionary(uniqueKeysWithValues: cookies)
-    }
-
     public init(_ cookies: [String: String]) {
         items = cookies
     }

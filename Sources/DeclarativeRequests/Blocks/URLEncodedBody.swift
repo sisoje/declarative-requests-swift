@@ -18,7 +18,7 @@ public struct URLEncodedBody: CompositeNode {
     }
 
     public init(object: Any) {
-        items = Array(queryItemsReflecting: object)
+        items = Array(reflecting: object)
     }
 
     let items: [URLQueryItem]
@@ -26,7 +26,8 @@ public struct URLEncodedBody: CompositeNode {
     public var body: some BuilderNode {
         RequestBlock { state in
             state.encodedBodyItems += items
-            state.request.httpBody = .httpBody(state.encodedBodyItems)
+            state.request.httpBody = state.encodedBodyItems.urlEncoded
         }
+        ContentType.URLEncoded
     }
 }
