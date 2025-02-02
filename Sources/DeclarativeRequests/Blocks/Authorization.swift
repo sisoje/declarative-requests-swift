@@ -1,37 +1,23 @@
 import Foundation
 
-public enum Authorization: CompositeNode {
-    case basic(username: String, password: String)
-    case bearer(token: String?)
-    case custom(String?)
+public enum Authorization {
+    public static func custom(value: () -> String) -> some BuilderNode {
+        Header.authorization.setValue(value())
+    }
 
-    public var body: some BuilderNode {
-        RequestBlock {
-            switch self {
-            case .basic(let username, let password):
-                if let authString = basic(username: username, password: password) {
-                    Header.authorization.setValue(authString)
-                }
-
-            case .bearer(let token):
-                if let token = token {
-                    Header.authorization.setValue("Bearer \(token)")
-                }
-
-            case .custom(let value):
-                if let value = value {
-                    Header.authorization.setValue(value)
-                }
-            }
+    public static func bearer(_ data: Data) -> some BuilderNode {
+        custom {
+            let base64 = data.base64EncodedString()
+            return "Bearer \(base64)"
         }
     }
 
-    private func basic(username: String, password: String) -> String? {
-        let credentials = "\(username):\(password)"
-        guard let data = credentials.data(using: .utf8) else {
-            return nil
+    public static func basic(username: String, password: String) -> some BuilderNode {
+        custom {
+            let credentials = "\(username):\(password)"
+            let data = Data(credentials.utf8)
+            let base64 = data.base64EncodedString()
+            return "Basic \(base64)"
         }
-        let base64 = data.base64EncodedString()
-        return "Basic \(base64)"
     }
 }
