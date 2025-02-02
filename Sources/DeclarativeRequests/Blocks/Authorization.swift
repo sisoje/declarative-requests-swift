@@ -10,9 +10,7 @@ public enum Authorization {
     }
     
     public static func bearer(_ string: String) -> some BuilderNode {
-        custom {
-            return "Bearer \(string)"
-        }
+        custom { "Bearer \(string)" }
     }
 
     public static func basic(username: String, password: String) -> some BuilderNode {
