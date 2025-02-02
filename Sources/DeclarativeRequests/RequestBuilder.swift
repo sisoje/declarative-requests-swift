@@ -10,6 +10,14 @@ public extension RequestBuilder {
 
     typealias Result = RequestBlock
 
+    static func buildExpression(_ data: Data?) -> RequestBlock {
+        RequestState[\.request.httpBody, data]
+    }
+
+    static func buildExpression(_ url: URL?) -> RequestBlock {
+        RequestState[\.baseURL, url]
+    }
+
     @available(*, unavailable, message: "This type is not supported in request builder")
     static func buildExpression<Unsupported>(_: Unsupported) -> RequestBlock {
         fatalError()

@@ -1,16 +1,7 @@
 import Foundation
 
-public struct BaseURL: CompositeNode {
-    public init(_ url: URL?) {
-        self.url = url
-    }
-
-    public init(_ string: String) {
-        url = URL(string: string)
-    }
-
-    let url: URL?
+extension URL: CompositeNode {
     public var body: some BuilderNode {
-        RequestState[\RequestState.baseURL, url]
+        RequestState[\RequestState.baseURL, self]
     }
 }

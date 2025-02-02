@@ -8,7 +8,7 @@ public enum Authorization {
     public static func bearer(_ data: Data) -> some BuilderNode {
         bearer(data.base64EncodedString())
     }
-    
+
     public static func bearer(_ string: String) -> some BuilderNode {
         custom { "Bearer \(string)" }
     }

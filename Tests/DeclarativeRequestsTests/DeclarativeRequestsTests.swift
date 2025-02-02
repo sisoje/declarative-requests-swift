@@ -29,7 +29,7 @@ import Testing
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
         Method.POST
-        BaseURL("https://google.com")
+        URL(string: "https://google.com")
         Endpoint("/getLanguage")
         JSONBody([1])
         Query("languageId", "1")
@@ -55,7 +55,7 @@ import Testing
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
     let builder = RequestBlock {
-        BaseURL("https://google.com")
+        URL(string: "https://google.com")
 
         for i in 1 ... count {
             Endpoint("/getLanguage")
@@ -74,7 +74,7 @@ import Testing
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
     let builder = RequestBlock {
-        BaseURL("https://google.com")
+        URL(string: "https://google.com")
 
         if isFirst {
             Endpoint("/first")
@@ -93,7 +93,7 @@ import Testing
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
     let builder = RequestBlock {
-        BaseURL("https://google.com")
+        URL(string: "https://google.com")
 
         if isFirst {
             Endpoint("/first")

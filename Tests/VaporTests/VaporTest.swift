@@ -16,11 +16,9 @@ struct VaporTests {
 
             RequestBlock {
                 Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
-                DataBody(
-                    "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--".data(
-                        using: .utf8
-                    )!
-                )
+
+                "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--"
+                    .data(using: .utf8)
             }
 
             RequestBlock {
