@@ -23,8 +23,8 @@ actor MockServer {
         return components.url!
     }
 
-    func getVaporRequest(_ response: URLResponse) -> Request {
-        middleware.getVaporRequest(response)
+    func getVaporRequest(_ response: URLResponse) async -> Request {
+        await middleware.getVaporRequest(response)
     }
 
     private func requestHandler(_: Request) async -> String {
@@ -36,24 +36,23 @@ actor MockServer {
     }
 }
 
-private class MockServerMiddleware: Middleware, @unchecked Sendable {
-    init() {}
-
+private actor MockServerMiddleware: AsyncMiddleware {
     private let headerName = "X-Vapor-Test-ID"
     private var requests: [String: Request] = [:]
 
-    func getVaporRequest(_ response: URLResponse) -> Request {
+    init() {}
+
+    func getVaporRequest(_ response: URLResponse) async -> Request {
         let id = (response as! HTTPURLResponse).value(forHTTPHeaderField: headerName)!
         return requests.removeValue(forKey: id)!
     }
 
-    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
+    func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         let testId = UUID().uuidString
         requests[testId] = request
 
-        return next.respond(to: request).map { response in
-            response.headers.add(name: self.headerName, value: testId)
-            return response
-        }
+        let response = try await next.respond(to: request)
+        response.headers.add(name: headerName, value: testId)
+        return response
     }
 }
