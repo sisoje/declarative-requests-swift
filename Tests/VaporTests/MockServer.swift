@@ -40,8 +40,6 @@ private actor MockServerMiddleware: AsyncMiddleware {
     private let headerName = "X-Vapor-Test-ID"
     private var requests: [String: Request] = [:]
 
-    init() {}
-
     func getVaporRequest(_ response: URLResponse) async -> Request {
         let id = (response as! HTTPURLResponse).value(forHTTPHeaderField: headerName)!
         return requests.removeValue(forKey: id)!
