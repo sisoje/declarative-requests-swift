@@ -24,7 +24,8 @@ actor MockServer {
     }
 
     func getVaporRequest(_ response: URLResponse) async -> Request {
-        await middleware.getVaporRequest(response)
+        let httpResponse = response as! HTTPURLResponse
+        return await middleware.getVaporRequest(httpResponse)
     }
 
     private func requestHandler(_: Request) async -> String {
@@ -40,8 +41,8 @@ private actor MockServerMiddleware: AsyncMiddleware {
     private let headerName = "X-Vapor-Test-ID"
     private var requests: [String: Request] = [:]
 
-    func getVaporRequest(_ response: URLResponse) async -> Request {
-        let id = (response as! HTTPURLResponse).value(forHTTPHeaderField: headerName)!
+    func getVaporRequest(_ response: HTTPURLResponse) async -> Request {
+        let id = response.value(forHTTPHeaderField: headerName)!
         return requests.removeValue(forKey: id)!
     }
 
