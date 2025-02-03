@@ -1,17 +1,17 @@
 import Foundation
 import Vapor
 
-actor MockServer {
+final class MockServer {
     private let app: Application
-    private var middleware: MockServerMiddleware
+    var middleware: MockServerMiddleware
 
     init() {
         app = Application(.testing)
         middleware = MockServerMiddleware()
         app.middleware.use(middleware)
         app.http.server.configuration.port = .zero
-        app.get(.catchall, use: requestHandler)
-        app.post(.catchall, use: requestHandler)
+        app.get(.catchall) { _ in "Success" }
+        app.post(.catchall) { _ in "Success" }
         try! app.start()
     }
 
@@ -23,27 +23,20 @@ actor MockServer {
         return components.url!
     }
 
-    func getVaporRequest(_ response: URLResponse) async -> Request {
-        let httpResponse = response as! HTTPURLResponse
-        return await middleware.getVaporRequest(httpResponse)
-    }
-
-    private func requestHandler(_: Request) async -> String {
-        "Success"
-    }
-
     deinit {
         app.shutdown()
     }
 }
 
-private actor MockServerMiddleware: AsyncMiddleware {
+actor MockServerMiddleware: AsyncMiddleware {
     private let headerName = "X-Vapor-Test-ID"
     private var requests: [String: Request] = [:]
+    private var responses: [String: Response] = [:]
 
-    func getVaporRequest(_ response: HTTPURLResponse) async -> Request {
+    func getVaporRequest(_ response: URLResponse) -> (Request, Response) {
+        let response = response as! HTTPURLResponse
         let id = response.value(forHTTPHeaderField: headerName)!
-        return requests.removeValue(forKey: id)!
+        return (requests.removeValue(forKey: id)!, responses.removeValue(forKey: id)!)
     }
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
@@ -51,6 +44,7 @@ private actor MockServerMiddleware: AsyncMiddleware {
         requests[requestID] = request
 
         let response = try await next.respond(to: request)
+        responses[requestID] = response
         response.headers.add(name: headerName, value: requestID)
         return response
     }

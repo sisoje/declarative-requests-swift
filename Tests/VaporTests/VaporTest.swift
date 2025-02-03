@@ -8,7 +8,7 @@ struct VaporTests {
 
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let url = await server.baseUrl
+        let url = server.baseUrl
 
         let request = try url.buildRequest {
             Method.POST
@@ -28,7 +28,7 @@ struct VaporTests {
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        let vaporRequest = await server.getVaporRequest(response)
+        let (vaporRequest, _) = await server.middleware.getVaporRequest(response)
 
         #expect((response as! HTTPURLResponse).statusCode == 200)
         #expect(String(decoding: data, as: UTF8.self) == "Success")
