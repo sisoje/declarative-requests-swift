@@ -2,13 +2,15 @@ import Foundation
 
 public struct JSONBody: CompositeNode {
     public init(_ value: any Encodable, encoder: JSONEncoder = .init()) {
-        dataSource = { try encoder.encode(value) }
+        self.value = value
+        self.encoder = encoder
     }
 
-    let dataSource: () throws -> Data
+    let value: any Encodable
+    let encoder: JSONEncoder
 
     public var body: some BuilderNode {
-        RequestState[\.request.httpBody, dataSource]
+        RequestState[\.request.httpBody] { try encoder.encode(value) }
         ContentType.JSON
     }
 }

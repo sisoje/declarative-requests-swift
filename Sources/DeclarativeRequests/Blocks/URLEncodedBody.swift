@@ -2,15 +2,15 @@ import Foundation
 
 public struct URLEncodedBody: CompositeNode {
     public init(_ name: String, _ value: String?) {
-        items = [URLQueryItem(name: name, value: value)]
+        self.init([name: value])
     }
 
     public init(_ params: [(String, String?)]) {
-        items = params.map(URLQueryItem.init)
+        self.init(params.map(URLQueryItem.init))
     }
 
     public init(_ params: [String: String?]) {
-        items = params.map(URLQueryItem.init)
+        self.init(Array(params))
     }
 
     public init(_ items: [URLQueryItem]) {
@@ -18,7 +18,7 @@ public struct URLEncodedBody: CompositeNode {
     }
 
     public init(object: Any) {
-        items = Array(reflecting: object)
+        self.init(Dictionary(describingProperties: object))
     }
 
     let items: [URLQueryItem]
