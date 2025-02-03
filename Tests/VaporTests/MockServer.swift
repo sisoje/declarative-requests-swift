@@ -25,7 +25,7 @@ final class AppLifecycler {
 
     init(app: Application) {
         try! app.start()
-        shutdown = { app.shutdown() }
+        shutdown = app.shutdown
     }
 
     deinit {
