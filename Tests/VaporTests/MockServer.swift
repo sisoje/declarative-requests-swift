@@ -44,9 +44,9 @@ struct MockServer {
         midleware = VaporInterceptor(intercept: interceptor.save)
         app.middleware.use(midleware)
         app.http.server.configuration.port = .zero
-        appLifecycler = .init(app: app)
         app.get(.catchall, use: requestHandler)
         app.post(.catchall, use: requestHandler)
+        appLifecycler = .init(app: app)
     }
 
     var requestHandler: @Sendable (_: Request) async -> String = { _ in
