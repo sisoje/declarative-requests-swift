@@ -8,7 +8,7 @@ struct VaporTests {
 
     @Test("Multipart upload correctly constructs request")
     func testMultipartUpload() async throws {
-        let url = server.baseUrl
+        let url = server.app.baseUrl
 
         let request = try url.buildRequest {
             Method.POST

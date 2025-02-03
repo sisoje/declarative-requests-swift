@@ -20,45 +20,50 @@ actor VaporArchive {
     }
 }
 
-final class AppLifecycler {
-    let shutdown: () -> Void
+final class ResourceCleaner {
+    let cleanup: () -> Void
 
     init(app: Application) {
         try! app.start()
-        shutdown = app.shutdown
+        cleanup = app.shutdown
     }
 
     deinit {
-        shutdown()
+        cleanup()
+    }
+}
+
+actor RequestHandler {
+    func hanleRequest(_: Request) async -> String {
+        "Success"
+    }
+}
+
+extension Application {
+    var baseUrl: URL {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = http.server.configuration.hostname
+        components.port = http.server.configuration.port
+        return components.url!
     }
 }
 
 struct MockServer {
-    private let app: Application
+    let app: Application
     let interceptor = VaporArchive()
     private let midleware: AsyncMiddleware
-    private let appLifecycler: AppLifecycler
+    private let appLifecycler: ResourceCleaner
+    private let requestHandler = RequestHandler()
 
     init() {
         app = Application(.testing)
         midleware = VaporInterceptor(intercept: interceptor.save)
         app.middleware.use(midleware)
         app.http.server.configuration.port = .zero
-        app.get(.catchall, use: requestHandler)
-        app.post(.catchall, use: requestHandler)
-        appLifecycler = .init(app: app)
-    }
-
-    private let requestHandler: @Sendable (Request) async -> String = { _ in
-        "Success"
-    }
-
-    var baseUrl: URL {
-        var components = URLComponents()
-        components.scheme = "http"
-        components.host = app.http.server.configuration.hostname
-        components.port = app.http.server.configuration.port
-        return components.url!
+        app.get(.catchall, use: requestHandler.hanleRequest)
+        app.post(.catchall, use: requestHandler.hanleRequest)
+        appLifecycler = ResourceCleaner(app: app)
     }
 }
 
