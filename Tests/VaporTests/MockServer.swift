@@ -47,11 +47,11 @@ private actor MockServerMiddleware: AsyncMiddleware {
     }
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
-        let testId = UUID().uuidString
-        requests[testId] = request
+        let requestID = UUID().uuidString
+        requests[requestID] = request
 
         let response = try await next.respond(to: request)
-        response.headers.add(name: headerName, value: testId)
+        response.headers.add(name: headerName, value: requestID)
         return response
     }
 }
