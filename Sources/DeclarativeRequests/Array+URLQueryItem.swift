@@ -7,9 +7,7 @@ extension [URLQueryItem] {
         return components.percentEncodedQuery?.data(using: .utf8)
     }
 
-    init(reflecting object: Any) {
-        let numbers: [String: NSNumber?] = Dictionary(reflecting: object)
-        let strings: [String: String?] = Dictionary(reflecting: object)
-        self = numbers.mapValues(\.?.description).map(URLQueryItem.init) + strings.map(URLQueryItem.init)
+    init(describingProperties object: Any) {
+        self = Dictionary(describingProperties: object).map(URLQueryItem.init)
     }
 }

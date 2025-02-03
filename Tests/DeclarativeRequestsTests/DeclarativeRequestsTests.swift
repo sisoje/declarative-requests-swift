@@ -277,14 +277,43 @@ import Testing
 }
 
 @Test func stream() throws {
-    let data = "sisoje".data(using: .utf8)!
+    let data = Data("sisoje".utf8)
     let request = try URLRequest {
         InputStream(data: data)
     }
-    let stream = request.httpBodyStream
-    #expect(stream != nil)
-    stream?.open()
-    var buffer: [UInt8] = .init(repeating: 0, count: data.count + 1)
-    let count = stream?.read(&buffer, maxLength: buffer.count)
-    #expect(count == data.count)
+    #expect(request.httpBodyStream != nil)
+    request.httpBodyStream?.open()
+    var buffer: [UInt8] = .init(repeating: 0, count: data.count)
+    request.httpBodyStream?.read(&buffer, maxLength: buffer.count)
+    #expect(Data(buffer) == data)
+}
+
+@Test func query() throws {
+    struct Model {
+        var str1: String?
+        var str2 = "2"
+        var num1: Int?
+        var num2 = 2
+    }
+    let request = try URLRequest {
+        Query("x", "y")
+        Query(object: Model())
+        Query("1", "2")
+    }
+    #expect(request.url?.absoluteString == "?1=2&num2=2&str2=2&x=y")
+}
+
+@Test func cookie() throws {
+    struct Model {
+        var str1: String?
+        var str2 = "2"
+        var num1: Int?
+        var num2 = 2
+    }
+    let request = try URLRequest {
+        Cookie("x", "y")
+        Cookie(object: Model())
+        Cookie("1", "2")
+    }
+    #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; num2=2; str2=2; x=y")
 }

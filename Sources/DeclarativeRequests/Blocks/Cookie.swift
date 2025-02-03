@@ -4,7 +4,7 @@ public struct Cookie: CompositeNode {
     private let items: [String: String]
 
     public init(_ name: String, _ value: String) {
-        items = [name: value]
+        self.init([name: value])
     }
 
     public init(_ cookies: [String: String]) {
@@ -12,7 +12,7 @@ public struct Cookie: CompositeNode {
     }
 
     public init(object: Any) {
-        items = Dictionary(reflecting: object)
+        self.init(Dictionary(describingProperties: object))
     }
 
     public var body: some BuilderNode {
@@ -23,10 +23,11 @@ public struct Cookie: CompositeNode {
 
             let cookieString = state.cookies
                 .map { "\($0.key)=\($0.value)" }
+                .sorted()
                 .joined(separator: "; ")
 
             if !cookieString.isEmpty {
-                state.request.setValue(cookieString, forHTTPHeaderField: "Cookie")
+                state.request.setValue(cookieString, forHTTPHeaderField: Header.cookie.rawValue)
             }
         }
     }
