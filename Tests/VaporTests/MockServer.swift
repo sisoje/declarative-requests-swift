@@ -49,7 +49,7 @@ struct MockServer {
         appLifecycler = .init(app: app)
     }
 
-    var requestHandler: @Sendable (_: Request) async -> String = { _ in
+    private let requestHandler: @Sendable (Request) async -> String = { _ in
         "Success"
     }
 
