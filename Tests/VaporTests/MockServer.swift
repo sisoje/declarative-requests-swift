@@ -1,18 +1,52 @@
 import Foundation
 import Vapor
 
-final class MockServer {
+actor VaporArchive {
+    private let headerName = "X-Vapor-Test-ID"
+    private var requests: [String: Request] = [:]
+    private var responses: [String: Response] = [:]
+
+    func get(_ response: URLResponse) async -> (Request, Response) {
+        let response = response as! HTTPURLResponse
+        let id = response.value(forHTTPHeaderField: headerName)!
+        return (requests.removeValue(forKey: id)!, responses.removeValue(forKey: id)!)
+    }
+
+    func save(_ vreq: Request, _ vresp: Response) async {
+        let requestID = UUID().uuidString
+        requests[requestID] = vreq
+        responses[requestID] = vresp
+        vresp.headers.add(name: headerName, value: requestID)
+    }
+}
+
+final class AppLifecycler {
+    let shutdown: () -> Void
+
+    init(app: Application) {
+        try! app.start()
+        shutdown = { app.shutdown() }
+    }
+
+    deinit {
+        shutdown()
+    }
+}
+
+struct MockServer {
     private let app: Application
-    var middleware: MockServerMiddleware
+    let interceptor = VaporArchive()
+    private let midleware: AsyncMiddleware
+    private let appLifecycler: AppLifecycler
 
     init() {
         app = Application(.testing)
-        middleware = MockServerMiddleware()
-        app.middleware.use(middleware)
+        midleware = VaporInterceptor(intercept: interceptor.save)
+        app.middleware.use(midleware)
         app.http.server.configuration.port = .zero
         app.get(.catchall) { _ in "Success" }
         app.post(.catchall) { _ in "Success" }
-        try! app.start()
+        appLifecycler = .init(app: app)
     }
 
     var baseUrl: URL {
@@ -22,30 +56,13 @@ final class MockServer {
         components.port = app.http.server.configuration.port
         return components.url!
     }
-
-    deinit {
-        app.shutdown()
-    }
 }
 
-actor MockServerMiddleware: AsyncMiddleware {
-    private let headerName = "X-Vapor-Test-ID"
-    private var requests: [String: Request] = [:]
-    private var responses: [String: Response] = [:]
-
-    func getVaporRequest(_ response: URLResponse) -> (Request, Response) {
-        let response = response as! HTTPURLResponse
-        let id = response.value(forHTTPHeaderField: headerName)!
-        return (requests.removeValue(forKey: id)!, responses.removeValue(forKey: id)!)
-    }
-
+struct VaporInterceptor: AsyncMiddleware {
+    let intercept: @Sendable (Request, Response) async -> Void
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
-        let requestID = UUID().uuidString
-        requests[requestID] = request
-
         let response = try await next.respond(to: request)
-        responses[requestID] = response
-        response.headers.add(name: headerName, value: requestID)
+        await intercept(request, response)
         return response
     }
 }

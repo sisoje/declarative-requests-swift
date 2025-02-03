@@ -28,7 +28,7 @@ struct VaporTests {
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        let (vaporRequest, _) = await server.middleware.getVaporRequest(response)
+        let (vaporRequest, _) = await server.interceptor.get(response)
 
         #expect((response as! HTTPURLResponse).statusCode == 200)
         #expect(String(decoding: data, as: UTF8.self) == "Success")
