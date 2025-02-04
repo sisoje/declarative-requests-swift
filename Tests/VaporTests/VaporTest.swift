@@ -28,10 +28,10 @@ struct VaporTests {
         }
 
         let (_, response) = try await URLSession.shared.data(for: request)
-        let (vaporRequest, _) = await server.interceptor.get(response)
-
+        let (vaporRequest, vaporResponse, err) = await server.interceptor.get(response)
+        #expect(vaporResponse.status.code == 500)
+        #expect(err?.localizedDescription == "RouteNotFound.404: Not Found")
         #expect((response as! HTTPURLResponse).statusCode == 500)
-
         #expect(vaporRequest.url.path == "/upload")
         #expect(vaporRequest.method == .POST)
         #expect(vaporRequest.headers.contentType?.type == "multipart")

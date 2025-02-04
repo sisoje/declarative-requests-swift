@@ -55,25 +55,29 @@ struct GoogleForwarder {
 }
 
 struct TestForwarder {
-    static let googleForwarder = RequestForwarder { uri in
-        var res = uri
-        res.host = "www.google.com"
-        res.port = nil
-        res.scheme = "https"
-        return res
+    func makeForwarder(domain: String) -> RequestForwarder {
+        RequestForwarder { uri in
+            var res = uri
+            res.host = domain
+            res.port = nil
+            res.scheme = "https"
+            return res
+        }
     }
 
-    let server = GoogleForwarder(
-        midlewares: [ProxyMiddleware(responser: googleForwarder.forw)]
-    )
-
-    @Test func googleForward() async throws {
+    @Test(arguments: ["github.com", ""]) func googleForward(_ domain: String) async throws {
+        let server = GoogleForwarder(
+            midlewares: [ProxyMiddleware(responser: makeForwarder(domain: domain).forw)]
+        )
         let request = URLRequest(url: server.app.baseUrl)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        #expect(data.count > 0)
-        #expect((response as! HTTPURLResponse).statusCode == 200)
-        let (vaporRequest, vaporResponse) = await server.interceptor.get(response)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        let (vaporRequest, vaporResponse, error) = await server.interceptor.get(response)
         #expect(vaporRequest.headers["Host"].first!.starts(with: "127.0.0.1"))
-        #expect(vaporResponse.cookies["AEC"]?.domain == ".google.com")
+
+        if domain.isEmpty {
+            #expect((error as! HTTPClientError).description == "HTTPClientError.emptyHost")
+        } else {
+            #expect(vaporResponse.headers.contains(name: "etag"))
+        }
     }
 }

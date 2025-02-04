@@ -3,19 +3,17 @@ import Vapor
 
 actor VaporArchive {
     private let headerName = "X-Vapor-Test-ID"
-    private var requests: [String: Request] = [:]
-    private var responses: [String: Response] = [:]
+    private var requests: [String: (Request, Response, Error?)] = [:]
 
-    func get(_ response: URLResponse) async -> (Request, Response) {
+    func get(_ response: URLResponse) async -> (Request, Response, Error?) {
         let response = response as! HTTPURLResponse
         let id = response.value(forHTTPHeaderField: headerName)!
-        return (requests.removeValue(forKey: id)!, responses.removeValue(forKey: id)!)
+        return requests.removeValue(forKey: id)!
     }
 
-    func save(_ vreq: Request, _ vresp: Response) async {
+    func save(_ vreq: Request, _ vresp: Response, _ error: Error?) async {
         let requestID = UUID().uuidString
-        requests[requestID] = vreq
-        responses[requestID] = vresp
+        requests[requestID] = (vreq, vresp, error)
         vresp.headers.add(name: headerName, value: requestID)
     }
 }
@@ -59,16 +57,17 @@ struct MockServer {
 }
 
 struct VaporInterceptor: AsyncMiddleware {
-    let intercept: @Sendable (Request, Response) async -> Void
+    let intercept: @Sendable (Request, Response, Error?) async -> Void
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         let response: Response
         do {
             response = try await next.respond(to: request)
+            await intercept(request, response, nil)
         } catch {
             response = Response(status: .internalServerError)
+            await intercept(request, response, error)
         }
-        await intercept(request, response)
         return response
     }
 }
