@@ -33,12 +33,6 @@ final class ResourceCleaner {
     }
 }
 
-actor RequestHandler {
-    func hanleRequest(_: Request) async -> String {
-        "Success"
-    }
-}
-
 extension Application {
     var baseUrl: URL {
         var components = URLComponents()
@@ -54,23 +48,26 @@ struct MockServer {
     let interceptor = VaporArchive()
     private let midleware: AsyncMiddleware
     private let appLifecycler: ResourceCleaner
-    private let requestHandler = RequestHandler()
 
     init() {
         app = Application(.testing)
         midleware = VaporInterceptor(intercept: interceptor.save)
         app.middleware.use(midleware)
         app.http.server.configuration.port = .zero
-        app.get(.catchall, use: requestHandler.hanleRequest)
-        app.post(.catchall, use: requestHandler.hanleRequest)
         appLifecycler = ResourceCleaner(app: app)
     }
 }
 
 struct VaporInterceptor: AsyncMiddleware {
     let intercept: @Sendable (Request, Response) async -> Void
+
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
-        let response = try await next.respond(to: request)
+        let response: Response
+        do {
+            response = try await next.respond(to: request)
+        } catch {
+            response = Response(status: .internalServerError)
+        }
         await intercept(request, response)
         return response
     }
