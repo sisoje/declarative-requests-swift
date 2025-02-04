@@ -40,26 +40,32 @@ actor RequestForwarder {
 
 struct GoogleForwarder {
     let app: Application
-    private let appLifecycler: ResourceCleaner
     let interceptor = VaporArchive()
+    private let appStarter: ResourceCleaner
 
-    init(requestForwarder: RequestForwarder) {
+    init(midlewares: [any AsyncMiddleware]) {
         app = Application(.testing)
         app.middleware.use(VaporInterceptor(intercept: interceptor.save))
-        app.middleware.use(ProxyMiddleware(responser: requestForwarder.forw))
+        for midle in midlewares {
+            app.middleware.use(midle)
+        }
         app.http.server.configuration.port = .zero
-        appLifecycler = ResourceCleaner(app: app)
+        appStarter = ResourceCleaner(app: app)
     }
 }
 
 struct TestForwarder {
-    let server = GoogleForwarder(requestForwarder: RequestForwarder { uri in
+    static let googleForwarder = RequestForwarder { uri in
         var res = uri
         res.host = "www.google.com"
         res.port = nil
         res.scheme = "https"
         return res
-    })
+    }
+
+    let server = GoogleForwarder(
+        midlewares: [ProxyMiddleware(responser: googleForwarder.forw)]
+    )
 
     @Test func googleForward() async throws {
         let request = URLRequest(url: server.app.baseUrl)
