@@ -22,7 +22,6 @@ jobs:
           -scheme DeclarativeRequests-Package \
           -destination 'platform=macOS' \
           -resultBundlePath TestResults.xcresult
-          -quiet > /dev/null
     - uses: kishikawakatsumi/xcresulttool@v1
       with:
         path: TestResults.xcresult
