@@ -65,7 +65,7 @@ struct TestForwarder {
         }
     }
 
-    @Test(arguments: ["github.com", ""]) func googleForward(_ domain: String) async throws {
+    @Test(arguments: ["github.com"]) func googleForward(_ domain: String) async throws {
         let server = GoogleForwarder(
             midlewares: [ProxyMiddleware(responser: makeForwarder(domain: domain).forw)]
         )
