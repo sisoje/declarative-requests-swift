@@ -11,4 +11,9 @@ extension [String: String] {
             }
         self = Dictionary(uniqueKeysWithValues: tuples)
     }
+    
+    init(describingPropertiesEnum object: Any) {
+        let assoc = Mirror(reflecting: object).children.first!.value
+        self.init(describingProperties: assoc)
+    }
 }
