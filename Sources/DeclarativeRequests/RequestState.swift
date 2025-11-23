@@ -15,6 +15,7 @@ public struct RequestState {
         _request = request
     }
 
+    public var encoder: JSONEncoder = .init()
     public var baseURL: URL?
     public var cookies: [String: String]
     public var encodedBodyItems: [URLQueryItem]
