@@ -17,14 +17,6 @@ public struct Query: CompositeNode {
         self.items = items
     }
 
-    public init(object: Any) {
-        self.init(Dictionary(describingProperties: object))
-    }
-    
-    public init(enumValue: Any) {
-        self.init(Dictionary(describingPropertiesEnum: enumValue))
-    }
-
     let items: [URLQueryItem]
 
     public var body: some BuilderNode {

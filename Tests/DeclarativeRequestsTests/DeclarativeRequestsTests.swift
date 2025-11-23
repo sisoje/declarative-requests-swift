@@ -112,7 +112,7 @@ import Testing
     }
 }
 
-@Test func testURLEncodedBodySingleKeyValue() async throws {
+@Test func uRLEncodedBodySingleKeyValue() async throws {
     let builder = RequestBlock {
         URLEncodedBody("key", "value")
     }
@@ -126,7 +126,7 @@ import Testing
     #expect(items[0].value == "value")
 }
 
-@Test func testURLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
+@Test func uRLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
     let builder = RequestBlock {
         URLEncodedBody([
             ("color", "red"),
@@ -146,7 +146,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "size" && $0.value == "large" }))
 }
 
-@Test func testURLEncodedBodyDictionary() async throws {
+@Test func uRLEncodedBodyDictionary() async throws {
     let builder = RequestBlock {
         URLEncodedBody(["name": "john", "age": "25"])
     }
@@ -160,7 +160,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "age" && $0.value == "25" }))
 }
 
-@Test func testURLEncodedBodyURLQueryItems() async throws {
+@Test func uRLEncodedBodyURLQueryItems() async throws {
     let builder = RequestBlock {
         URLEncodedBody([
             URLQueryItem(name: "tag", value: "swift"),
@@ -178,7 +178,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "tag" && $0.value == "ios" }))
 }
 
-@Test func testURLEncodedBodyEncodable() async throws {
+@Test func uRLEncodedBodyEncodable() async throws {
     struct User {
         let id: Int
         let name: String
@@ -196,7 +196,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
 }
 
-@Test func testURLEncodedBodyMultipleBodiesMerging() async throws {
+@Test func uRLEncodedBodyMultipleBodiesMerging() async throws {
     let builder = RequestBlock {
         URLEncodedBody("page", "1")
         URLEncodedBody(["sort": "desc"])
@@ -215,7 +215,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "filter" && $0.value == "new" }))
 }
 
-@Test func testURLEncodedBodySequentialDuplicates() async throws {
+@Test func uRLEncodedBodySequentialDuplicates() async throws {
     let builder = RequestBlock {
         for i in 1 ... 6 {
             URLEncodedBody("count", "\(i)")
@@ -233,7 +233,7 @@ import Testing
     }
 }
 
-@Test func testQueryEncodable() async throws {
+@Test func queryEncodable() async throws {
     struct User {
         let id: Int
         let name: String

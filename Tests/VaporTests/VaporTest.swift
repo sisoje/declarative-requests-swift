@@ -7,7 +7,7 @@ struct VaporTests {
     let server = MockServer()
 
     @Test("Multipart upload correctly constructs request")
-    func testMultipartUpload() async throws {
+    func multipartUpload() async throws {
         let url = server.app.baseUrl
 
         let request = try url.buildRequest {
