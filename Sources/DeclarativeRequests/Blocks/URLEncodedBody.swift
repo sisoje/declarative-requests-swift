@@ -2,24 +2,12 @@ import Foundation
 
 public struct URLEncodedBody: RequestBuildable {
     public init(_ name: String, _ value: String?) {
-        self.init([name: value])
-    }
-
-    public init(_ params: [(String, String?)]) {
-        self.init(params.map(URLQueryItem.init))
-    }
-
-    public init(_ params: [String: String?]) {
-        self.init(Array(params))
-    }
-
-    public init(_ items: [URLQueryItem]) {
-        self.items = { _ in items }
+        items = { _ in [URLQueryItem(name: name, value: value)] }
     }
 
     public init<T: Encodable>(_ encodable: T) {
         items = {
-            try EncodableQueryItems(encodable, encoder: $0).items
+            try [URLQueryItem].from(encodable, encoder: $0)
         }
     }
 
