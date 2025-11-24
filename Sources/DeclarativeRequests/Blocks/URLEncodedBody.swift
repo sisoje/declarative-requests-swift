@@ -5,7 +5,7 @@ public struct URLEncodedBody: RequestBuildable {
         items = { _ in [URLQueryItem(name: name, value: value)] }
     }
 
-    public init<T: Encodable>(_ encodable: T) {
+    public init(_ encodable: any Encodable) {
         items = {
             try [URLQueryItem].from(encodable, encoder: $0)
         }
