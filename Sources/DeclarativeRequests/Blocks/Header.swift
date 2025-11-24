@@ -8,6 +8,7 @@ public enum Header: String {
     case origin = "Origin"
     case cookie = "Cookie"
     case referer = "Referer"
+    case host = "Host"
     case acceptLanguage = "Accept-Language"
     case acceptEncoding = "Accept-Encoding"
 }
