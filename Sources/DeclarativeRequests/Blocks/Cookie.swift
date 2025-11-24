@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Cookie: CompositeNode {
+public struct Cookie: RequestBuildable {
     private let items: [String: String]
 
     public init(_ name: String, _ value: String) {
@@ -15,8 +15,8 @@ public struct Cookie: CompositeNode {
         self.init(Dictionary(describingProperties: object))
     }
 
-    public var body: some BuilderNode {
-        RequestBlock { state in
+    public var body: some RequestBuildable {
+        RequestTransformation { state in
             for (name, value) in items {
                 state.cookies[name] = value
             }

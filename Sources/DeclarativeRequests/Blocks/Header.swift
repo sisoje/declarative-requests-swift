@@ -13,26 +13,26 @@ public enum Header: String {
 }
 
 public extension Header {
-    func addValue(_ value: String) -> some BuilderNode {
-        RequestBlock {
+    func addValue(_ value: String) -> some RequestBuildable {
+        RequestTransformation {
             $0.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
-    func setValue(_ value: String) -> some BuilderNode {
-        RequestBlock {
+    func setValue(_ value: String) -> some RequestBuildable {
+        RequestTransformation {
             $0.request.setValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
-    static func addCustom(_ name: String, _ value: String) -> some BuilderNode {
-        RequestBlock {
+    static func addCustom(_ name: String, _ value: String) -> some RequestBuildable {
+        RequestTransformation {
             $0.request.addValue(value, forHTTPHeaderField: name)
         }
     }
 
-    static func setCustom(_ name: String, _ value: String) -> some BuilderNode {
-        RequestBlock {
+    static func setCustom(_ name: String, _ value: String) -> some RequestBuildable {
+        RequestTransformation {
             $0.request.setValue(value, forHTTPHeaderField: name)
         }
     }

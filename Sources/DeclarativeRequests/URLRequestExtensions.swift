@@ -1,9 +1,9 @@
 import Foundation
 
 public extension URLRequest {
-    init(@RequestBuilder builder: () -> BuilderNode) throws {
+    init(@RequestBuilder builder: () -> RequestBuildable) throws {
         var state = RequestState()
-        let transformer = builder().transformer
+        let transformer = builder().transformRequest
         try transformer(&state)
         self = state.request
     }

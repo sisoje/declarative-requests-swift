@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ContentType: String, CompositeNode {
+public enum ContentType: String, RequestBuildable {
     // Application types
     case URLEncoded = "application/x-www-form-urlencoded"
     case JSON = "application/json"
@@ -59,7 +59,7 @@ public enum ContentType: String, CompositeNode {
     case TTF = "font/ttf"
     case OTF = "font/otf"
 
-    public var body: some BuilderNode {
+    public var body: some RequestBuildable {
         Header.contentType.setValue(rawValue)
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct URLEncodedBody: CompositeNode {
+public struct URLEncodedBody: RequestBuildable {
     public init(_ name: String, _ value: String?) {
         self.init([name: value])
     }
@@ -23,8 +23,8 @@ public struct URLEncodedBody: CompositeNode {
 
     let items: [URLQueryItem]
 
-    public var body: some BuilderNode {
-        RequestBlock { state in
+    public var body: some RequestBuildable {
+        RequestTransformation { state in
             state.encodedBodyItems += items
             state.request.httpBody = state.encodedBodyItems.urlEncoded
         }

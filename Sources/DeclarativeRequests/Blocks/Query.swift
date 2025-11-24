@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Query: CompositeNode {
+public struct Query: RequestBuildable {
     public init(_ items: [URLQueryItem]) {
         self.items = { _ in items }
     }
@@ -25,8 +25,8 @@ public struct Query: CompositeNode {
 
     let items: (JSONEncoder) throws -> [URLQueryItem]
 
-    public var body: some BuilderNode {
-        RequestBlock { state in
+    public var body: some RequestBuildable {
+        RequestTransformation { state in
             let oldItems = state.pathComponents.queryItems ?? []
             try state.pathComponents.queryItems = (oldItems + items(state.encoder)).sorted { $0.name < $1.name }
         }

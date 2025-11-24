@@ -1,11 +1,11 @@
-public struct Endpoint: CompositeNode {
+public struct Endpoint: RequestBuildable {
     public init(_ path: String) {
         self.path = path
     }
 
     let path: String
 
-    public var body: some BuilderNode {
+    public var body: some RequestBuildable {
         RequestState[\.pathComponents.path, path]
     }
 }

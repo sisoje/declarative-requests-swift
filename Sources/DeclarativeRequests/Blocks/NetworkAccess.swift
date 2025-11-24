@@ -1,7 +1,7 @@
-public enum NetworkAccess: CompositeNode {
+public enum NetworkAccess: RequestBuildable {
     case NoCellular, NoExpensive, NoConstrained
 
-    public var body: some BuilderNode {
+    public var body: some RequestBuildable {
         switch self {
         case .NoCellular:
             RequestState[\.request.allowsCellularAccess, false]

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Authorization: CompositeNode {
+public struct Authorization: RequestBuildable {
     public init(username: String, password: String) {
         let credentials = "\(username):\(password)"
         let data = Data(credentials.utf8)
@@ -18,7 +18,7 @@ public struct Authorization: CompositeNode {
 
     let value: String
 
-    public var body: some BuilderNode {
+    public var body: some RequestBuildable {
         Header.authorization.setValue(value)
     }
 }
