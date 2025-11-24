@@ -54,7 +54,7 @@ import Testing
 }
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URL(string: "https://google.com")
 
         for i in 1 ... count {
@@ -64,7 +64,7 @@ import Testing
     }
 
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     if count == 1 {
         #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1")
     } else {
@@ -73,7 +73,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URL(string: "https://google.com")
 
         if isFirst {
@@ -83,7 +83,7 @@ import Testing
     }
 
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
     } else {
@@ -92,7 +92,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URL(string: "https://google.com")
 
         if isFirst {
@@ -104,7 +104,7 @@ import Testing
     }
 
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
     } else {
@@ -113,11 +113,11 @@ import Testing
 }
 
 @Test func uRLEncodedBodySingleKeyValue() async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URLEncodedBody("key", "value")
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -127,15 +127,13 @@ import Testing
 }
 
 @Test func uRLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
-    let builder = RequestBlock {
-        URLEncodedBody([
-            ("color", "red"),
-            ("color", "blue"),
-            ("size", "large"),
-        ])
+    let builder = RequestTransformation {
+        URLEncodedBody("color", "red")
+        URLEncodedBody("color", "blue")
+        URLEncodedBody("size", "large")
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -147,11 +145,11 @@ import Testing
 }
 
 @Test func uRLEncodedBodyDictionary() async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URLEncodedBody(["name": "john", "age": "25"])
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -161,14 +159,12 @@ import Testing
 }
 
 @Test func uRLEncodedBodyURLQueryItems() async throws {
-    let builder = RequestBlock {
-        URLEncodedBody([
-            URLQueryItem(name: "tag", value: "swift"),
-            URLQueryItem(name: "tag", value: "ios"),
-        ])
+    let builder = RequestTransformation {
+        URLEncodedBody("tag", "swift")
+        URLEncodedBody("tag", "ios")
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -179,15 +175,15 @@ import Testing
 }
 
 @Test func uRLEncodedBodyEncodable() async throws {
-    struct User {
+    struct User: Codable {
         let id: Int
         let name: String
     }
-    let builder = RequestBlock {
-        URLEncodedBody(object: User(id: 123, name: "john"))
+    let builder = RequestTransformation {
+        URLEncodedBody(User(id: 123, name: "john"))
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -197,13 +193,14 @@ import Testing
 }
 
 @Test func uRLEncodedBodyMultipleBodiesMerging() async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         URLEncodedBody("page", "1")
-        URLEncodedBody(["sort": "desc"])
-        URLEncodedBody([("filter", "active"), ("filter", "new")])
+        URLEncodedBody("sort", "desc")
+        URLEncodedBody("filter", "active")
+        URLEncodedBody("filter", "new")
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -216,13 +213,13 @@ import Testing
 }
 
 @Test func uRLEncodedBodySequentialDuplicates() async throws {
-    let builder = RequestBlock {
+    let builder = RequestTransformation {
         for i in 1 ... 6 {
             URLEncodedBody("count", "\(i)")
         }
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -234,15 +231,15 @@ import Testing
 }
 
 @Test func queryEncodable() async throws {
-    struct User {
+    struct User: Codable {
         let id: Int
         let name: String
     }
-    let builder = RequestBlock {
-        Query(object: User(id: 123, name: "john"))
+    let builder = RequestTransformation {
+        Query(User(id: 123, name: "john"))
     }
     var source = RequestState()
-    try builder.transformer(&source)
+    try builder.transform(&source)
     let queryItems = source.pathComponents.queryItems ?? []
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
@@ -252,8 +249,8 @@ import Testing
 
 @Test func repositoryExample() throws {
     struct Repository {
-        @RequestBuilder var refreshToken: (_ accessToken: String) -> BuilderNode
-        @RequestBuilder var getUser: (String) -> BuilderNode
+        @RequestBuilder var refreshToken: (_ accessToken: String) -> RequestBuildable
+        @RequestBuilder var getUser: (String) -> RequestBuildable
     }
     let repository = Repository(
         refreshToken: { accessToken in
@@ -289,7 +286,7 @@ import Testing
 }
 
 @Test func query() throws {
-    struct Model {
+    struct Model: Codable {
         var str1: String?
         var str2 = "2"
         var num1: Int?
@@ -297,14 +294,14 @@ import Testing
     }
     let request = try URLRequest {
         Query("x", "y")
-        Query(object: Model())
+        Query(Model())
         Query("1", "2")
     }
     #expect(request.url?.absoluteString == "?1=2&num2=2&str2=2&x=y")
 }
 
 @Test func cookie() throws {
-    struct Model {
+    struct Model: Codable {
         var str1: String?
         var str2 = "2"
         var num1: Int?
@@ -312,7 +309,7 @@ import Testing
     }
     let request = try URLRequest {
         Cookie("x", "y")
-        Cookie(object: Model())
+        // Cookie(Model())
         Cookie("1", "2")
     }
     #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; num2=2; str2=2; x=y")

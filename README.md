@@ -48,7 +48,7 @@ let request = try URLRequest {
 This builds a `POST` request to `https://google.com/getLanguage?languageId=1` with a proper body.
 
 ## Features
-- **Composable Nodes**: Easily add custom `BuilderNode` types.
+- **Composable Nodes**: Easily add custom `RequestBuildable` types.
 - **Stateless Logic**: Decouples state from mutation logic.
 - **Testable**: Validate requests through isolated `RequestState`.
 

@@ -14,14 +14,14 @@ struct VaporTests {
             Method.POST
             Endpoint("/upload")
 
-            RequestBlock {
+            RequestTransformation {
                 Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
 
                 "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--"
                     .data(using: .utf8)
             }
 
-            RequestBlock {
+            RequestTransformation {
                 Cookie("Key", "Value")
                 Cookie("Key2", "Value2")
             }
