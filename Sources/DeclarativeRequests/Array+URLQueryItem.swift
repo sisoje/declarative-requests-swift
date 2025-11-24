@@ -6,8 +6,4 @@ extension [URLQueryItem] {
         components.queryItems = self
         return components.percentEncodedQuery?.data(using: .utf8)
     }
-
-    init(describingProperties object: Any) {
-        self = Dictionary(describingProperties: object).map(URLQueryItem.init)
-    }
 }

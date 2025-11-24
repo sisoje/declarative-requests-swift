@@ -1,4 +1,4 @@
-public struct RequestTransformation {
+public struct RequestTransformation: RequestBuildable {
     public init() {
         transform = { _ in }
     }
@@ -16,9 +16,7 @@ public struct RequestTransformation {
     }
 
     public let transform: RequestTransformationClosure
-}
 
-extension RequestTransformation: RequestBuildable {
     public var body: some RequestBuildable {
         let _ = fatalError("dont call body of StateTransformationNode")
     }

@@ -10,7 +10,7 @@ public struct JSONBody: RequestBuildable {
     let encoder: JSONEncoder
 
     public var body: some RequestBuildable {
-        RequestState[\.request.httpBody] { try encoder.encode(value) }
+        try RequestState[\.request.httpBody, encoder.encode(value)]
         ContentType.JSON
     }
 }

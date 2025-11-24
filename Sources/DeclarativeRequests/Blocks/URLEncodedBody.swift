@@ -14,18 +14,21 @@ public struct URLEncodedBody: RequestBuildable {
     }
 
     public init(_ items: [URLQueryItem]) {
-        self.items = items
+        self.items = { _ in items }
     }
 
-    public init(object: Any) {
-        self.init(Dictionary(describingProperties: object))
+    public init<T: Encodable>(_ encodable: T) {
+        items = {
+            try EncodableQueryItems(encodable, encoder: $0).items
+        }
     }
 
-    let items: [URLQueryItem]
+    let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
         RequestTransformation { state in
-            state.encodedBodyItems += items
+            let newItems = try items(state.encoder)
+            state.encodedBodyItems += newItems
             state.request.httpBody = state.encodedBodyItems.urlEncoded
         }
         ContentType.URLEncoded

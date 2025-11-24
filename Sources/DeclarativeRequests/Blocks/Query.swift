@@ -28,7 +28,8 @@ public struct Query: RequestBuildable {
     public var body: some RequestBuildable {
         RequestTransformation { state in
             let oldItems = state.pathComponents.queryItems ?? []
-            try state.pathComponents.queryItems = (oldItems + items(state.encoder)).sorted { $0.name < $1.name }
+            let newItems = try items(state.encoder)
+            state.pathComponents.queryItems = (oldItems + newItems).sorted { $0.name < $1.name }
         }
     }
 }

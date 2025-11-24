@@ -11,10 +11,6 @@ public struct Cookie: RequestBuildable {
         items = cookies
     }
 
-    public init(object: Any) {
-        self.init(Dictionary(describingProperties: object))
-    }
-
     public var body: some RequestBuildable {
         RequestTransformation { state in
             for (name, value) in items {

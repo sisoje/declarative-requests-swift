@@ -34,15 +34,9 @@ public struct RequestState {
 }
 
 public extension RequestState {
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> RequestTransformation {
+    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestTransformation {
         RequestTransformation {
-            $0[keyPath: keyPath] = value
-        }
-    }
-
-    static subscript<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: @escaping () throws -> T) -> RequestTransformation {
-        RequestTransformation {
-            try $0[keyPath: keyPath] = value()
+            $0[keyPath: keyPath] = try value()
         }
     }
 }
