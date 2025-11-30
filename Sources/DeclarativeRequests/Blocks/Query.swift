@@ -7,7 +7,7 @@ public struct Query: RequestBuildable {
 
     public init(_ encodable: any Encodable) {
         items = {
-            try [URLQueryItem].from(encodable, encoder: $0)
+            try EncodableQueryItems(encodable: encodable, encoder: $0).items
         }
     }
 
