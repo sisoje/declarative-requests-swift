@@ -23,37 +23,37 @@ public extension RequestBuilder {
     }
 
     /// Required by every result builder to build combined results from statement blocks
-    static func buildBlock(_ components: RequestBuildable...) -> RequestTransformation {
+    static func buildBlock(_ components: any RequestBuildable...) -> RequestTransformation {
         RequestTransformation(components.map(\.transform))
     }
 
     /// If declared, provides contextual type information for statement expressions to translate them into partial results
-    static func buildExpression(_ component: RequestBuildable) -> RequestTransformation {
+    static func buildExpression(_ component: any RequestBuildable) -> RequestTransformation {
         RequestTransformation(component.transform)
     }
 
     /// With buildEither(first:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(first component: RequestBuildable) -> RequestTransformation {
+    static func buildEither(first component: any RequestBuildable) -> RequestTransformation {
         RequestTransformation(component.transform)
     }
 
     /// With buildEither(second:), enables support for 'if-else' and 'switch' statements by folding conditional results into a single result
-    static func buildEither(second component: RequestBuildable) -> RequestTransformation {
+    static func buildEither(second component: any RequestBuildable) -> RequestTransformation {
         RequestTransformation(component.transform)
     }
 
     /// Enables support for 'if' statements that do not have an 'else'
-    static func buildOptional(_ component: RequestBuildable?) -> RequestTransformation {
+    static func buildOptional(_ component: (any RequestBuildable)?) -> RequestTransformation {
         RequestTransformation(component?.transform ?? { _ in })
     }
 
     /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
-    static func buildArray(_ components: [RequestBuildable]) -> RequestTransformation {
+    static func buildArray(_ components: [any RequestBuildable]) -> RequestTransformation {
         RequestTransformation(components.map(\.transform))
     }
 
     /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
-    static func buildLimitedAvailability(_ component: RequestBuildable) -> RequestTransformation {
+    static func buildLimitedAvailability(_ component: any RequestBuildable) -> RequestTransformation {
         RequestTransformation(component.transform)
     }
 }

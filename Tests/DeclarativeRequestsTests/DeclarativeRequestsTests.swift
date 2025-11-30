@@ -249,8 +249,8 @@ import Testing
 
 @Test func repositoryExample() throws {
     struct Repository {
-        @RequestBuilder var refreshToken: (_ accessToken: String) -> RequestBuildable
-        @RequestBuilder var getUser: (String) -> RequestBuildable
+        @RequestBuilder var refreshToken: (_ accessToken: String) -> any RequestBuildable
+        @RequestBuilder var getUser: (String) -> any RequestBuildable
     }
     let repository = Repository(
         refreshToken: { accessToken in
