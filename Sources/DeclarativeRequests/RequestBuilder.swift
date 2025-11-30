@@ -4,10 +4,6 @@ import Foundation
 public struct RequestBuilder {}
 
 public extension RequestBuilder {
-    static func buildExpression(_ data: Data?) -> RequestTransformation {
-        RequestState[\.request.httpBody, data]
-    }
-
     static func buildExpression(_ url: URL?) -> RequestTransformation {
         RequestState[\.baseURL, url]
     }

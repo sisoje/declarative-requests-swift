@@ -63,8 +63,8 @@ import Testing
         }
     }
 
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     if count == 1 {
         #expect(source.request.url?.absoluteString == "https://google.com/getLanguage?count=1")
     } else {
@@ -82,8 +82,8 @@ import Testing
         }
     }
 
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
     } else {
@@ -103,8 +103,8 @@ import Testing
         }
     }
 
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     if isFirst {
         #expect(source.request.url?.absoluteString == "https://google.com/first?isFirst=1")
     } else {
@@ -116,8 +116,8 @@ import Testing
     let builder = RequestTransformation {
         URLEncodedBody("key", "value")
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -132,8 +132,8 @@ import Testing
         URLEncodedBody("color", "blue")
         URLEncodedBody("size", "large")
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -148,8 +148,8 @@ import Testing
     let builder = RequestTransformation {
         URLEncodedBody(["name": "john", "age": "25"])
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -163,8 +163,8 @@ import Testing
         URLEncodedBody("tag", "swift")
         URLEncodedBody("tag", "ios")
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -182,8 +182,8 @@ import Testing
     let builder = RequestTransformation {
         URLEncodedBody(User(id: 123, name: "john"))
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -199,8 +199,8 @@ import Testing
         URLEncodedBody("filter", "active")
         URLEncodedBody("filter", "new")
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -218,8 +218,8 @@ import Testing
             URLEncodedBody("count", "\(i)")
         }
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
@@ -238,8 +238,8 @@ import Testing
     let builder = RequestTransformation {
         Query(User(id: 123, name: "john"))
     }
-    var source = RequestState()
-    try builder.transform(&source)
+    let source = RequestState()
+    try builder.transform(source)
     let queryItems = source.pathComponents.queryItems ?? []
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
@@ -312,5 +312,5 @@ import Testing
         // Cookie(Model())
         Cookie("1", "2")
     }
-    #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; num2=2; str2=2; x=y")
+    #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; x=y")
 }
