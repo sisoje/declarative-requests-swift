@@ -40,14 +40,14 @@ import Testing
 }
 
 @Test func jsonBodyTest() throws {
-    let request = try URL(filePath: "").buildRequest {
+    let request = try URL(fileURLWithPath: "").buildRequest {
         JSONBody([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
 }
 
 @Test func httpMethodTest() throws {
-    let request = try URL(filePath: "").buildRequest {
+    let request = try URL(fileURLWithPath: "").buildRequest {
         Method.custom("sisoje")
     }
     #expect(request.httpMethod == "sisoje")
