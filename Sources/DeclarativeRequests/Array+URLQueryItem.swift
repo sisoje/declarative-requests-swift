@@ -1,6 +1,6 @@
 import Foundation
 
-struct AnyQueryItems {
+private struct AnyQueryItems {
     let name: String
     let any: Any
 
@@ -29,7 +29,7 @@ struct AnyQueryItems {
     }
 }
 
-struct EncodableQueryItems {
+private struct EncodableQueryItems {
     let encodable: any Encodable
     let encoder: JSONEncoder
 
@@ -47,5 +47,9 @@ extension [URLQueryItem] {
         var components = URLComponents()
         components.queryItems = self
         return components.percentEncodedQuery?.data(using: .utf8)
+    }
+
+    static func from(_ encodable: Encodable, encoder: JSONEncoder) throws -> [URLQueryItem] {
+        try EncodableQueryItems(encodable: encodable, encoder: encoder).items
     }
 }
