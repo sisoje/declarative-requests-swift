@@ -8,7 +8,7 @@ public struct JSONBody: RequestBuildable {
     let value: any Encodable
 
     public var body: some RequestBuildable {
-        RequestTransformation { state in
+        RequestBlock { state in
             state.request.httpBody = try state.encoder.encode(value)
         }
         ContentType.JSON

@@ -5,7 +5,7 @@ public protocol RequestBuildable {
 
 extension RequestBuildable {
     var transform: RequestTransformationClosure {
-        if let s = self as? RequestTransformation {
+        if let s = self as? RequestBlock {
             s._transform
         } else {
             body.transform

@@ -29,8 +29,8 @@ public final class RequestState {
             let cookieString = newValue
                 .map { "\($0.key)=\($0.value)" }
                 .joined(separator: "; ")
-            let val = cookieString.isEmpty ? nil : cookieString
-            request.setValue(val, forHTTPHeaderField: Header.cookie.rawValue)
+            let value = cookieString.isEmpty ? nil : cookieString
+            request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
         }
     }
 
@@ -76,8 +76,8 @@ public final class RequestState {
 }
 
 public extension RequestState {
-    static subscript<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestTransformation {
-        RequestTransformation { state in
+    static subscript<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestBlock {
+        RequestBlock { state in
             state[keyPath: keyPath] = try value()
         }
     }

@@ -10,7 +10,7 @@ public struct Cookie: RequestBuildable {
     let value: String
 
     public var body: some RequestBuildable {
-        RequestTransformation { state in
+        RequestBlock { state in
             state.cookies[key] = value
         }
     }

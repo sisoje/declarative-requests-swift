@@ -52,7 +52,7 @@ import Testing
 }
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URL(string: "https://google.com")!
 
         for i in 1 ... count {
@@ -71,7 +71,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URL(string: "https://google.com")!
 
         if isFirst {
@@ -90,7 +90,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URL(string: "https://google.com")!
 
         if isFirst {
@@ -111,7 +111,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodySingleKeyValue() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody("key", "value")
     }
     let source = RequestState()
@@ -125,7 +125,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody("color", "red")
         URLEncodedBody("color", "blue")
         URLEncodedBody("size", "large")
@@ -143,7 +143,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodyDictionary() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody(["name": "john", "age": "25"])
     }
     let source = RequestState()
@@ -157,7 +157,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodyURLQueryItems() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody("tag", "swift")
         URLEncodedBody("tag", "ios")
     }
@@ -177,7 +177,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody(User(id: 123, name: "john"))
     }
     let source = RequestState()
@@ -191,7 +191,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodyMultipleBodiesMerging() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         URLEncodedBody("page", "1")
         URLEncodedBody("sort", "desc")
         URLEncodedBody("filter", "active")
@@ -211,7 +211,7 @@ import Testing
 }
 
 @Test func uRLEncodedBodySequentialDuplicates() async throws {
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         for i in 1 ... 6 {
             URLEncodedBody("count", "\(i)")
         }
@@ -233,7 +233,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestTransformation {
+    let builder = RequestBlock {
         Query(User(id: 123, name: "john"))
     }
     let source = RequestState()

@@ -1,4 +1,4 @@
-public struct RequestTransformation: RequestBuildable {
+public struct RequestBlock: RequestBuildable {
     public init(_ transform: @escaping RequestTransformationClosure = { _ in }) {
         _transform = transform
     }

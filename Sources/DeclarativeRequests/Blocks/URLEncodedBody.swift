@@ -14,7 +14,7 @@ public struct URLEncodedBody: RequestBuildable {
     let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
-        RequestTransformation { state in
+        RequestBlock { state in
             state.encodedBodyItems += try items(state.encoder)
         }
         ContentType.URLEncoded
