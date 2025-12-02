@@ -1,4 +1,4 @@
-import DeclarativeRequests
+@testable import DeclarativeRequests
 import Foundation
 import Testing
 
@@ -295,22 +295,17 @@ import Testing
         Query(Model())
         Query("1", "2")
     }
-    let q1 = URLComponents(string: "?x=y&num2=2&str2=2&1=2")!.queryItems!.sorted { $0.name < $1.name }
-    let q2 = URLComponents(string: request.url!.absoluteString)?.queryItems!.sorted { $0.name < $1.name }
+    let rs = RequestState(request: request)
+    let q1 = Set(rs.queryItems)
+    let q2 = Set(URLComponents(string: "?x=y&num2=2&str2=2&1=2")!.queryItems!)
     #expect(q1 == q2)
 }
 
 @Test func cookie() throws {
-    struct Model: Codable {
-        var str1: String?
-        var str2 = "2"
-        var num1: Int?
-        var num2 = 2
-    }
     let request = try URLRequest {
         Cookie("x", "y")
-        // Cookie(Model())
         Cookie("1", "2")
     }
-    #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; x=y")
+    let rs = RequestState(request: request)
+    #expect(rs.cookies == ["x": "y", "1": "2"])
 }

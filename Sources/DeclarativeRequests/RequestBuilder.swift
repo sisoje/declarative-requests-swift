@@ -26,7 +26,7 @@ public extension RequestBuilder {
 
     /// Required by every result builder to build combined results from statement blocks
     static func buildBlock(_ components: any RequestBuildable...) -> RequestTransformation {
-        RequestTransformation(components.map(\.transform))
+        RequestTransformation(components.map(\.transform).reduced)
     }
 
     /// If declared, provides contextual type information for statement expressions to translate them into partial results
@@ -51,7 +51,7 @@ public extension RequestBuilder {
 
     /// Enables support for...in loops in a result builder by combining the results of all iterations into a single result
     static func buildArray(_ components: [any RequestBuildable]) -> RequestTransformation {
-        RequestTransformation(components.map(\.transform))
+        RequestTransformation(components.map(\.transform).reduced)
     }
 
     /// If declared, this will be called on the partial result of an 'if #available' block to allow the result builder to erase type information
