@@ -6,13 +6,13 @@ public enum AllowAcces: RequestBuildable {
 
     public var body: some RequestBuildable {
         switch self {
-        case let .cellular(value):
+        case .cellular(let value):
             RequestState[\.request.allowsCellularAccess, value]
-        case let .expensiveNetwork(value):
+        case .expensiveNetwork(let value):
             RequestState[\.request.allowsExpensiveNetworkAccess, value]
-        case let .constrainedNetwork(value):
+        case .constrainedNetwork(let value):
             RequestState[\.request.allowsConstrainedNetworkAccess, value]
-        case let .ultraConstrainedNetwork(value):
+        case .ultraConstrainedNetwork(let value):
             if #available(macOS 26.1, iOS 26.1, watchOS 26.1, tvOS 26.1, *) {
                 RequestState[\.request.allowsUltraConstrainedNetworkAccess, value]
             }
