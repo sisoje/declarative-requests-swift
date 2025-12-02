@@ -4,9 +4,9 @@ import Testing
 
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
     let req = try URLRequest {
-        AllowAcces.cellular(isAllowed)
-        AllowAcces.constrainedNetwork(isAllowed)
-        AllowAcces.expensiveNetwork(isAllowed)
+        AllowAccess.cellular(isAllowed)
+        AllowAccess.constrainedNetwork(isAllowed)
+        AllowAccess.expensiveNetwork(isAllowed)
     }
     #expect(req.allowsCellularAccess == isAllowed)
     #expect(req.allowsExpensiveNetworkAccess == isAllowed)

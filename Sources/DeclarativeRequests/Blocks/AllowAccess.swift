@@ -1,4 +1,4 @@
-public enum AllowAcces: RequestBuildable {
+public enum AllowAccess: RequestBuildable {
     case cellular(Bool)
     case expensiveNetwork(Bool)
     case constrainedNetwork(Bool)

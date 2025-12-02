@@ -1,19 +1,17 @@
 import Foundation
 
 public struct Cookie: RequestBuildable {
-    private let cookies: [String: String]
-
-    public init(_ name: String, _ value: String) {
-        cookies = [name: value]
+    public init(_ key: String, _ value: String) {
+        self.key = key
+        self.value = value
     }
 
-    public init(_ dict: [String: String]) {
-        cookies = dict
-    }
+    let key: String
+    let value: String
 
     public var body: some RequestBuildable {
         RequestTransformation { state in
-            state.cookies.merge(cookies, uniquingKeysWith: { _, new in new })
+            state.cookies[key] = value
         }
     }
 }

@@ -3,7 +3,7 @@ public protocol RequestBuildable {
     @RequestBuilder var body: Body { get }
 }
 
-public extension RequestBuildable {
+extension RequestBuildable {
     var transform: RequestTransformationClosure {
         if let s = self as? RequestTransformation {
             s._transform
