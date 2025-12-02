@@ -34,28 +34,28 @@ public final class RequestState {
         }
     }
 
-    var urlComponents: URLComponents {
-        URLComponents(url: request.url!, resolvingAgainstBaseURL: true)!
+    var urlComponents: URLComponents? {
+        request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) }
     }
 
     func setBaseURL(_ url: URL) {
-        request.url = urlComponents.url(relativeTo: url)!
+        request.url = urlComponents?.url(relativeTo: url)
     }
 
     func setPath(_ path: String) {
         var urlComponents = urlComponents
-        urlComponents.path = path
-        request.url = urlComponents.url!
+        urlComponents?.path = path
+        request.url = urlComponents?.url
     }
 
     var queryItems: [URLQueryItem] {
         get {
-            urlComponents.queryItems ?? []
+            urlComponents?.queryItems ?? []
         }
         set {
             var urlComponents = urlComponents
-            urlComponents.queryItems = newValue
-            request.url = urlComponents.url!
+            urlComponents?.queryItems = newValue
+            request.url = urlComponents?.url
         }
     }
 

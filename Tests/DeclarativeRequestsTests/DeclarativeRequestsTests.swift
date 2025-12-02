@@ -2,6 +2,15 @@
 import Foundation
 import Testing
 
+extension URL {
+    func buildRequest(@RequestBuilder builder: () -> any RequestBuildable) throws -> URLRequest {
+        try URLRequest {
+            builder()
+            self
+        }
+    }
+}
+
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
     let req = try URLRequest {
         AllowAccess.cellular(isAllowed)
