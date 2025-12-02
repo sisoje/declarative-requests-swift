@@ -10,7 +10,7 @@ public final class RequestState {
     }
 
     public var request: URLRequest
-    public let encoder: JSONEncoder
+    public var encoder: JSONEncoder
 
     public var cookies: [String: String] {
         get {
@@ -38,14 +38,20 @@ public final class RequestState {
         request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) }
     }
 
-    func setBaseURL(_ url: URL) {
-        request.url = urlComponents?.url(relativeTo: url)
+    func setBaseURL(_ url: URL) throws {
+        guard let url = urlComponents?.url(relativeTo: url) else {
+            throw DeclarativeRequestsError.badUrl
+        }
+        request.url = url
     }
 
-    func setPath(_ path: String) {
+    func setPath(_ path: String) throws {
         var urlComponents = urlComponents
         urlComponents?.path = path
-        request.url = urlComponents?.url
+        guard let url = urlComponents?.url else {
+            throw DeclarativeRequestsError.badUrl
+        }
+        request.url = url
     }
 
     var queryItems: [URLQueryItem] {

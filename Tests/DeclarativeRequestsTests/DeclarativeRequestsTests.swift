@@ -6,7 +6,7 @@ extension URL {
     func buildRequest(@RequestBuilder builder: () -> any RequestBuildable) throws -> URLRequest {
         try URLRequest {
             builder()
-            self
+            BaseURL(self)
         }
     }
 }
@@ -36,7 +36,7 @@ extension URL {
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
         Method.POST
-        URL(string: "https://google.com")!
+        BaseURL("https://google.com")
         Endpoint("/getLanguage")
         JSONBody([1])
         Query("languageId", "1")
@@ -62,7 +62,7 @@ extension URL {
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
     let builder = RequestBlock {
-        URL(string: "https://google.com")!
+        BaseURL("https://google.com")
 
         for i in 1 ... count {
             Endpoint("/getLanguage")
@@ -81,7 +81,7 @@ extension URL {
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
     let builder = RequestBlock {
-        URL(string: "https://google.com")!
+        BaseURL("https://google.com")
 
         if isFirst {
             Endpoint("/first")
@@ -100,7 +100,7 @@ extension URL {
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
     let builder = RequestBlock {
-        URL(string: "https://google.com")!
+        BaseURL("https://google.com")
 
         if isFirst {
             Endpoint("/first")
@@ -283,7 +283,7 @@ extension URL {
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
     let request = try URLRequest {
-        InputStream(data: data)
+        StreamBody(InputStream(data: data))
     }
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()

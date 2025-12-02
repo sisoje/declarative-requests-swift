@@ -4,16 +4,6 @@ import Foundation
 public struct RequestBuilder {}
 
 public extension RequestBuilder {
-    static func buildExpression(_ url: URL) -> RequestBlock {
-        RequestBlock {
-            $0.setBaseURL(url)
-        }
-    }
-
-    static func buildExpression(_ stream: InputStream?) -> RequestBlock {
-        RequestState[\.request.httpBodyStream, stream]
-    }
-
     @available(*, unavailable, message: "This type is not supported in request builder")
     static func buildExpression<Unsupported>(_: Unsupported) -> RequestBlock {
         fatalError()
