@@ -29,7 +29,7 @@ private struct AnyQueryItems {
     }
 }
 
-private struct EncodableQueryItems {
+struct EncodableQueryItems {
     let encodable: any Encodable
     let encoder: JSONEncoder
 
@@ -39,17 +39,5 @@ private struct EncodableQueryItems {
             let json = try JSONSerialization.jsonObject(with: data)
             return AnyQueryItems(name: "", any: json).items
         }
-    }
-}
-
-extension [URLQueryItem] {
-    var urlEncoded: Data? {
-        var components = URLComponents()
-        components.queryItems = self
-        return components.percentEncodedQuery?.data(using: .utf8)
-    }
-
-    static func from(_ encodable: Encodable, encoder: JSONEncoder) throws -> [URLQueryItem] {
-        try EncodableQueryItems(encodable: encodable, encoder: encoder).items
     }
 }

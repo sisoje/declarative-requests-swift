@@ -7,7 +7,7 @@ public struct Query: RequestBuildable {
 
     public init(_ encodable: any Encodable) {
         items = {
-            try [URLQueryItem].from(encodable, encoder: $0)
+            try EncodableQueryItems(encodable: encodable, encoder: $0).items
         }
     }
 
@@ -15,9 +15,7 @@ public struct Query: RequestBuildable {
 
     public var body: some RequestBuildable {
         RequestTransformation { state in
-            let oldItems = state.pathComponents.queryItems ?? []
-            let newItems = try items(state.encoder)
-            state.pathComponents.queryItems = (oldItems + newItems).sorted { $0.name < $1.name }
+            state.queryItems += try items(state.encoder)
         }
     }
 }

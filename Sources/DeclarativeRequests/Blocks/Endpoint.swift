@@ -6,6 +6,8 @@ public struct Endpoint: RequestBuildable {
     let path: String
 
     public var body: some RequestBuildable {
-        RequestState[\.pathComponents.path, path]
+        RequestTransformation {
+            $0.setPath(path)
+        }
     }
 }

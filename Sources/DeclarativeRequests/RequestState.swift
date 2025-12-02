@@ -2,25 +2,47 @@ import Foundation
 
 public final class RequestState {
     public init() {}
+    public var request = URLRequest(url: URLComponents().url!)
     public var encoder = JSONEncoder()
-    public var baseURL: URL?
     public var cookies: [String: String] = [:]
-    public var encodedBodyItems: [URLQueryItem] = []
-    public var pathComponents = URLComponents()
 
-    private var _request = URLRequest(url: URL(fileURLWithPath: ""))
-    private func updateUrl() {
-        _request.url = pathComponents.url(relativeTo: baseURL)
+    var urlComponents: URLComponents {
+        URLComponents(url: request.url!, resolvingAgainstBaseURL: true)!
     }
 
-    public var request: URLRequest {
+    func setBaseURL(_ url: URL) {
+        request.url = urlComponents.url(relativeTo: url)!
+    }
+
+    func setPath(_ path: String) {
+        var urlComponents = urlComponents
+        urlComponents.path = path
+        request.url = urlComponents.url!
+    }
+
+    var queryItems: [URLQueryItem] {
         get {
-            updateUrl()
-            return _request
+            urlComponents.queryItems ?? []
         }
         set {
-            _request = newValue
-            updateUrl()
+            var urlComponents = urlComponents
+            urlComponents.queryItems = newValue
+            request.url = urlComponents.url!
+        }
+    }
+
+    var encodedBodyItems: [URLQueryItem] {
+        get {
+            request.httpBody.flatMap { bodyData in
+                var comp = URLComponents()
+                comp.percentEncodedQuery = String(decoding: bodyData, as: UTF8.self)
+                return comp.queryItems
+            } ?? []
+        }
+        set {
+            var comp = URLComponents()
+            comp.queryItems = newValue
+            request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
         }
     }
 }

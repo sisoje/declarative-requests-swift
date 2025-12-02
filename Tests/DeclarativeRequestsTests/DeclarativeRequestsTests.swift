@@ -2,7 +2,7 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
-@Test(arguments: [true, false]) func disallow(_ isAllowed: Bool) throws {
+@Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
     let req = try URLRequest {
         AllowAcces.cellular(isAllowed)
         AllowAcces.constrainedNetwork(isAllowed)
@@ -27,7 +27,7 @@ import Testing
 @Test func urlRequestTest() throws {
     let request = try URLRequest {
         Method.POST
-        URL(string: "https://google.com")
+        URL(string: "https://google.com")!
         Endpoint("/getLanguage")
         JSONBody([1])
         Query("languageId", "1")
@@ -53,7 +53,7 @@ import Testing
 
 @Test(arguments: [1, 2]) func countTest(count: Int) async throws {
     let builder = RequestTransformation {
-        URL(string: "https://google.com")
+        URL(string: "https://google.com")!
 
         for i in 1 ... count {
             Endpoint("/getLanguage")
@@ -72,7 +72,7 @@ import Testing
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
     let builder = RequestTransformation {
-        URL(string: "https://google.com")
+        URL(string: "https://google.com")!
 
         if isFirst {
             Endpoint("/first")
@@ -91,7 +91,7 @@ import Testing
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
     let builder = RequestTransformation {
-        URL(string: "https://google.com")
+        URL(string: "https://google.com")!
 
         if isFirst {
             Endpoint("/first")
@@ -238,7 +238,7 @@ import Testing
     }
     let source = RequestState()
     try builder.transform(source)
-    let queryItems = source.pathComponents.queryItems ?? []
+    let queryItems = URLComponents(url: source.request.url!, resolvingAgainstBaseURL: true)!.queryItems!
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))
@@ -295,7 +295,9 @@ import Testing
         Query(Model())
         Query("1", "2")
     }
-    #expect(request.url?.absoluteString == "?1=2&num2=2&str2=2&x=y")
+    let q1 = URLComponents(string: "?x=y&num2=2&str2=2&1=2")!.queryItems!.sorted { $0.name < $1.name }
+    let q2 = URLComponents(string: request.url!.absoluteString)?.queryItems!.sorted { $0.name < $1.name }
+    #expect(q1 == q2)
 }
 
 @Test func cookie() throws {
