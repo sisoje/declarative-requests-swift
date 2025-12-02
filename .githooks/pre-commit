@@ -2,7 +2,4 @@
 
 # Run SwiftFormat
 echo "Running SwiftFormat..."
-swiftformat .
-
-# Add the formatted files back to staging
-git add .
+swiftformat --header strip --patternlet inline .
