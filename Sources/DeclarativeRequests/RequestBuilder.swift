@@ -1,5 +1,16 @@
 import Foundation
 
+extension Sequence where Element == RequestStateTransformClosure {
+    var reduced: RequestStateTransformClosure {
+        reduce({ _ in }) { partialResult, closure in
+            {
+                try partialResult($0)
+                try closure($0)
+            }
+        }
+    }
+}
+
 @resultBuilder
 public struct RequestBuilder {}
 
@@ -11,7 +22,7 @@ public extension RequestBuilder {
 
     /// Build empty block
     static func buildBlock() -> RequestBlock {
-        RequestBlock()
+        RequestBlock {}
     }
 
     /// Required by every result builder to build combined results from statement blocks

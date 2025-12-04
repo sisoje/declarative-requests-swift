@@ -12,13 +12,11 @@ public struct Authorization: RequestBuildable {
         value = "Bearer \(token)"
     }
 
-    public init(_ value: String) {
-        self.value = value
-    }
-
     let value: String
 
     public var body: some RequestBuildable {
-        Header.authorization.setValue(value)
+        RequestBlock { state in
+            state.request.setValue(value, forHTTPHeaderField: Header.authorization.rawValue)
+        }
     }
 }

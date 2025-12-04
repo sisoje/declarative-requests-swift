@@ -4,19 +4,19 @@ import Testing
 
 extension URL {
     func buildRequest(@RequestBuilder builder: () -> any RequestBuildable) throws -> URLRequest {
-        try URLRequest {
+        try RequestBlock {
             builder()
             BaseURL(self)
-        }
+        }.request
     }
 }
 
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
-    let req = try URLRequest {
+    let req = try RequestBlock {
         AllowAccess.cellular(isAllowed)
         AllowAccess.constrainedNetwork(isAllowed)
         AllowAccess.expensiveNetwork(isAllowed)
-    }
+    }.request
     #expect(req.allowsCellularAccess == isAllowed)
     #expect(req.allowsExpensiveNetworkAccess == isAllowed)
     #expect(req.allowsConstrainedNetworkAccess == isAllowed)
@@ -34,13 +34,13 @@ extension URL {
 }
 
 @Test func urlRequestTest() throws {
-    let request = try URLRequest {
+    let request = try RequestBlock {
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
         JSONBody([1])
         Query("languageId", "1")
-    }
+    }.request
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
@@ -271,10 +271,10 @@ extension URL {
             Query("userId", userId)
         }
     )
-    let request = try URLRequest { repository.getUser("1") }
+    let request = try repository.getUser("1").request
     #expect(request.url?.absoluteString == "/user?userId=1")
     #expect(request.httpMethod == "GET")
-    let request2 = try URLRequest { repository.refreshToken("1") }
+    let request2 = try repository.refreshToken("1").request
     #expect(request2.url?.absoluteString == "/refreshToken")
     #expect(request2.httpMethod == "POST")
     #expect(request2.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"token\":\"1\"}")
@@ -282,9 +282,9 @@ extension URL {
 
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
-    let request = try URLRequest {
+    let request = try RequestBlock {
         StreamBody(InputStream(data: data))
-    }
+    }.request
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()
     var buffer: [UInt8] = .init(repeating: 0, count: data.count)
@@ -292,29 +292,62 @@ extension URL {
     #expect(Data(buffer) == data)
 }
 
-@Test func query() throws {
+@Test func queryModel() throws {
     struct Model: Codable {
-        var str1: String?
         var str2 = "2"
         var num1: Int?
         var num2 = 2
+        var b = true
     }
-    let request = try URLRequest {
-        Query("x", "y")
-        Query(Model())
-        Query("1", "2")
-    }
+    let request = try Query(Model()).request
     let rs = RequestState(request: request)
     let q1 = Set(rs.queryItems)
-    let q2 = Set(URLComponents(string: "?x=y&num2=2&str2=2&1=2")!.queryItems!)
+    let q2 = Set(URLComponents(string: "?num2=2&str2=2&b=true")!.queryItems!)
+    #expect(q1 == q2)
+}
+
+@Test func queryItems() throws {
+    let request = try RequestBlock {
+        Query("x", "y")
+        Query("1", "2")
+    }.request
+    let rs = RequestState(request: request)
+    let q1 = Set(rs.queryItems)
+    let q2 = Set(URLComponents(string: "?x=y&1=2")!.queryItems!)
+    #expect(q1 == q2)
+}
+
+@Test func queryEnum() throws {
+    enum Model: Codable {
+        case some(x: Int = 5, y: String = "a")
+    }
+    let request = try Query(Model.some()).request
+    let q1 = Set(RequestState(request: request).queryItems)
+    let q2 = Set(URLComponents(string: "?x=5&y=a")!.queryItems!)
     #expect(q1 == q2)
 }
 
 @Test func cookie() throws {
-    let request = try URLRequest {
+    let request = try RequestBlock {
         Cookie("x", "y")
         Cookie("1", "2")
-    }
+    }.request
     let rs = RequestState(request: request)
     #expect(rs.cookies == ["x": "y", "1": "2"])
+}
+
+@Test func authBearer() async throws {
+    let request = try RequestBlock {
+        Authorization(bearer: "x")
+    }.request
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "Bearer x")
+}
+
+@Test func authUserPass() async throws {
+    let request = try RequestBlock {
+        Authorization(username: "x", password: "y")
+    }.request
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "Basic eDp5")
 }

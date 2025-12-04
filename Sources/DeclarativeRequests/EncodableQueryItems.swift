@@ -37,9 +37,6 @@ struct EncodableQueryItems {
         get throws {
             let data = try encoder.encode(encodable)
             let json = try JSONSerialization.jsonObject(with: data)
-            guard json is NSDictionary else {
-                throw DeclarativeRequestsError.badEncodable
-            }
             return AnyQueryItems(name: "", any: json).items
         }
     }
