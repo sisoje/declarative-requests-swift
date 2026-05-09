@@ -16,7 +16,7 @@ private struct AnyQueryItems {
 
     var items: [URLQueryItem] {
         if let dict = any as? [String: Any] {
-            Array(dict).flatMap { key, value in
+            dict.sorted { $0.key < $1.key }.flatMap { key, value in
                 AnyQueryItems(name: key, any: value).items
             }
         } else if let arr = any as? [Any] {

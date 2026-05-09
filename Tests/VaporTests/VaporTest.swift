@@ -14,17 +14,12 @@ struct VaporTests {
             Method.POST
             Endpoint("/upload")
 
-            RequestTransformation {
-                Header.setCustom("Content-Type", "multipart/form-data; boundary=test")
-
-                "--test\r\nContent-Disposition: form-data; name=\"test\"\r\n\r\ntest content\r\n--test--"
-                    .data(using: .utf8)
+            MultipartBody {
+                MultipartPart.field(name: "test", value: "test content")
             }
 
-            RequestTransformation {
-                Cookie("Key", "Value")
-                Cookie("Key2", "Value2")
-            }
+            Cookie("Key", "Value")
+            Cookie("Key2", "Value2")
         }
 
         let (_, response) = try await URLSession.shared.data(for: request)
@@ -36,7 +31,7 @@ struct VaporTests {
         #expect(vaporRequest.method == .POST)
         #expect(vaporRequest.headers.contentType?.type == "multipart")
         #expect(vaporRequest.headers.contentType?.subType == "form-data")
-        #expect(vaporRequest.headers.contentType?.parameters["boundary"] == "test")
+        #expect(vaporRequest.headers.contentType?.parameters["boundary"]?.isEmpty == false)
         #expect(vaporRequest.headers.cookie!["Key"]?.string == "Value")
         #expect(vaporRequest.headers.cookie!["Key2"]?.string == "Value2")
 

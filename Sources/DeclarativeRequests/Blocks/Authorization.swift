@@ -1,6 +1,28 @@
 import Foundation
 
-public struct Authorization: RequestBuildable {
+/// Sets the `Authorization` header.
+///
+/// Use ``init(bearer:)`` for OAuth-style bearer tokens or
+/// ``init(username:password:)`` for HTTP Basic credentials.
+///
+/// ```swift
+/// // Bearer token:
+/// Authorization(bearer: accessToken)
+/// // → Authorization: Bearer <token>
+///
+/// // Basic auth:
+/// Authorization(username: "alice", password: "s3cret")
+/// // → Authorization: Basic YWxpY2U6czNjcmV0
+/// ```
+public struct Authorization: RequestBuildable, Sendable {
+    /// Create an `Authorization` block using HTTP Basic credentials.
+    ///
+    /// The credentials are joined with a colon, UTF-8 encoded, and Base64-encoded
+    /// per RFC 7617.
+    ///
+    /// - Parameters:
+    ///   - username: The username.
+    ///   - password: The password.
     public init(username: String, password: String) {
         let credentials = "\(username):\(password)"
         let data = Data(credentials.utf8)
@@ -8,6 +30,9 @@ public struct Authorization: RequestBuildable {
         value = "Basic \(base64)"
     }
 
+    /// Create an `Authorization` block using a bearer token.
+    ///
+    /// - Parameter token: The bearer token. Written verbatim after `Bearer `.
     public init(bearer token: String) {
         value = "Bearer \(token)"
     }
