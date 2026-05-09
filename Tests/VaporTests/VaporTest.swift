@@ -10,7 +10,7 @@ struct VaporTests {
     func multipartUpload() async throws {
         let url = server.app.baseUrl
 
-        let request = try url.buildRequest {
+        let request = try URLRequest(url: url) {
             Method.POST
             Endpoint("/upload")
 

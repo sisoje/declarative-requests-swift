@@ -15,7 +15,7 @@ import Testing
 
 @Test func baseUrlTest() throws {
     let baseUrl = URL(string: "https://google.com")!
-    let request = try baseUrl.buildRequest {
+    let request = try URLRequest(url: baseUrl) {
         Method.POST
         JSONBody([1])
     }
@@ -25,7 +25,7 @@ import Testing
 }
 
 @Test func urlStringBuilderTest() throws {
-    let request = try URL("https://google.com") {
+    let request = try URLRequest(string: "https://google.com") {
         Method.POST
         Endpoint("/getLanguage")
         JSONBody([1])
@@ -38,7 +38,7 @@ import Testing
 
 @Test func urlStringBuilderInvalidThrows() throws {
     #expect(throws: DeclarativeRequestsError.badUrl) {
-        try URL("") {
+        try URLRequest(string: "") {
             Method.GET
         }
     }
@@ -58,14 +58,14 @@ import Testing
 }
 
 @Test func jsonBodyTest() throws {
-    let request = try URL(fileURLWithPath: "").buildRequest {
+    let request = try URLRequest(url: URL(fileURLWithPath: "")) {
         JSONBody([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
 }
 
 @Test func httpMethodTest() throws {
-    let request = try URL(fileURLWithPath: "").buildRequest {
+    let request = try URLRequest(url: URL(fileURLWithPath: "")) {
         Method.custom("sisoje")
     }
     #expect(request.httpMethod == "sisoje")

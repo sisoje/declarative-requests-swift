@@ -9,7 +9,7 @@ import Foundation
 ///
 /// You typically don't construct a `RequestState` yourself — call
 /// ``RequestBuildable/request`` (or one of the convenience entry points like
-/// ``Foundation/URL/buildRequest(builder:)``) and the framework manages the lifecycle.
+/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``) and the framework manages the lifecycle.
 /// Constructing one explicitly is useful for tests:
 ///
 /// ```swift

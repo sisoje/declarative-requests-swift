@@ -22,7 +22,8 @@
 ///    ```
 ///
 /// The latter form is the entry point for building a request from a list of blocks
-/// without going through ``URLRequest/init(_:)`` or ``Foundation/URL/buildRequest(builder:)``.
+/// without going through ``URLRequest/init(_:)`` or
+/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``.
 ///
 /// > Important: ``body`` is unused for a `RequestBlock` (it is a leaf). Calling it
 /// > traps; the result builder routes around it via the `transform` closure.
