@@ -19,7 +19,7 @@ public extension URLSession {
     /// - Throws: Any error thrown while building the request, plus any error
     ///   thrown by `URLSession.data(for:)` itself.
     func data(@RequestBuilder _ builder: () -> any RequestBuildable) async throws -> (Data, URLResponse) {
-        let request = try URLRequest(builder)
+        let request = try URLRequest(builder: builder)
         return try await data(for: request)
     }
 
