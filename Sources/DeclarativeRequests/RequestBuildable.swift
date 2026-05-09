@@ -9,8 +9,8 @@ import Foundation
 /// lower-level blocks, terminating in primitive ``RequestBlock`` leaves.
 ///
 /// You rarely need to write a custom conformance — the built-in blocks
-/// (``BaseURL``, ``Endpoint``, ``Method``, ``Header``, ``JSONBody``, …) cover most
-/// cases. When you do, return your composition from `body`:
+/// (``BaseURL``, ``Endpoint``, ``Method``, ``Header``, ``RequestBody``, …)
+/// cover most cases. When you do, return your composition from `body`:
 ///
 /// ```swift
 /// struct AuthenticatedJSON: RequestBuildable {
@@ -20,7 +20,7 @@ import Foundation
 ///     var body: some RequestBuildable {
 ///         Method.POST
 ///         Authorization(bearer: token)
-///         JSONBody(payload)
+///         RequestBody.json(payload)
 ///     }
 /// }
 /// ```

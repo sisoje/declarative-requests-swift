@@ -13,8 +13,8 @@ public extension URLRequest {
     ///     Method.POST
     ///     BaseURL("https://api.example.com")
     ///     Endpoint("/login")
-    ///     Header.accept.setValue("application/json")
-    ///     Body("{\"user\":\"alice\"}", type: .JSON)
+    ///     Header(.accept, "application/json")
+    ///     RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     /// }
     /// print(request.curlCommand)
     /// // curl -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \

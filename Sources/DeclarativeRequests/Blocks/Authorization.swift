@@ -41,7 +41,7 @@ public struct Authorization: RequestBuildable {
 
     public var body: some RequestBuildable {
         RequestBlock { state in
-            state.request.setValue(value, forHTTPHeaderField: Header.authorization.rawValue)
+            state.request.setValue(value, forHTTPHeaderField: Header.Field.authorization.rawValue)
         }
     }
 }

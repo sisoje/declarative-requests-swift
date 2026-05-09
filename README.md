@@ -2,102 +2,102 @@
 
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
-A concise and declarative way to build and modify `URLRequest` using SwiftUI-inspired state management and composable builder nodes.
+A SwiftUI-style result builder for composing `URLRequest`. Each block in the
+builder maps onto one piece of a raw HTTP request — read the builder top to
+bottom and you read the request top to bottom.
 
-```mermaid
-flowchart LR
+```http
+POST /v1/login HTTP/1.1
+Host: api.example.com
+Accept: application/json
+Authorization: Bearer eyJhbGci...
+Content-Type: application/json
 
-    RequestBuilder --- transforms ---> RequestState
-
-    subgraph RequestState
-        baseUrl["base URL"]
-        request
-        path["path components"]
-        baseUrl --> finalUrl["final URL"]
-        path --> finalUrl
-    end
-
-    request --> FinalRequest["final request"]
-    finalUrl --> FinalRequest
-
-    subgraph RequestBuilder
-        function1 --> function2
-        function2 --> dots["..."]
-        dots --> functionN
-    end
+{"email":"alice@example.com","password":"hunter2"}
 ```
-
-## Key Concepts
-
-- **Builder Nodes**: Protocol-based components like `Method`, `JSONBody`, `Query`...
-- **Request Builders**: Declaratively composes node elements. **NOTE**: The request builder produces the final node with transformer function — it does **NOT** produce a request.
-- **Request State**: Maintains the state for the base `URL`, `URLRequest` and `URLComponents`.
-- **Final Request**: Computed by applying the transformer function on a request state. The transformer is stateless and can be re-applied on any request state.
-
-## Example Usage
 
 ```swift
 let request = try URLRequest {
     Method.POST
-    BaseURL("https://google.com")
-    Endpoint("/getLanguage")
-    JSONBody([1])
-    Query("languageId", "1")
+    BaseURL("https://api.example.com")
+    Endpoint("/v1/login")
+    Header(.accept, "application/json")
+    Authorization(bearer: token)
+    RequestBody.json(LoginRequest(email: email, password: password))
 }
 ```
 
-This builds a `POST` request to `https://google.com/getLanguage?languageId=1` with a proper body.
+Each `Header(...)` is one HTTP-line. `RequestBody.json(...)` is the body
+section. The block order roughly mirrors the wire order.
 
-You can also build from a `URL` value:
+## Block reference
 
-```swift
-let request = try URL(string: "https://google.com")!.buildRequest {
-    Method.GET
-    Path("v1", "languages")
-}
-```
-
-## Available blocks
+One type per request property. Pick the factory or initializer that matches
+the data you have.
 
 ### URL & path
-- `BaseURL(_ url:)` / `BaseURL(_ string:)` — set the base URL.
-- `Endpoint(_ path:)` — replace the URL path.
-- `Path("a", "b", ...)` — append slash-joined segments to the existing path.
-- `Query(_ name:_ value:)` / `Query(_ encodable:)` — append query items.
 
-### Method & headers
-- `Method.GET` / `.POST` / `.PUT` / `.DELETE` / ... or `Method.custom("…")`.
-- `Header.contentType.setValue("…")` / `.addValue("…")`.
-- `Headers("X-Trace", "abc")` — single name/value (literal name).
-- `Headers(.referer, "https://…")` — single header keyed by the `Header` enum.
-- `Headers(["X-A": "1", ...])` / `Headers([.accept: "application/json", ...])` — bulk-set from a map.
-- `Headers(MyHeadersModel())` — flatten an `Encodable` model into headers.
-- `ContentType.JSON` / `.XML` / `.URLEncoded` / ...
-- `Cookie("name", "value")`.
-- `Authorization(bearer: "…")` or `Authorization(username: "…", password: "…")`.
+| Block | What it does | Example |
+|---|---|---|
+| `BaseURL(_:)` | Sets host/scheme; preserves any path/query already declared. | `BaseURL("https://api.example.com")` |
+| `Endpoint(_:)` | Replaces the URL path. | `Endpoint("/v1/users")` |
+| `Path(_:...)` | Appends slash-joined segments to the existing path. | `Path("users", "\(id)", "posts")` |
+| `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
+| `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
-### Bodies
-- `JSONBody(_ encodable:)` — JSON-encoded body, sets Content-Type.
-- `URLEncodedBody(_ name:_ value:)` / `URLEncodedBody(_ encodable:)`.
-- `Body(_ data:type:)` / `Body(_ string:type:)` — raw body bytes plus optional Content-Type.
-- `MultipartBody { … }` — `multipart/form-data` with field, data, and file parts.
-- `StreamBody(_ stream:)` — stream the body from an `InputStream`.
+### Method, headers, cookies, auth
+
+| Block | What it does | Example |
+|---|---|---|
+| `Method.GET` / `.POST` / `.PUT` / … / `.custom("LINK")` | Sets the HTTP method. | `Method.POST` |
+| `Header(_ field:, _ value:)` | Sets one header by ``Header.Field``. | `Header(.accept, "application/json")` |
+| `Header(_ name:, _ value:)` | Sets one header by literal name. | `Header("X-Trace-Id", "abc123")` |
+| `…  mode: .add` | Append (comma-list) instead of replace. | `Header(.accept, "text/html", mode: .add)` |
+| `Header(_ map:)` | Bulk set from `[Field: String]` or `[String: String]`. | `Header([.accept: "application/json"])` |
+| `Header(_ encodable:)` | Bulk set from a flat `Encodable` model. | `Header(MyHeadersModel())` |
+| `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
+| `Authorization(bearer:)` | `Authorization: Bearer …` | `Authorization(bearer: token)` |
+| `Authorization(username:password:)` | `Authorization: Basic …` (Base64-encoded) | `Authorization(username: u, password: p)` |
+| `ContentType.JSON` (etc.) | Convenience block that sets `Content-Type`. | `ContentType.JSON` |
+
+### Body — one type, many factories
+
+`RequestBody` is **the** body block. The factory you pick decides how the
+bytes are produced and what (if any) `Content-Type` is set:
+
+| Factory | What you supply | Sets `Content-Type` |
+|---|---|---|
+| `RequestBody.data(_ data:type:)` | `Data` + optional `ContentType` | only if you pass `type:` |
+| `RequestBody.string(_ s:type:)` | `String` (UTF-8) + `ContentType` | yes (defaults `text/plain`) |
+| `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
+| `RequestBody.urlEncoded(_ items:)` | `[URLQueryItem]` | `application/x-www-form-urlencoded` |
+| `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
+| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `Header(.contentType, …)` if needed |
+| `RequestBody.multipart { parts }` | `MultipartPart`s, in-memory | `multipart/form-data; boundary=…` |
+| `RequestBody.multipart(strategy: .streamed()) { parts }` | `MultipartPart`s, streamed from disk | `multipart/form-data; boundary=…` + `Content-Length` |
+
+The body is *replaced* by each `RequestBody.*` block — last one wins. To
+collect form items across iterations, build the array first and pass it
+once.
 
 ### Networking knobs
-- `Timeout(_ seconds:)`.
-- `CachePolicy(.reloadIgnoringLocalCacheData)`.
-- `NetworkServiceType(.background)`.
-- `HTTPShouldHandleCookies(false)`.
-- `AllowAccess.cellular(true)` / `.expensiveNetwork(true)` / `.constrainedNetwork(true)`.
 
-## Multipart
+| Block | What it does |
+|---|---|
+| `Timeout(_ seconds:)` | `request.timeoutInterval` |
+| `CachePolicy(.reloadIgnoringLocalCacheData)` | `request.cachePolicy` |
+| `NetworkServiceType(.background)` | `request.networkServiceType` |
+| `HTTPShouldHandleCookies(false)` | `request.httpShouldHandleCookies` |
+| `AllowAccess.cellular(true)` etc. | `allowsCellularAccess` / `allowsExpensiveNetworkAccess` / `allowsConstrainedNetworkAccess` / `allowsUltraConstrainedNetworkAccess` |
+
+## Multipart upload
 
 ```swift
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("/upload")
-    MultipartBody {
+    RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
         MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
         for url in fileURLs {
@@ -106,6 +106,40 @@ let request = try URLRequest {
     }
 }
 ```
+
+For very large uploads, switch to streaming so memory use stays bounded:
+
+```swift
+RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
+    MultipartPart.field(name: "title", value: "Vacation 2026")
+    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .MP4)
+}
+```
+
+## Building from a base URL
+
+If you already have a `URL`, hand it to the initializer:
+
+```swift
+let request = try URLRequest(url: api) {
+    Method.GET
+    Path("v1", "users", userId)
+    Header(.accept, "application/json")
+}
+```
+
+Or skip constructing the `URL` yourself:
+
+```swift
+let request = try URLRequest(string: "https://api.example.com") {
+    Method.POST
+    Endpoint("/login")
+    RequestBody.json(credentials)
+}
+```
+
+`url` and `string` are optional — if you omit them, the builder is expected
+to set the URL via `BaseURL(...)`.
 
 ## Sending requests
 
@@ -127,20 +161,77 @@ let user = try await URLSession.shared.decode(User.self) {
 }
 ```
 
+## Repository pattern
+
+Declare an endpoint surface as a struct of `@RequestBuilder` closures and
+materialize requests on demand. Keeps URL construction out of call sites
+and makes endpoints easy to mock in tests.
+
+```swift
+struct UserRepository {
+    @RequestBuilder var getUser: (_ id: String) -> any RequestBuildable
+    @RequestBuilder var refreshToken: (_ token: String) -> any RequestBuildable
+}
+
+extension UserRepository {
+    static func live(baseURL: URL, tokenProvider: @escaping () -> String?) -> Self {
+        .init(
+            getUser: { id in
+                Method.GET
+                BaseURL(baseURL)
+                Endpoint("/v1/users/\(id)")
+                if let t = tokenProvider() { Authorization(bearer: t) }
+            },
+            refreshToken: { token in
+                Method.POST
+                BaseURL(baseURL)
+                Endpoint("/v1/auth/refresh")
+                RequestBody.json(["token": token])
+            }
+        )
+    }
+}
+
+let request = try repo.getUser("42").request
+```
+
 ## Debugging
 
-Every `URLRequest` exposes a copy-pasteable curl equivalent:
+Every `URLRequest` exposes a copy-pasteable `curl` equivalent:
 
 ```swift
 print(request.curlCommand)
 // curl -X POST -H 'Content-Type: application/json' --data-binary '{"x":1}' 'https://api.example.com/foo'
 ```
 
-## Features
+## Architecture sketch
 
-- **Composable Nodes**: Easily add custom `RequestBuildable` types.
-- **Stateless Logic**: Decouples state from mutation logic.
-- **Testable**: Validate requests through isolated `RequestState`.
-- **Concurrency-friendly**: Public block types and the transform closure are `Sendable`.
+```mermaid
+flowchart LR
+    RequestBuilder --- transforms ---> RequestState
 
-Perfect for creating and managing HTTP requests in a clean, declarative style.
+    subgraph RequestState
+        baseUrl["base URL"]
+        request
+        path["path components"]
+        baseUrl --> finalUrl["final URL"]
+        path --> finalUrl
+    end
+
+    request --> FinalRequest["final request"]
+    finalUrl --> FinalRequest
+
+    subgraph RequestBuilder
+        function1 --> function2
+        function2 --> dots["..."]
+        dots --> functionN
+    end
+```
+
+## Key concepts
+
+- **`RequestBuildable`** — the protocol every block conforms to.
+- **`RequestBuilder`** — the `@resultBuilder` that stitches blocks together.
+- **`RequestBlock`** — the leaf block; holds a closure that mutates `RequestState`.
+- **`RequestState`** — the in-progress `URLRequest` plus the `JSONEncoder` that body / header / query blocks use.
+- **`URLRequest { … }.request`** — applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest`.

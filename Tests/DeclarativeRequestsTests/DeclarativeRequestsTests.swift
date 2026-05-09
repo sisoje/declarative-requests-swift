@@ -17,7 +17,7 @@ import Testing
     let baseUrl = URL(string: "https://google.com")!
     let request = try URLRequest(url: baseUrl) {
         Method.POST
-        JSONBody([1])
+        RequestBody.json([1])
     }
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.httpMethod == "POST")
@@ -28,7 +28,7 @@ import Testing
     let request = try URLRequest(string: "https://google.com") {
         Method.POST
         Endpoint("/getLanguage")
-        JSONBody([1])
+        RequestBody.json([1])
         Query("languageId", "1")
     }
     #expect(request.httpMethod == "POST")
@@ -49,7 +49,7 @@ import Testing
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
-        JSONBody([1])
+        RequestBody.json([1])
         Query("languageId", "1")
     }.request
     #expect(request.httpMethod == "POST")
@@ -59,7 +59,7 @@ import Testing
 
 @Test func jsonBodyTest() throws {
     let request = try URLRequest(url: URL(fileURLWithPath: "")) {
-        JSONBody([1])
+        RequestBody.json([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
 }
@@ -130,9 +130,9 @@ import Testing
     }
 }
 
-@Test func uRLEncodedBodySingleKeyValue() async throws {
+@Test func urlEncodedBodySingleKeyValue() async throws {
     let builder = RequestBlock {
-        URLEncodedBody("key", "value")
+        RequestBody.urlEncoded([URLQueryItem(name: "key", value: "value")])
     }
     let source = RequestState()
     try builder.transform(source)
@@ -144,11 +144,13 @@ import Testing
     #expect(items[0].value == "value")
 }
 
-@Test func uRLEncodedBodyArrayOfTuplesWithDuplicates() async throws {
+@Test func urlEncodedBodyDuplicateNames() async throws {
     let builder = RequestBlock {
-        URLEncodedBody("color", "red")
-        URLEncodedBody("color", "blue")
-        URLEncodedBody("size", "large")
+        RequestBody.urlEncoded([
+            URLQueryItem(name: "color", value: "red"),
+            URLQueryItem(name: "color", value: "blue"),
+            URLQueryItem(name: "size", value: "large"),
+        ])
     }
     let source = RequestState()
     try builder.transform(source)
@@ -162,9 +164,9 @@ import Testing
     #expect(items.contains(where: { $0.name == "size" && $0.value == "large" }))
 }
 
-@Test func uRLEncodedBodyDictionary() async throws {
+@Test func urlEncodedBodyDictionary() async throws {
     let builder = RequestBlock {
-        URLEncodedBody(["name": "john", "age": "25"])
+        RequestBody.urlEncoded(["name": "john", "age": "25"])
     }
     let source = RequestState()
     try builder.transform(source)
@@ -176,29 +178,13 @@ import Testing
     #expect(items.contains(where: { $0.name == "age" && $0.value == "25" }))
 }
 
-@Test func uRLEncodedBodyURLQueryItems() async throws {
-    let builder = RequestBlock {
-        URLEncodedBody("tag", "swift")
-        URLEncodedBody("tag", "ios")
-    }
-    let source = RequestState()
-    try builder.transform(source)
-    let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
-    let items = URLComponents(string: "?" + body)?.queryItems ?? []
-
-    #expect(items.count == 2)
-    #expect(items.filter { $0.name == "tag" }.count == 2)
-    #expect(items.contains(where: { $0.name == "tag" && $0.value == "swift" }))
-    #expect(items.contains(where: { $0.name == "tag" && $0.value == "ios" }))
-}
-
-@Test func uRLEncodedBodyEncodable() async throws {
+@Test func urlEncodedBodyEncodable() async throws {
     struct User: Codable {
         let id: Int
         let name: String
     }
     let builder = RequestBlock {
-        URLEncodedBody(User(id: 123, name: "john"))
+        RequestBody.urlEncoded(User(id: 123, name: "john"))
     }
     let source = RequestState()
     try builder.transform(source)
@@ -210,41 +196,37 @@ import Testing
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
 }
 
-@Test func uRLEncodedBodyMultipleBodiesMerging() async throws {
+@Test func urlEncodedBodyLastWins() async throws {
+    // Multiple Body blocks: last one wins (replace semantics, not accumulate).
     let builder = RequestBlock {
-        URLEncodedBody("page", "1")
-        URLEncodedBody("sort", "desc")
-        URLEncodedBody("filter", "active")
-        URLEncodedBody("filter", "new")
+        RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
+        RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
     }
     let source = RequestState()
     try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
-    #expect(items.count == 4)
-    #expect(items.contains(where: { $0.name == "page" && $0.value == "1" }))
-    #expect(items.contains(where: { $0.name == "sort" && $0.value == "desc" }))
-    #expect(items.filter { $0.name == "filter" }.count == 2)
-    #expect(items.contains(where: { $0.name == "filter" && $0.value == "active" }))
-    #expect(items.contains(where: { $0.name == "filter" && $0.value == "new" }))
+    #expect(items.count == 1)
+    #expect(items[0].name == "second")
+    #expect(items[0].value == "2")
 }
 
-@Test func uRLEncodedBodySequentialDuplicates() async throws {
+@Test func urlEncodedBodyBuiltFromLoop() async throws {
+    // To bundle multiple items, build the array up front and pass it once.
+    let items = (1 ... 6).map { URLQueryItem(name: "count", value: "\($0)") }
     let builder = RequestBlock {
-        for i in 1 ... 6 {
-            URLEncodedBody("count", "\(i)")
-        }
+        RequestBody.urlEncoded(items)
     }
     let source = RequestState()
     try builder.transform(source)
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
-    let items = URLComponents(string: "?" + body)?.queryItems ?? []
+    let parsed = URLComponents(string: "?" + body)?.queryItems ?? []
 
-    #expect(items.count == 6)
-    #expect(items.filter { $0.name == "count" }.count == 6)
+    #expect(parsed.count == 6)
+    #expect(parsed.filter { $0.name == "count" }.count == 6)
     for i in 1 ... 6 {
-        #expect(items.contains(where: { $0.name == "count" && $0.value == "\(i)" }))
+        #expect(parsed.contains(where: { $0.name == "count" && $0.value == "\(i)" }))
     }
 }
 
@@ -274,7 +256,7 @@ import Testing
         refreshToken: { accessToken in
             Method.POST
             Endpoint("/refreshToken")
-            JSONBody(["token": accessToken])
+            RequestBody.json(["token": accessToken])
         },
         getUser: { userId in
             Method.GET
@@ -294,7 +276,7 @@ import Testing
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
     let request = try RequestBlock {
-        StreamBody(InputStream(data: data))
+        RequestBody.stream(InputStream(data: data))
     }.request
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()
@@ -351,7 +333,7 @@ import Testing
     let request = try RequestBlock {
         Authorization(bearer: "x")
     }.request
-    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
     #expect(tok == "Bearer x")
 }
 
@@ -359,7 +341,7 @@ import Testing
     let request = try RequestBlock {
         Authorization(username: "x", password: "y")
     }.request
-    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
     #expect(tok == "Basic eDp5")
 }
 
@@ -401,56 +383,64 @@ import Testing
     #expect(request.url?.absoluteString == "https://api.example.com/users/123")
 }
 
-// MARK: - Body (raw)
+// MARK: - RequestBody (raw / string)
 
 @Test func bodyDataNoContentType() throws {
     let request = try URLRequest {
-        Body(Data("hello".utf8))
+        RequestBody.data(Data("hello".utf8))
     }
     #expect(request.httpBody == Data("hello".utf8))
-    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == nil)
+    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == nil)
 }
 
 @Test func bodyStringSetsPlainTextContentType() throws {
     let request = try URLRequest {
-        Body("hello")
+        RequestBody.string("hello")
     }
     #expect(request.httpBody == Data("hello".utf8))
-    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/plain")
+    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == "text/plain")
 }
 
 @Test func bodyExplicitContentType() throws {
     let request = try URLRequest {
-        Body(Data("<x/>".utf8), type: .XML)
+        RequestBody.data(Data("<x/>".utf8), type: .XML)
     }
-    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
+    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == "application/xml")
 }
 
-// MARK: - Headers (bulk)
+// MARK: - Header
 
-@Test func headersSingleStringPair() throws {
+@Test func headerSingleStringPair() throws {
     let request = try URLRequest {
-        Headers("X-Trace-Id", "abc123")
+        Header("X-Trace-Id", "abc123")
     }
     #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
 }
 
-@Test func headersSingleHeaderEnumPair() throws {
+@Test func headerSingleFieldPair() throws {
     let request = try URLRequest {
-        Headers(.referer, "https://example.com")
+        Header(.referer, "https://example.com")
     }
     #expect(request.value(forHTTPHeaderField: "Referer") == "https://example.com")
 }
 
-@Test func headersSingleHeaderEnumNilDoesNothing() throws {
+@Test func headerNilValueIsNoOp() throws {
     let request = try URLRequest {
-        Headers(.userAgent, "first/1.0")
-        Headers(.userAgent, nil)
+        Header(.userAgent, "first/1.0")
+        Header(.userAgent, nil)
     }
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "first/1.0")
 }
 
-@Test func headersFromEncodableModel() throws {
+@Test func headerAddModeAppends() throws {
+    let request = try URLRequest {
+        Header(.accept, "application/json")
+        Header(.accept, "text/html", mode: .add)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+@Test func headerFromEncodableModel() throws {
     struct ApiHeaders: Codable {
         let userAgent: String
         let acceptLanguage: String
@@ -461,45 +451,45 @@ import Testing
         }
     }
     let request = try URLRequest {
-        Headers(ApiHeaders(userAgent: "test/1.0", acceptLanguage: "en"))
+        Header(ApiHeaders(userAgent: "test/1.0", acceptLanguage: "en"))
     }
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
     #expect(request.value(forHTTPHeaderField: "Accept-Language") == "en")
 }
 
-@Test func headersFromEncodableModelStringifiesPrimitives() throws {
+@Test func headerFromEncodableModelStringifiesPrimitives() throws {
     struct Mixed: Codable {
         let count: Int
         let enabled: Bool
         let label: String
     }
     let request = try URLRequest {
-        Headers(Mixed(count: 42, enabled: true, label: "hello"))
+        Header(Mixed(count: 42, enabled: true, label: "hello"))
     }
     #expect(request.value(forHTTPHeaderField: "count") == "42")
     #expect(request.value(forHTTPHeaderField: "enabled") == "true")
     #expect(request.value(forHTTPHeaderField: "label") == "hello")
 }
 
-@Test func headersFromEncodableModelOmitsNilOptionals() throws {
+@Test func headerFromEncodableModelOmitsNilOptionals() throws {
     struct WithOptional: Codable {
         let name: String
         let trace: String?
     }
     let request = try URLRequest {
-        Headers(WithOptional(name: "alice", trace: nil))
+        Header(WithOptional(name: "alice", trace: nil))
     }
     #expect(request.value(forHTTPHeaderField: "name") == "alice")
     #expect(request.value(forHTTPHeaderField: "trace") == nil)
 }
 
-@Test func headersFromEncodableModelRejectsNested() {
+@Test func headerFromEncodableModelRejectsNested() {
     struct Nested: Codable {
         let pagination: [String: Int]
     }
     #expect {
         _ = try URLRequest {
-            Headers(Nested(pagination: ["page": 1]))
+            Header(Nested(pagination: ["page": 1]))
         }
     } throws: { error in
         if case DeclarativeRequestsError.encodingFailed = error { return true }
@@ -507,9 +497,9 @@ import Testing
     }
 }
 
-@Test func headersFromHeaderMap() throws {
+@Test func headerFromFieldMap() throws {
     let request = try URLRequest {
-        Headers([
+        Header([
             .accept: "application/json",
             .userAgent: "test/1.0",
         ])
@@ -518,9 +508,9 @@ import Testing
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
 }
 
-@Test func headersFromStringMap() throws {
+@Test func headerFromStringMap() throws {
     let request = try URLRequest {
-        Headers([
+        Header([
             "X-Trace-Id": "abc123",
             "X-Custom": "value",
         ])
@@ -529,11 +519,11 @@ import Testing
     #expect(request.value(forHTTPHeaderField: "X-Custom") == "value")
 }
 
-// MARK: - MultipartBody
+// MARK: - RequestBody.multipart (in-memory)
 
 @Test func multipartBodyHasFormDataContentType() throws {
     let request = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "user", value: "alice")
         }
     }
@@ -543,7 +533,7 @@ import Testing
 
 @Test func multipartBodyContainsField() throws {
     let request = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "name", value: "alice")
         }
     }
@@ -556,7 +546,7 @@ import Testing
 @Test func multipartBodyContainsFileData() throws {
     let payload = Data([0x89, 0x50, 0x4E, 0x47])
     let request = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: .PNG)
         }
     }
@@ -570,7 +560,7 @@ import Testing
 
 @Test func multipartBuilderSupportsConditionalsAndLoops() throws {
     let request = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "always", value: "yes")
             if true {
                 MultipartPart.field(name: "conditional", value: "maybe")
@@ -594,7 +584,7 @@ import Testing
     defer { try? FileManager.default.removeItem(at: tmp) }
 
     let request = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.file(name: "doc", fileURL: tmp, type: .Stream)
         }
     }
@@ -608,7 +598,7 @@ import Testing
     let missing = URL(fileURLWithPath: "/definitely/not/here-\(UUID().uuidString).bin")
     #expect {
         _ = try URLRequest {
-            MultipartBody {
+            RequestBody.multipart {
                 MultipartPart.file(name: "doc", fileURL: missing)
             }
         }
@@ -618,11 +608,11 @@ import Testing
     }
 }
 
-// MARK: - StreamedMultipartBody
+// MARK: - RequestBody.multipart (streamed)
 
 @Test func streamedMultipartSetsHttpBodyStreamNotData() throws {
     let request = try URLRequest {
-        StreamedMultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
             MultipartPart.field(name: "k", value: "v")
         }
     }
@@ -632,7 +622,7 @@ import Testing
 
 @Test func streamedMultipartSetsContentTypeWithBoundary() throws {
     let request = try URLRequest {
-        StreamedMultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
             MultipartPart.field(name: "k", value: "v")
         }
     }
@@ -641,14 +631,14 @@ import Testing
 
 @Test func streamedMultipartComputesContentLength() throws {
     let inMemory = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "k", value: "v")
         }
     }
     let expected = inMemory.httpBody!.count
 
     let streamed = try URLRequest {
-        StreamedMultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
             MultipartPart.field(name: "k", value: "v")
         }
     }
@@ -659,7 +649,7 @@ import Testing
     let missing = URL(fileURLWithPath: "/definitely/not/here-\(UUID().uuidString).bin")
     #expect {
         _ = try URLRequest {
-            StreamedMultipartBody {
+            RequestBody.multipart(strategy: .streamed()) {
                 MultipartPart.file(name: "doc", fileURL: missing)
             }
         }
@@ -676,7 +666,7 @@ import Testing
     defer { try? FileManager.default.removeItem(at: tmp) }
 
     let inMemory = try URLRequest {
-        MultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "title", value: "movie")
             MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
         }
@@ -684,7 +674,7 @@ import Testing
     let expected = inMemory.httpBody!
 
     let streamed = try URLRequest {
-        StreamedMultipartBody(boundary: "TEST") {
+        RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
             MultipartPart.field(name: "title", value: "movie")
             MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
         }
@@ -788,8 +778,8 @@ private final class StreamConsumer: NSObject, StreamDelegate {
         Method.POST
         BaseURL("https://api.example.com")
         Endpoint("/login")
-        Header.accept.setValue("application/json")
-        Body("{\"user\":\"alice\"}", type: .JSON)
+        Header(.accept, "application/json")
+        RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     }
     let curl = request.curlCommand
     #expect(curl.contains("curl"))
@@ -811,7 +801,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func curlCommandQuotesSingleQuotes() throws {
     let request = try URLRequest {
-        Body("don't break")
+        RequestBody.string("don't break")
     }
     let curl = request.curlCommand
     #expect(curl.contains("'don'\\''t break'"))

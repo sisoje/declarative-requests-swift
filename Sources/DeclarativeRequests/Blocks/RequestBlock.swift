@@ -17,7 +17,7 @@
 ///    let block = RequestBlock {
 ///        Method.POST
 ///        Endpoint("/users")
-///        JSONBody(payload)
+///        RequestBody.json(payload)
 ///    }
 ///    ```
 ///

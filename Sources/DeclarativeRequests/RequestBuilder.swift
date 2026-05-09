@@ -27,7 +27,7 @@ extension Sequence where Element == RequestStateTransformClosure {
 ///         Authorization(bearer: token)
 ///     }
 ///     for header in extraHeaders {
-///         Header.custom(header.name).setValue(header.value)
+///         Header(.custom(header.name), header.value)
 ///     }
 /// }
 /// ```

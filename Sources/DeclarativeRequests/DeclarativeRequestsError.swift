@@ -12,10 +12,11 @@ public enum DeclarativeRequestsError: Error, Equatable, LocalizedError {
     /// ``Endpoint`` / ``Path`` when no base URL has been set.
     case badUrl
 
-    /// A ``StreamBody`` could not produce or open its `InputStream`.
+    /// A ``RequestBody/stream(_:)`` block could not produce or open its `InputStream`.
     case badStream
 
-    /// A ``MultipartBody`` could not be assembled — most often because a
+    /// A ``RequestBody/multipart(boundary:strategy:_:)`` block could not be
+    /// assembled — most often because a
     /// ``MultipartPart/file(name:fileURL:type:filename:)`` part references a
     /// path that cannot be read.
     ///

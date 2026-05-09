@@ -2,15 +2,17 @@ import Foundation
 
 /// The mutable scratchpad threaded through every block while a request is being built.
 ///
-/// `RequestState` holds the in-progress `URLRequest` plus the encoder and decoder used
-/// by Encodable-driven blocks (``JSONBody``, ``URLEncodedBody``, ``Query``, ``Headers``).
-/// Each ``RequestBuildable`` mutates this state through a
-/// ``RequestStateTransformClosure`` and the next block sees the result.
+/// `RequestState` holds the in-progress `URLRequest` plus the encoder used by
+/// Encodable-driven blocks (``RequestBody/json(_:)``, ``RequestBody/urlEncoded(_:)-(any_Encodable)``,
+/// ``Query``, ``Header/init(_:mode:)-(any_Encodable,_)``). Each ``RequestBuildable``
+/// mutates this state through a ``RequestStateTransformClosure`` and the next
+/// block sees the result.
 ///
 /// You typically don't construct a `RequestState` yourself — call
 /// ``RequestBuildable/request`` (or one of the convenience entry points like
-/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``) and the framework manages the lifecycle.
-/// Constructing one explicitly is useful for tests:
+/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``) and the
+/// framework manages the lifecycle. Constructing one explicitly is useful for
+/// tests:
 ///
 /// ```swift
 /// let state = RequestState()
@@ -18,47 +20,25 @@ import Foundation
 /// XCTAssertEqual(state.request.httpMethod, "POST")
 /// ```
 public final class RequestState {
-    /// An empty placeholder URL used when no ``BaseURL`` has been declared yet.
-    ///
-    /// `URLComponents().url` is non-nil on every Foundation platform we target. The
-    /// fallback inside this constant is a safety net so the value can be initialized
-    /// without an inline force-unwrap.
-    public static let placeholderURL: URL = {
-        if let url = URLComponents().url { return url }
-        guard let fallback = URL(string: "") else {
-            preconditionFailure("Foundation could not produce an empty placeholder URL")
-        }
-        return fallback
-    }()
-
     /// Create a new state.
     ///
     /// - Parameters:
     ///   - request: The starting `URLRequest`. Defaults to a request rooted at
-    ///     ``placeholderURL``.
+    ///     a placeholder URL that ``BaseURL`` is expected to replace.
     ///   - encoder: The `JSONEncoder` used by Encodable-driven blocks.
-    ///   - decoder: The `JSONDecoder` made available to extensions like
-    ///     ``Foundation/URLSession/decode(_:decoder:_:)``.
     public init(
-        request: URLRequest = URLRequest(url: RequestState.placeholderURL),
-        encoder: JSONEncoder = JSONEncoder(),
-        decoder: JSONDecoder = JSONDecoder()
+        request: URLRequest = URLRequest(url: placeholderURL),
+        encoder: JSONEncoder = JSONEncoder()
     ) {
         self.request = request
         self.encoder = encoder
-        self.decoder = decoder
     }
 
     /// The in-progress request being built. Blocks read and mutate this directly.
     public var request: URLRequest
 
-    /// The encoder used to serialize Encodable values inside ``JSONBody``,
-    /// ``URLEncodedBody``, ``Query``, and ``Headers``.
+    /// The encoder used to serialize Encodable values inside body and header blocks.
     public var encoder: JSONEncoder
-
-    /// A decoder you can pre-configure here so response-decoding helpers like
-    /// ``Foundation/URLSession/decode(_:decoder:_:)`` pick it up.
-    public var decoder: JSONDecoder
 
     /// The cookies currently encoded into the `Cookie` header, parsed lazily.
     ///
@@ -66,7 +46,7 @@ public final class RequestState {
     /// `name=value; …` string. Setting an empty dictionary clears the header.
     public var cookies: [String: String] {
         get {
-            request.value(forHTTPHeaderField: Header.cookie.rawValue)?
+            request.value(forHTTPHeaderField: Header.Field.cookie.rawValue)?
                 .split(separator: ";")
                 .reduce(into: [:]) { result, component in
                     let parts = component.split(separator: "=", maxSplits: 1)
@@ -82,7 +62,7 @@ public final class RequestState {
                 .map { "\($0.key)=\($0.value)" }
                 .joined(separator: "; ")
             let value = cookieString.isEmpty ? nil : cookieString
-            request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
+            request.setValue(value, forHTTPHeaderField: Header.Field.cookie.rawValue)
         }
     }
 
@@ -116,22 +96,13 @@ public final class RequestState {
             request.url = urlComponents?.url
         }
     }
-
-    var encodedBodyItems: [URLQueryItem] {
-        get {
-            request.httpBody.flatMap { bodyData in
-                var comp = URLComponents()
-                comp.percentEncodedQuery = String(decoding: bodyData, as: UTF8.self)
-                return comp.queryItems
-            } ?? []
-        }
-        set {
-            var comp = URLComponents()
-            comp.queryItems = newValue
-            request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
-        }
-    }
 }
+
+/// An empty placeholder URL used by ``RequestState`` and
+/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)`` when no URL
+/// has been supplied — a ``BaseURL`` block in the builder is expected to
+/// replace it.
+public let placeholderURL = URLComponents().url!
 
 public extension RequestState {
     /// Generate a ``RequestBlock`` that writes a value through a key path on

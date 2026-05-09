@@ -3,15 +3,15 @@ import Foundation
 /// A typed identifier for an HTTP `Content-Type` value.
 ///
 /// Used directly as a block to set the `Content-Type` header, and as a
-/// parameter on body blocks like ``Body`` and ``MultipartPart`` to label
-/// payload bytes:
+/// parameter on body blocks like ``RequestBody`` and ``MultipartPart`` to
+/// label payload bytes:
 ///
 /// ```swift
 /// // As a block:
 /// ContentType.JSON  // sets Content-Type: application/json
 ///
 /// // As a value passed to other blocks:
-/// Body(svgData, type: .SVG)
+/// RequestBody.data(svgData, type: .SVG)
 /// MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
 /// ```
 public enum ContentType: String, RequestBuildable {
@@ -126,6 +126,6 @@ public enum ContentType: String, RequestBuildable {
     case OTF = "font/otf"
 
     public var body: some RequestBuildable {
-        Header.contentType.setValue(rawValue)
+        Header(.contentType, rawValue)
     }
 }

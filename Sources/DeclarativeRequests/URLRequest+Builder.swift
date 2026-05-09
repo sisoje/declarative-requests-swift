@@ -12,7 +12,7 @@ public extension URLRequest {
     /// let request = try URLRequest(url: api) {
     ///     Method.GET
     ///     Path("v1", "users", userId)
-    ///     Header.accept.setValue("application/json")
+    ///     Header(.accept, "application/json")
     /// }
     /// ```
     ///
@@ -46,7 +46,7 @@ public extension URLRequest {
         @RequestBuilder builder: () -> any RequestBuildable
     ) throws {
         let initial = URLRequest(
-            url: url ?? RequestState.placeholderURL,
+            url: url ?? placeholderURL,
             cachePolicy: cachePolicy,
             timeoutInterval: timeoutInterval
         )
@@ -63,7 +63,7 @@ public extension URLRequest {
     /// let request = try URLRequest(string: "https://api.example.com") {
     ///     Method.POST
     ///     Endpoint("/login")
-    ///     JSONBody(credentials)
+    ///     RequestBody.json(credentials)
     /// }
     /// ```
     ///

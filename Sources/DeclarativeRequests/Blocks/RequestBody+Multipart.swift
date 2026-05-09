@@ -1,138 +1,232 @@
 import Foundation
 
-/// Builds a streaming `multipart/form-data` body suitable for very large uploads.
-///
-/// Unlike ``MultipartBody``, which assembles the entire payload in memory,
-/// `StreamedMultipartBody` reads ``MultipartPart/file(name:fileURL:type:filename:)``
-/// parts from disk on demand as the request is sent. Memory use stays bounded
-/// to roughly `bufferSize` regardless of how big the files are, so payloads in
-/// the hundreds of gigabytes (or terabytes) are practical.
-///
-/// ```swift
-/// let request = try URLRequest {
-///     Method.POST
-///     BaseURL("https://uploads.example.com")
-///     Endpoint("/videos")
-///     StreamedMultipartBody {
-///         MultipartPart.field(name: "title", value: "Vacation 2026")
-///         MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .MP4)
-///     }
-/// }
-/// let (data, response) = try await URLSession.shared.data(for: request)
-/// ```
-///
-/// ## How it works
-///
-/// At build time:
-/// 1. Each part's contribution to the body is measured. For
-///    ``MultipartPart/file(name:fileURL:type:filename:)`` parts, the size is
-///    read from the filesystem. The total is set as `Content-Length`.
-/// 2. A bound `InputStream`/`OutputStream` pair is created via
-///    `Stream.getBoundStreams(withBufferSize:inputStream:outputStream:)`.
-/// 3. The input stream is attached to the request as `httpBodyStream`. The
-///    output stream is wired to a producer that runs on a dedicated thread,
-///    streaming bytes through as `URLSession` reads them.
-/// 4. The producer reads file parts in `bufferSize`-sized chunks. Memory use
-///    is bounded by the buffer regardless of file size.
-///
-/// ## Memory characteristics
-///
-/// - ``MultipartPart/field(name:value:)``: in memory (typically tiny).
-/// - ``MultipartPart/data(name:filename:data:type:)``: in memory (the `Data` blob).
-/// - ``MultipartPart/file(name:fileURL:type:filename:)``: read from disk in
-///   `bufferSize` chunks; never fully held in memory.
-///
-/// To stream a non-file source, write it to a temp file first and pass that as
-/// `.file`.
-///
-/// ## Limitations
-///
-/// - **No automatic retry.** The underlying body stream is single-use. If
-///   `URLSession` needs a fresh body (e.g. on an authentication challenge), it
-///   has no way to obtain one. For retry-resilient uploads use a custom
-///   `URLSessionTaskDelegate` and `urlSession(_:task:needNewBodyStream:)`.
-/// - **Don't modify source files mid-upload.** `Content-Length` is computed
-///   before the upload starts. If a file shrinks while the upload is in
-///   progress, the upload will be truncated; if it grows, the extra bytes are
-///   ignored.
-/// - **Build-then-discard leaks the producer thread.** If you build a request
-///   but never send it, the producer thread will idle holding the streams. In
-///   practice this is rare; if you build speculatively, drop references to
-///   the request once you decide not to use it so the system can tear it down
-///   on error.
-public struct StreamedMultipartBody: RequestBuildable {
-    let parts: [MultipartPart]
-    let boundary: String
-    let bufferSize: Int
+// MARK: - Public API
 
-    /// Create a `StreamedMultipartBody` from a builder closure.
+public extension RequestBody {
+    /// How the multipart body bytes are produced.
+    enum MultipartStrategy {
+        /// Assemble the entire payload in memory, then set it as `httpBody`.
+        /// Simple, but holds the whole body in RAM.
+        case inMemory
+
+        /// Stream the payload from disk on demand. Memory use stays bounded to
+        /// roughly `bufferSize` regardless of total payload size, so payloads
+        /// in the hundreds of gigabytes are practical.
+        ///
+        /// - Parameter bufferSize: The chunk size used for both the bound
+        ///   stream pair and for reading from disk. Defaults to 64 KB.
+        case streamed(bufferSize: Int = 64 * 1024)
+    }
+
+    /// A `multipart/form-data` body assembled from the supplied parts.
+    ///
+    /// ```swift
+    /// RequestBody.multipart {
+    ///     MultipartPart.field(name: "user", value: "alice")
+    ///     MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
+    ///     for url in fileURLs {
+    ///         MultipartPart.file(name: "files", fileURL: url, type: .Stream)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Sets `Content-Type: multipart/form-data; boundary=…`. With
+    /// ``MultipartStrategy/streamed(bufferSize:)`` it also sets
+    /// `Content-Length` and `httpBodyStream` instead of `httpBody`.
     ///
     /// - Parameters:
     ///   - boundary: The multipart boundary token. Defaults to a random
     ///     `Boundary-<UUID>` value.
-    ///   - bufferSize: The chunk size used for both the bound stream pair and
-    ///     for reading from disk. Defaults to 64 KB.
+    ///   - strategy: Whether to assemble in memory (default) or stream from
+    ///     disk for very large payloads.
     ///   - parts: A `@MultipartBuilder` closure that produces the parts.
-    public init(
+    static func multipart(
         boundary: String? = nil,
-        bufferSize: Int = 64 * 1024,
+        strategy: MultipartStrategy = .inMemory,
         @MultipartBuilder _ parts: () -> [MultipartPart]
-    ) {
-        self.parts = parts()
-        self.boundary = boundary ?? "Boundary-\(UUID().uuidString)"
-        self.bufferSize = bufferSize
-    }
-
-    /// Create a `StreamedMultipartBody` from an explicit `[MultipartPart]` array.
-    ///
-    /// - Parameters:
-    ///   - parts: The parts to include.
-    ///   - boundary: The multipart boundary token. Defaults to a random
-    ///     `Boundary-<UUID>` value.
-    ///   - bufferSize: The chunk size used for both the bound stream pair and
-    ///     for reading from disk. Defaults to 64 KB.
-    public init(_ parts: [MultipartPart], boundary: String? = nil, bufferSize: Int = 64 * 1024) {
-        self.parts = parts
-        self.boundary = boundary ?? "Boundary-\(UUID().uuidString)"
-        self.bufferSize = bufferSize
-    }
-
-    public var body: some RequestBuildable {
-        RequestBlock { state in
-            let length = try MultipartLength.compute(parts: parts, boundary: boundary)
-
-            var input: InputStream?
-            var output: OutputStream?
-            Stream.getBoundStreams(
-                withBufferSize: bufferSize,
-                inputStream: &input,
-                outputStream: &output
-            )
-
-            guard let input, let output else {
-                throw DeclarativeRequestsError.badMultipart(reason: "Could not create bound streams")
+    ) -> RequestBody {
+        let parts = parts()
+        let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
+        return RequestBody { state in
+            switch strategy {
+            case .inMemory:
+                try applyInMemory(parts: parts, boundary: boundary, state: state)
+            case .streamed(let bufferSize):
+                try applyStreamed(parts: parts, boundary: boundary, bufferSize: bufferSize, state: state)
             }
-
-            state.request.httpBodyStream = input
-            state.request.setValue(
-                "multipart/form-data; boundary=\(boundary)",
-                forHTTPHeaderField: Header.contentType.rawValue
-            )
-            state.request.setValue("\(length)", forHTTPHeaderField: "Content-Length")
-
-            MultipartStreamProducer(
-                parts: parts,
-                boundary: boundary,
-                output: output,
-                bufferSize: bufferSize
-            ).start()
         }
     }
 }
 
-// MARK: - Content-Length computation
+/// A single piece of a `multipart/form-data` payload.
+///
+/// Use the case constructors inside a ``RequestBody/multipart(boundary:strategy:_:)``
+/// block:
+///
+/// ```swift
+/// RequestBody.multipart {
+///     MultipartPart.field(name: "user", value: "alice")
+///     MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
+///     MultipartPart.file(name: "doc", fileURL: localFile, type: .PDF)
+/// }
+/// ```
+public enum MultipartPart {
+    /// A simple text field — the multipart equivalent of an HTML
+    /// `<input type="text">`.
+    case field(name: String, value: String)
 
-enum MultipartLength {
+    /// A file part backed by an in-memory `Data` blob.
+    case data(name: String, filename: String, data: Data, type: ContentType = .Stream)
+
+    /// A file part loaded from disk (or streamed, depending on strategy).
+    case file(name: String, fileURL: URL, type: ContentType = .Stream, filename: String? = nil)
+}
+
+/// Result builder for assembling `[MultipartPart]` inside a ``RequestBody/multipart(boundary:strategy:_:)`` block.
+@resultBuilder
+public enum MultipartBuilder {
+    public static func buildBlock(_ components: [MultipartPart]...) -> [MultipartPart] {
+        components.flatMap { $0 }
+    }
+
+    public static func buildExpression(_ part: MultipartPart) -> [MultipartPart] {
+        [part]
+    }
+
+    public static func buildExpression(_ parts: [MultipartPart]) -> [MultipartPart] {
+        parts
+    }
+
+    public static func buildOptional(_ component: [MultipartPart]?) -> [MultipartPart] {
+        component ?? []
+    }
+
+    public static func buildEither(first component: [MultipartPart]) -> [MultipartPart] {
+        component
+    }
+
+    public static func buildEither(second component: [MultipartPart]) -> [MultipartPart] {
+        component
+    }
+
+    public static func buildArray(_ components: [[MultipartPart]]) -> [MultipartPart] {
+        components.flatMap { $0 }
+    }
+
+    public static func buildLimitedAvailability(_ component: [MultipartPart]) -> [MultipartPart] {
+        component
+    }
+}
+
+// MARK: - In-memory implementation
+
+private func applyInMemory(parts: [MultipartPart], boundary: String, state: RequestState) throws {
+    var form = MultipartForm(boundary: boundary)
+    for part in parts {
+        try part.append(to: &form)
+    }
+    state.request.httpBody = form.bodyData
+    state.request.setValue(form.contentType, forHTTPHeaderField: Header.Field.contentType.rawValue)
+}
+
+private extension MultipartPart {
+    func append(to form: inout MultipartForm) throws {
+        switch self {
+        case .field(let name, let value):
+            form.addField(named: name, value: value)
+        case .data(let name, let filename, let payload, let type):
+            form.addFile(named: name, filename: filename, data: payload, mimeType: type.rawValue)
+        case .file(let name, let fileURL, let type, let filename):
+            let bytes: Data
+            do {
+                bytes = try Data(contentsOf: fileURL)
+            } catch {
+                throw DeclarativeRequestsError.badMultipart(reason: "Could not read \(fileURL.lastPathComponent): \(error.localizedDescription)")
+            }
+            form.addFile(
+                named: name,
+                filename: filename ?? fileURL.lastPathComponent,
+                data: bytes,
+                mimeType: type.rawValue
+            )
+        }
+    }
+}
+
+private struct MultipartForm {
+    let boundary: String
+    private var data = Data()
+
+    init(boundary: String) {
+        self.boundary = boundary
+    }
+
+    var contentType: String {
+        "multipart/form-data; boundary=\(boundary)"
+    }
+
+    mutating func addField(named name: String, value: String) {
+        data.append("--\(boundary)\r\n")
+        data.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n")
+        data.append("\(value)\r\n")
+    }
+
+    mutating func addFile(named name: String, filename: String, data fileData: Data, mimeType: String) {
+        data.append("--\(boundary)\r\n")
+        data.append("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\n")
+        data.append("Content-Type: \(mimeType)\r\n\r\n")
+        data.append(fileData)
+        data.append("\r\n")
+    }
+
+    var bodyData: Data {
+        var bodyData = data
+        bodyData.append("--\(boundary)--\r\n")
+        return bodyData
+    }
+}
+
+private extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
+// MARK: - Streamed implementation
+
+private func applyStreamed(parts: [MultipartPart], boundary: String, bufferSize: Int, state: RequestState) throws {
+    let length = try MultipartLength.compute(parts: parts, boundary: boundary)
+
+    var input: InputStream?
+    var output: OutputStream?
+    Stream.getBoundStreams(
+        withBufferSize: bufferSize,
+        inputStream: &input,
+        outputStream: &output
+    )
+
+    guard let input, let output else {
+        throw DeclarativeRequestsError.badMultipart(reason: "Could not create bound streams")
+    }
+
+    state.request.httpBodyStream = input
+    state.request.setValue(
+        "multipart/form-data; boundary=\(boundary)",
+        forHTTPHeaderField: Header.Field.contentType.rawValue
+    )
+    state.request.setValue("\(length)", forHTTPHeaderField: "Content-Length")
+
+    MultipartStreamProducer(
+        parts: parts,
+        boundary: boundary,
+        output: output,
+        bufferSize: bufferSize
+    ).start()
+}
+
+private enum MultipartLength {
     static func compute(parts: [MultipartPart], boundary: String) throws -> Int64 {
         var total: Int64 = 0
         for part in parts {
@@ -175,13 +269,9 @@ enum MultipartLength {
     }
 }
 
-// MARK: - Producer
+// MARK: - Streamed producer
 
-/// Drives the output side of a bound stream pair, feeding multipart bytes as
-/// `URLSession` reads them. Runs on a dedicated thread with its own runloop;
-/// shuts down automatically when the body is exhausted or the consumer
-/// disconnects.
-final class MultipartStreamProducer: NSObject, StreamDelegate {
+private final class MultipartStreamProducer: NSObject, StreamDelegate {
     enum Source {
         case data(Data)
         case file(URL)

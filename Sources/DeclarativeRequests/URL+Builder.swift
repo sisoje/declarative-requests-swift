@@ -10,7 +10,7 @@ public extension URL {
     /// let request = try api.buildRequest {
     ///     Method.GET
     ///     Path("v1", "users", userId)
-    ///     Header.accept.setValue("application/json")
+    ///     Header(.accept, "application/json")
     /// }
     /// ```
     ///

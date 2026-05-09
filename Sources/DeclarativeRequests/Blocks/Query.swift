@@ -2,9 +2,8 @@ import Foundation
 
 /// Appends one or more query items to the request URL.
 ///
-/// `Query` mirrors the shape of ``URLEncodedBody`` and ``Headers``: you can
-/// declare a single name/value pair or pass an `Encodable` model that flattens
-/// to a list of items.
+/// `Query` lets you declare a single name/value pair or pass an `Encodable`
+/// model that flattens to a list of items.
 ///
 /// ```swift
 /// // Single item:
