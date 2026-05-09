@@ -25,7 +25,7 @@ public extension URLRequest {
     /// aren't valid UTF-8 are noted as a comment with the byte count rather than
     /// dumped raw.
     var curlCommand: String {
-        var parts: [String] = ["curl"]
+        var parts = ["curl"]
 
         if let method = httpMethod, method.uppercased() != "GET" {
             parts.append("-X \(method)")

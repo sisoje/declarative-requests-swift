@@ -45,7 +45,7 @@ public extension URLSession {
     /// - Throws: Any error thrown while building or sending the request, plus
     ///   any decoding error from the supplied decoder.
     func decode<T: Decodable>(
-        _ type: T.Type,
+        _: T.Type,
         decoder: JSONDecoder = JSONDecoder(),
         @RequestBuilder _ builder: () -> any RequestBuildable
     ) async throws -> T {

@@ -16,6 +16,7 @@ import Foundation
 /// ```
 public enum ContentType: String, RequestBuildable, Sendable {
     // MARK: Application
+
     /// `application/x-www-form-urlencoded`
     case URLEncoded = "application/x-www-form-urlencoded"
     /// `application/json`
@@ -48,6 +49,7 @@ public enum ContentType: String, RequestBuildable, Sendable {
     case M3U8 = "application/x-mpegURL"
 
     // MARK: Text
+
     /// `text/html`
     case HTML = "text/html"
     /// `text/plain`
@@ -62,6 +64,7 @@ public enum ContentType: String, RequestBuildable, Sendable {
     case Calendar = "text/calendar"
 
     // MARK: Image
+
     /// `image/jpeg`
     case JPEG = "image/jpeg"
     /// `image/png`
@@ -80,6 +83,7 @@ public enum ContentType: String, RequestBuildable, Sendable {
     case ICO = "image/vnd.microsoft.icon"
 
     // MARK: Audio
+
     /// `audio/mpeg`
     case MP3 = "audio/mpeg"
     /// `audio/wav`
@@ -96,6 +100,7 @@ public enum ContentType: String, RequestBuildable, Sendable {
     case M3U = "audio/mpegURL"
 
     // MARK: Video
+
     /// `video/mp4`
     case MP4 = "video/mp4"
     /// `video/mpeg`
@@ -110,6 +115,7 @@ public enum ContentType: String, RequestBuildable, Sendable {
     case TS = "video/mp2t"
 
     // MARK: Font
+
     /// `font/woff`
     case WOFF = "font/woff"
     /// `font/woff2`

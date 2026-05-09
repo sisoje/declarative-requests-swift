@@ -28,7 +28,7 @@ public struct Body: RequestBuildable, Sendable {
     ///     existing `Content-Type` untouched.
     public init(_ data: Data, type: ContentType? = nil) {
         self.data = data
-        self.contentType = type
+        contentType = type
     }
 
     /// Create a `Body` block from a string.
@@ -39,8 +39,8 @@ public struct Body: RequestBuildable, Sendable {
     ///   - string: The body text.
     ///   - type: The content type to set. Defaults to ``ContentType/PlainText``.
     public init(_ string: String, type: ContentType = .PlainText) {
-        self.data = Data(string.utf8)
-        self.contentType = type
+        data = Data(string.utf8)
+        contentType = type
     }
 
     public var body: some RequestBuildable {

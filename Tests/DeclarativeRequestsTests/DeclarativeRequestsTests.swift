@@ -671,7 +671,7 @@ import Testing
 
 @Test func streamedMultipartProducesIdenticalBytesToInMemory() throws {
     let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("streamed-\(UUID().uuidString).bin")
-    let payload = Data((0..<(256 * 1024)).map { UInt8($0 & 0xFF) })  // 256 KB, larger than the default 64 KB buffer
+    let payload = Data((0 ..< (256 * 1024)).map { UInt8($0 & 0xFF) }) // 256 KB, larger than the default 64 KB buffer
     try payload.write(to: tmp)
     defer { try? FileManager.default.removeItem(at: tmp) }
 
@@ -843,4 +843,3 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let query = request.url?.query
     #expect(query == "alpha=a&mango=m&zebra=z")
 }
-

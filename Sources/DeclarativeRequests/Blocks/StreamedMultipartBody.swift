@@ -199,7 +199,7 @@ final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendab
     init(parts: [MultipartPart], boundary: String, output: OutputStream, bufferSize: Int) {
         self.bufferSize = bufferSize
         self.output = output
-        self.sources = Self.buildSources(parts: parts, boundary: boundary)
+        sources = Self.buildSources(parts: parts, boundary: boundary)
     }
 
     private static func buildSources(parts: [MultipartPart], boundary: String) -> [Source] {
@@ -248,9 +248,9 @@ final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendab
         guard aStream === output else { return }
         switch eventCode {
         case .hasSpaceAvailable:
-            self.feed()
+            feed()
         case .errorOccurred, .endEncountered:
-            self.finish()
+            finish()
         default:
             break
         }
@@ -321,7 +321,7 @@ final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendab
                     sourceIndex += 1
                     continue
                 }
-                return Data(buf[0..<bytesRead])
+                return Data(buf[0 ..< bytesRead])
             }
         }
         return nil
