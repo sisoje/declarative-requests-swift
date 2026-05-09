@@ -16,16 +16,15 @@ import Foundation
 ///     JSONBody(LoginRequest(email: email, password: password))
 /// }
 /// ```
-public struct JSONBody: RequestBuildable, Sendable {
+public struct JSONBody: RequestBuildable {
     /// Create a `JSONBody` block.
     ///
-    /// - Parameter value: The value to encode. Must be both `Encodable` and
-    ///   `Sendable` so the resulting block can cross actor boundaries.
-    public init(_ value: any Encodable & Sendable) {
+    /// - Parameter value: The value to encode.
+    public init(_ value: any Encodable) {
         self.value = value
     }
 
-    let value: any Encodable & Sendable
+    let value: any Encodable
 
     public var body: some RequestBuildable {
         RequestBlock { state in

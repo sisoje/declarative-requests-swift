@@ -13,7 +13,7 @@ import Foundation
 ///     CachePolicy(.reloadIgnoringLocalCacheData)
 /// }
 /// ```
-public struct CachePolicy: RequestBuildable, Sendable {
+public struct CachePolicy: RequestBuildable {
     let policy: URLRequest.CachePolicy
 
     /// Create a `CachePolicy` block.

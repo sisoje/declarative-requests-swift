@@ -15,7 +15,7 @@ import Foundation
 /// }
 /// // https://api.example.com/v1/users/123/posts
 /// ```
-public struct Path: RequestBuildable, Sendable {
+public struct Path: RequestBuildable {
     let segments: [String]
 
     /// Create a `Path` block from a variadic list of segments.

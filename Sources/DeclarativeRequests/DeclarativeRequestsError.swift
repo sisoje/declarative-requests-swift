@@ -4,7 +4,7 @@ import Foundation
 ///
 /// All cases conform to `LocalizedError` so they produce a useful
 /// `localizedDescription` when surfaced to users or logged.
-public enum DeclarativeRequestsError: Error, Equatable, Sendable, LocalizedError {
+public enum DeclarativeRequestsError: Error, Equatable, LocalizedError {
     /// The request URL is missing or could not be constructed from the inputs
     /// declared in the builder.
     ///

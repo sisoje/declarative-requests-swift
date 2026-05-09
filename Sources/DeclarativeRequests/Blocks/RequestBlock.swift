@@ -3,7 +3,7 @@
 /// `RequestBlock` is the primitive ``RequestBuildable`` that all other blocks
 /// reduce to. You construct one in two ways:
 ///
-/// 1. From a `@Sendable` closure that mutates ``RequestState`` directly:
+/// 1. From a closure that mutates ``RequestState`` directly:
 ///
 ///    ```swift
 ///    let block = RequestBlock { state in
@@ -22,15 +22,14 @@
 ///    ```
 ///
 /// The latter form is the entry point for building a request from a list of blocks
-/// without going through ``URLRequest/init(_:)`` or
-/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``.
+/// without going through ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``.
 ///
 /// > Important: ``body`` is unused for a `RequestBlock` (it is a leaf). Calling it
 /// > traps; the result builder routes around it via the `transform` closure.
-public struct RequestBlock: RequestBuildable, Sendable {
+public struct RequestBlock: RequestBuildable {
     /// Lift a raw transform closure into a ``RequestBuildable``.
     ///
-    /// - Parameter transform: A `@Sendable` closure that mutates ``RequestState``.
+    /// - Parameter transform: A closure that mutates ``RequestState``.
     public init(_ transform: @escaping RequestStateTransformClosure) {
         self.transform = transform
     }

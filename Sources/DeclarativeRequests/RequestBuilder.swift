@@ -2,8 +2,8 @@ import Foundation
 
 extension Sequence where Element == RequestStateTransformClosure {
     var reduced: RequestStateTransformClosure {
-        reduce({ @Sendable _ in }) { partialResult, closure in
-            { @Sendable in
+        reduce({ _ in }) { partialResult, closure in
+            {
                 try partialResult($0)
                 try closure($0)
             }
@@ -114,7 +114,7 @@ public extension RequestBuilder {
     /// - Returns: A ``RequestBlock`` that applies the inner transform when present
     ///   and is a no-op otherwise.
     static func buildOptional(_ component: (any RequestBuildable)?) -> RequestBlock {
-        RequestBlock(component?.transform ?? { @Sendable _ in })
+        RequestBlock(component?.transform ?? { _ in })
     }
 
     /// Build a `for`-`in` loop by combining the iteration results.

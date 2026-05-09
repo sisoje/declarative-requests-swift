@@ -14,7 +14,7 @@ import Foundation
 ///     HTTPShouldHandleCookies(false)
 /// }
 /// ```
-public struct HTTPShouldHandleCookies: RequestBuildable, Sendable {
+public struct HTTPShouldHandleCookies: RequestBuildable {
     let value: Bool
 
     /// Create an `HTTPShouldHandleCookies` block.

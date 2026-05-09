@@ -15,7 +15,7 @@ import Foundation
 ///     NetworkServiceType(.background)
 /// }
 /// ```
-public struct NetworkServiceType: RequestBuildable, Sendable {
+public struct NetworkServiceType: RequestBuildable {
     let type: URLRequest.NetworkServiceType
 
     /// Create a `NetworkServiceType` block.

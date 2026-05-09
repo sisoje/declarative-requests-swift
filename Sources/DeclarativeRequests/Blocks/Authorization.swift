@@ -14,7 +14,7 @@ import Foundation
 /// Authorization(username: "alice", password: "s3cret")
 /// // → Authorization: Basic YWxpY2U6czNjcmV0
 /// ```
-public struct Authorization: RequestBuildable, Sendable {
+public struct Authorization: RequestBuildable {
     /// Create an `Authorization` block using HTTP Basic credentials.
     ///
     /// The credentials are joined with a colon, UTF-8 encoded, and Base64-encoded

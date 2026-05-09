@@ -23,7 +23,7 @@ import Foundation
 /// wrap this for you, so reach for `BaseURL` when you're staying inside a
 /// `URLRequest { … }` builder closure or want to override the URL late in a
 /// composition.
-public struct BaseURL: RequestBuildable, Sendable {
+public struct BaseURL: RequestBuildable {
     /// Create a `BaseURL` from a `URL` value.
     ///
     /// Passing `nil` produces a block that throws ``DeclarativeRequestsError/badUrl``

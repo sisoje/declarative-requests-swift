@@ -18,7 +18,7 @@ import Foundation
 ///
 /// Encodable models go through `JSONSerialization` first; nested arrays use
 /// bracket-indexed keys (`tags[0]=a&tags[1]=b`).
-public struct URLEncodedBody: RequestBuildable, Sendable {
+public struct URLEncodedBody: RequestBuildable {
     /// Append a single form item.
     ///
     /// - Parameters:
@@ -31,13 +31,13 @@ public struct URLEncodedBody: RequestBuildable, Sendable {
     /// Append form items derived from an `Encodable` model.
     ///
     /// - Parameter encodable: The model to encode.
-    public init(_ encodable: any Encodable & Sendable) {
+    public init(_ encodable: any Encodable) {
         items = {
             try EncodableQueryItems(encodable: encodable, encoder: $0).items
         }
     }
 
-    let items: @Sendable (JSONEncoder) throws -> [URLQueryItem]
+    let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
         RequestBlock { state in

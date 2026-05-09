@@ -11,7 +11,7 @@
 ///     Endpoint("/users")          // → https://api.example.com/users
 /// }
 /// ```
-public struct Endpoint: RequestBuildable, Sendable {
+public struct Endpoint: RequestBuildable {
     /// Create an `Endpoint` block.
     ///
     /// - Parameter path: The full URL path, e.g. `"/users/123"`.

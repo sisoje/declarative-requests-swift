@@ -13,7 +13,7 @@
 ///     AllowAccess.constrainedNetwork(false) // skip in Low Data Mode
 /// }
 /// ```
-public enum AllowAccess: RequestBuildable, Sendable {
+public enum AllowAccess: RequestBuildable {
     /// Toggle `URLRequest.allowsCellularAccess`.
     /// - Parameter value: `true` to permit cellular, `false` to deny.
     case cellular(Bool)

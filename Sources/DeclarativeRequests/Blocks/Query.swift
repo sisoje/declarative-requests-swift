@@ -24,7 +24,7 @@ import Foundation
 /// serialized with the request's ``RequestState/encoder`` and then flattened via
 /// `JSONSerialization`; nested arrays are represented with bracket-indexed
 /// keys (`tags[0]=a&tags[1]=b`).
-public struct Query: RequestBuildable, Sendable {
+public struct Query: RequestBuildable {
     /// Append a single query item.
     ///
     /// - Parameters:
@@ -41,13 +41,13 @@ public struct Query: RequestBuildable, Sendable {
     /// nested keys becoming the names. Booleans serialize as `"true"`/`"false"`.
     ///
     /// - Parameter encodable: The model to encode.
-    public init(_ encodable: any Encodable & Sendable) {
+    public init(_ encodable: any Encodable) {
         items = {
             try EncodableQueryItems(encodable: encodable, encoder: $0).items
         }
     }
 
-    let items: @Sendable (JSONEncoder) throws -> [URLQueryItem]
+    let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
         RequestBlock { state in

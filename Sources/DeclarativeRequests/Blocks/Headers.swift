@@ -26,8 +26,8 @@ import Foundation
 ///     Headers(traceModel)
 /// }
 /// ```
-public struct Headers: RequestBuildable, Sendable {
-    let pairs: @Sendable (JSONEncoder) throws -> [(name: String, value: String)]
+public struct Headers: RequestBuildable {
+    let pairs: (JSONEncoder) throws -> [(name: String, value: String)]
 
     /// Set a single header by literal name.
     ///
@@ -113,7 +113,7 @@ public struct Headers: RequestBuildable, Sendable {
     /// - Throws: ``DeclarativeRequestsError/encodingFailed(reason:)`` when
     ///   applied if the model has nested arrays or dictionaries — headers must
     ///   be flat.
-    public init(_ encodable: any Encodable & Sendable) {
+    public init(_ encodable: any Encodable) {
         pairs = { encoder in
             try EncodableHeaders(encodable: encodable, encoder: encoder).pairs
         }

@@ -12,7 +12,7 @@ import Foundation
 ///     Cookie("locale", "en")
 /// }
 /// ```
-public struct Cookie: RequestBuildable, Sendable {
+public struct Cookie: RequestBuildable {
     /// Create a `Cookie` block.
     ///
     /// - Parameters:

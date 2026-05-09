@@ -14,7 +14,7 @@ import Foundation
 /// Body(svgData, type: .SVG)
 /// MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
 /// ```
-public enum ContentType: String, RequestBuildable, Sendable {
+public enum ContentType: String, RequestBuildable {
     // MARK: Application
 
     /// `application/x-www-form-urlencoded`

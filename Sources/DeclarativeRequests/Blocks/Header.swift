@@ -14,7 +14,7 @@ import Foundation
 /// `Header` is the underlying type for ``Headers`` and pairs with both
 /// ``setValue(_:)`` (replaces any existing value) and ``addValue(_:)``
 /// (appends, useful for headers that allow multiple comma-separated values).
-public enum Header: Equatable, Hashable, Sendable {
+public enum Header: Equatable, Hashable {
     /// `Content-Type`
     case contentType
     /// `Accept`

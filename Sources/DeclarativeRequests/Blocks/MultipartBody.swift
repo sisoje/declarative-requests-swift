@@ -11,7 +11,7 @@ import Foundation
 ///     MultipartPart.file(name: "doc", fileURL: localFile, type: .PDF)
 /// }
 /// ```
-public enum MultipartPart: Sendable {
+public enum MultipartPart {
     /// A simple text field — the multipart equivalent of an HTML
     /// `<input type="text">`.
     /// - Parameters:
@@ -150,7 +150,7 @@ public enum MultipartBuilder {
 /// A fresh boundary token is generated per instance unless you supply one.
 /// You'd typically only set the boundary explicitly in tests, where a stable
 /// boundary makes assertions easier.
-public struct MultipartBody: RequestBuildable, Sendable {
+public struct MultipartBody: RequestBuildable {
     let parts: [MultipartPart]
     let boundary: String
 

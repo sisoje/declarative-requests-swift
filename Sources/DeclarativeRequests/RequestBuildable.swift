@@ -15,7 +15,7 @@ import Foundation
 /// ```swift
 /// struct AuthenticatedJSON: RequestBuildable {
 ///     let token: String
-///     let payload: any Encodable & Sendable
+///     let payload: any Encodable
 ///
 ///     var body: some RequestBuildable {
 ///         Method.POST

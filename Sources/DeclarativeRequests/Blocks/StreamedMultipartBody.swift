@@ -60,7 +60,7 @@ import Foundation
 ///   practice this is rare; if you build speculatively, drop references to
 ///   the request once you decide not to use it so the system can tear it down
 ///   on error.
-public struct StreamedMultipartBody: RequestBuildable, Sendable {
+public struct StreamedMultipartBody: RequestBuildable {
     let parts: [MultipartPart]
     let boundary: String
     let bufferSize: Int
@@ -181,7 +181,7 @@ enum MultipartLength {
 /// `URLSession` reads them. Runs on a dedicated thread with its own runloop;
 /// shuts down automatically when the body is exhausted or the consumer
 /// disconnects.
-final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendable {
+final class MultipartStreamProducer: NSObject, StreamDelegate {
     enum Source {
         case data(Data)
         case file(URL)
@@ -225,15 +225,12 @@ final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendab
     }
 
     func start() {
-        let thread = Thread { [self] in
-            self.runOnThread()
-        }
-        thread.name = "DeclarativeRequests.MultipartProducer"
+        let thread = ProducerThread(producer: self)
         self.thread = thread
         thread.start()
     }
 
-    private func runOnThread() {
+    fileprivate func runOnThread() {
         output.delegate = self
         output.schedule(in: .current, forMode: .default)
         output.open()
@@ -335,5 +332,19 @@ final class MultipartStreamProducer: NSObject, StreamDelegate, @unchecked Sendab
         output.remove(from: .current, forMode: .default)
         output.close()
         CFRunLoopStop(RunLoop.current.getCFRunLoop())
+    }
+}
+
+private final class ProducerThread: Thread {
+    let producer: MultipartStreamProducer
+
+    init(producer: MultipartStreamProducer) {
+        self.producer = producer
+        super.init()
+        name = "DeclarativeRequests.MultipartProducer"
+    }
+
+    override func main() {
+        producer.runOnThread()
     }
 }

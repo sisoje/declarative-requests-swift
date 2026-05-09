@@ -16,7 +16,7 @@ import Foundation
 /// // Binary upload, no content type:
 /// Body(imageBytes)
 /// ```
-public struct Body: RequestBuildable, Sendable {
+public struct Body: RequestBuildable {
     let data: Data
     let contentType: ContentType?
 

@@ -12,7 +12,7 @@ import Foundation
 ///     Timeout(120)  // 2 minutes
 /// }
 /// ```
-public struct Timeout: RequestBuildable, Sendable {
+public struct Timeout: RequestBuildable {
     let interval: TimeInterval
 
     /// Create a `Timeout` block.

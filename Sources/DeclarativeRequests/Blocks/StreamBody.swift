@@ -20,15 +20,15 @@ import Foundation
 /// is lazily produced when the block is applied. This matters because a stream
 /// is single-use; if the request is built more than once, each build needs its
 /// own stream.
-public struct StreamBody: RequestBuildable, Sendable {
-    let stream: @Sendable () throws -> InputStream?
+public struct StreamBody: RequestBuildable {
+    let stream: () throws -> InputStream?
 
     /// Create a `StreamBody` block.
     ///
     /// - Parameter str: An autoclosure that produces an `InputStream`. If it
     ///   returns `nil`, the block throws ``DeclarativeRequestsError/badStream``
     ///   when applied.
-    public init(_ str: @Sendable @autoclosure @escaping () throws -> InputStream?) {
+    public init(_ str: @autoclosure @escaping () throws -> InputStream?) {
         stream = str
     }
 

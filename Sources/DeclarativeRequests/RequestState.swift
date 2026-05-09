@@ -17,15 +17,7 @@ import Foundation
 /// try block.transform(state)
 /// XCTAssertEqual(state.request.httpMethod, "POST")
 /// ```
-///
-/// ## Concurrency
-///
-/// `RequestState` is `@unchecked Sendable`. Each instance is meant to be created and
-/// mutated within a single synchronous build; the library never shares one across
-/// concurrency domains. The `Sendable` conformance exists so that ``RequestBlock``'s
-/// transform closures (which capture the state-typed parameter) can themselves be
-/// `@Sendable` and used inside actor-isolated code.
-public final class RequestState: @unchecked Sendable {
+public final class RequestState {
     /// An empty placeholder URL used when no ``BaseURL`` has been declared yet.
     ///
     /// `URLComponents().url` is non-nil on every Foundation platform we target. The
@@ -141,13 +133,6 @@ public final class RequestState: @unchecked Sendable {
     }
 }
 
-/// Wraps a key path so it can be captured by `@Sendable` closures. Key paths into
-/// non-final classes are not `Sendable` in the stdlib yet, but the ones used here are
-/// simple stored-property paths that are safe to share.
-private struct UncheckedSendableKeyPath<Root, Value>: @unchecked Sendable {
-    let keyPath: ReferenceWritableKeyPath<Root, Value>
-}
-
 public extension RequestState {
     /// Generate a ``RequestBlock`` that writes a value through a key path on
     /// ``RequestState``.
@@ -169,10 +154,9 @@ public extension RequestState {
     ///   - value: The value to assign. The closure is `@autoclosure` so the
     ///     expression is evaluated lazily and may `throw`.
     /// - Returns: A ``RequestBlock`` that performs the assignment when applied.
-    static subscript<T: Sendable>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: @autoclosure @escaping @Sendable () throws -> T) -> RequestBlock {
-        let wrapped = UncheckedSendableKeyPath(keyPath: keyPath)
-        return RequestBlock { state in
-            state[keyPath: wrapped.keyPath] = try value()
+    static subscript<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestBlock {
+        RequestBlock { state in
+            state[keyPath: keyPath] = try value()
         }
     }
 }

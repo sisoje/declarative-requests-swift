@@ -14,7 +14,7 @@
 ///     BaseURL("https://files.example.com")
 /// }
 /// ```
-public enum Method: String, RequestBuildable, Sendable {
+public enum Method: String, RequestBuildable {
     /// `GET`
     case GET
     /// `HEAD`
