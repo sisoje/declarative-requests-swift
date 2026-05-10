@@ -22,8 +22,16 @@ final class ResourceCleaner {
     let cleanup: () -> Void
 
     init(app: Application) {
-        try! app.start()
-        cleanup = app.shutdown
+        try! app.server.start()
+        cleanup = {
+            let semaphore = DispatchSemaphore(value: 0)
+            Task {
+                await app.server.shutdown()
+                try? await app.asyncShutdown()
+                semaphore.signal()
+            }
+            semaphore.wait()
+        }
     }
 
     deinit {
@@ -43,16 +51,22 @@ extension Application {
 
 struct MockServer {
     let app: Application
-    let interceptor = VaporArchive()
-    private let midleware: AsyncMiddleware
+    let interceptor: VaporArchive
     private let appLifecycler: ResourceCleaner
 
-    init() {
-        app = Application(.testing)
-        midleware = VaporInterceptor(intercept: interceptor.save)
-        app.middleware.use(midleware)
+    static func make() async throws -> MockServer {
+        let app = try await Application.make(.testing)
+        let interceptor = VaporArchive()
+        app.middleware.use(VaporInterceptor(intercept: interceptor.save))
         app.http.server.configuration.port = .zero
-        appLifecycler = ResourceCleaner(app: app)
+        let lifecycler = ResourceCleaner(app: app)
+        return MockServer(app: app, interceptor: interceptor, appLifecycler: lifecycler)
+    }
+
+    private init(app: Application, interceptor: VaporArchive, appLifecycler: ResourceCleaner) {
+        self.app = app
+        self.interceptor = interceptor
+        self.appLifecycler = appLifecycler
     }
 }
 
@@ -60,6 +74,8 @@ struct VaporInterceptor: AsyncMiddleware {
     let intercept: @Sendable (Request, Response, Error?) async -> Void
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
+        _ = try await request.body.collect(max: nil).get()
+
         let response: Response
         do {
             response = try await next.respond(to: request)

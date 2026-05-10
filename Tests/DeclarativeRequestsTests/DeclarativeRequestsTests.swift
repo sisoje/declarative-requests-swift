@@ -197,7 +197,6 @@ import Testing
 }
 
 @Test func urlEncodedBodyLastWins() async throws {
-    // Multiple Body blocks: last one wins (replace semantics, not accumulate).
     let builder = RequestBlock {
         RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
         RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
@@ -213,7 +212,6 @@ import Testing
 }
 
 @Test func urlEncodedBodyBuiltFromLoop() async throws {
-    // To bundle multiple items, build the array up front and pass it once.
     let items = (1 ... 6).map { URLQueryItem(name: "count", value: "\($0)") }
     let builder = RequestBlock {
         RequestBody.urlEncoded(items)
@@ -379,6 +377,15 @@ import Testing
     let request = try URLRequest {
         BaseURL("https://api.example.com")
         Path("/users/", "/123/")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/users/123")
+}
+
+@Test func multiplePathTrimsAndJoinsSlashes() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com")
+        Path("/users/")
+        Path("/123/")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/users/123")
 }
@@ -554,7 +561,6 @@ import Testing
     let head = String(decoding: body, as: UTF8.self)
     #expect(head.contains("Content-Disposition: form-data; name=\"avatar\"; filename=\"a.png\""))
     #expect(head.contains("Content-Type: image/png"))
-    // Payload is included verbatim somewhere in the body.
     #expect(body.range(of: payload) != nil)
 }
 
@@ -661,7 +667,7 @@ import Testing
 
 @Test func streamedMultipartProducesIdenticalBytesToInMemory() throws {
     let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("streamed-\(UUID().uuidString).bin")
-    let payload = Data((0 ..< (256 * 1024)).map { UInt8($0 & 0xFF) }) // 256 KB, larger than the default 64 KB buffer
+    let payload = Data((0 ..< (256 * 1024)).map { UInt8($0 & 0xFF) })
     try payload.write(to: tmp)
     defer { try? FileManager.default.removeItem(at: tmp) }
 
@@ -685,8 +691,6 @@ import Testing
     #expect(streamed.value(forHTTPHeaderField: "Content-Length") == "\(expected.count)")
 }
 
-/// Reads an `InputStream` to completion on the current runloop using delegate
-/// callbacks. A wall-clock timeout protects the test from a stuck producer.
 private func drainStream(_ stream: InputStream, timeout: TimeInterval) throws -> Data {
     let consumer = StreamConsumer(stream: stream)
     return try consumer.consume(timeout: timeout)
@@ -832,4 +836,115 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     }
     let query = request.url?.query
     #expect(query == "alpha=a&mango=m&zebra=z")
+}
+
+// MARK: - Header bulk-add modes
+
+@Test func headerStringNameAddMode() throws {
+    let request = try URLRequest {
+        Header("Accept", "application/json")
+        Header("Accept", "text/html", mode: .add)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+@Test func headerFieldMapAddMode() throws {
+    let request = try URLRequest {
+        Header(.accept, "application/json")
+        Header([.accept: "text/html"], mode: .add)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+@Test func headerStringMapAddMode() throws {
+    let request = try URLRequest {
+        Header("Accept", "application/json")
+        Header(["Accept": "text/html"], mode: .add)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+@Test func headerEncodableAddMode() throws {
+    struct Extra: Codable {
+        let accept: String
+        enum CodingKeys: String, CodingKey { case accept = "Accept" }
+    }
+    let request = try URLRequest {
+        Header(.accept, "application/json")
+        Header(Extra(accept: "text/html"), mode: .add)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+// MARK: - URLRequest initializer (cache + timeout)
+
+@Test func urlRequestInitAppliesCustomCacheAndTimeout() throws {
+    let request = try URLRequest(
+        url: URL(string: "https://api.example.com")!,
+        cachePolicy: .reloadIgnoringLocalCacheData,
+        timeoutInterval: 5
+    ) {
+        Method.GET
+    }
+    #expect(request.cachePolicy == .reloadIgnoringLocalCacheData)
+    #expect(request.timeoutInterval == 5)
+    #expect(request.url?.absoluteString == "https://api.example.com")
+}
+
+@Test func urlRequestStringInitAppliesCustomCacheAndTimeout() throws {
+    let request = try URLRequest(
+        string: "https://api.example.com",
+        cachePolicy: .returnCacheDataDontLoad,
+        timeoutInterval: 10
+    ) {
+        Method.GET
+    }
+    #expect(request.cachePolicy == .returnCacheDataDontLoad)
+    #expect(request.timeoutInterval == 10)
+    #expect(request.url?.absoluteString == "https://api.example.com")
+}
+
+// MARK: - URL.buildRequest
+
+@Test func urlBuildRequest() throws {
+    let url = URL(string: "https://api.example.com")!
+    let request = try url.buildRequest {
+        Method.PUT
+        Endpoint("/widgets/1")
+    }
+    #expect(request.httpMethod == "PUT")
+    #expect(request.url?.absoluteString == "https://api.example.com/widgets/1")
+}
+
+// MARK: - ContentType as a block
+
+@Test func contentTypeBlockSetsHeader() throws {
+    let request = try URLRequest {
+        ContentType.JSON
+    }
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+}
+
+// MARK: - Method (every standard case)
+
+@Test func methodAppliesRawValueForAllStandardCases() throws {
+    let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .CONNECT, .OPTIONS, .TRACE, .PATCH]
+    for method in cases {
+        let request = try URLRequest { method }
+        #expect(request.httpMethod == method.rawValue)
+    }
+}
+
+// MARK: - curlCommand binary body
+
+@Test func curlCommandBinaryBodyOmitted() throws {
+    let binary = Data([0xFF, 0xFE, 0x00, 0x01])
+    let request = try URLRequest {
+        Method.POST
+        BaseURL("https://api.example.com")
+        RequestBody.data(binary, type: .Stream)
+    }
+    let curl = request.curlCommand
+    #expect(curl.contains("# binary body of 4 bytes omitted"))
+    #expect(!curl.contains("--data-binary"))
 }
