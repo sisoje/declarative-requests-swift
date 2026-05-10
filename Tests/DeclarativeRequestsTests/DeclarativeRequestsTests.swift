@@ -343,6 +343,23 @@ import Testing
     #expect(tok == "Basic eDp5")
 }
 
+@Test func authCustomAuthenticator() throws {
+    let request = try URLRequest {
+        Method.POST
+        BaseURL("https://api.example.com")
+        Endpoint("/v1/data")
+        Header(.accept, "application/json")
+        RequestBody.json(["key": "value"])
+        Authorization { request in
+            let bodyHash = (request.httpBody ?? Data()).count
+            request.setValue("Signed \(bodyHash)", forHTTPHeaderField: "Authorization")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Signed 15")
+    #expect(request.httpMethod == "POST")
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+}
+
 // MARK: - URLRequest initializer
 
 @Test func urlRequestInitializer() throws {
