@@ -18,7 +18,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/v1/login")
     Header(.accept, "application/json")
-    Authorization(bearer: token)
+    Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
 }
 ```
@@ -74,7 +74,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
 
     if let token = tokenProvider() {
-        Authorization(bearer: token)
+        Authorization.bearer(token)
     }
 
     for (key, value) in extraHeaders {
@@ -94,7 +94,7 @@ struct AuthenticatedJSON: RequestBuildable {
 
     var body: some RequestBuildable {
         Method.POST
-        Authorization(bearer: token)
+        Authorization.bearer(token)
         RequestBody.json(payload)
     }
 }
@@ -140,7 +140,7 @@ let request = try repo.getUser("42").request
 
 For signing schemes that derive credentials from the request itself —
 like HMAC signatures computed over headers or the body — use the
-``Authorization/init(_:)`` authenticator closure. Place it after all other
+``Authorization/custom(_:)`` authenticator closure. Place it after all other
 blocks so the request is fully formed when the closure runs:
 
 ```swift
@@ -150,7 +150,7 @@ let request = try URLRequest {
     Endpoint("/v1/data")
     Header(.contentType, "application/json")
     RequestBody.json(payload)
-    Authorization { request in
+    Authorization.custom { request in
         let body = request.httpBody ?? Data()
         let signature = hmac(body, secret: key)
         request.setValue("Signed \(signature)",

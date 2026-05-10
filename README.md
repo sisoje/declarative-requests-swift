@@ -22,7 +22,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/v1/login")
     Header(.accept, "application/json")
-    Authorization(bearer: token)
+    Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
 }
 ```
@@ -55,8 +55,12 @@ the data you have.
 | `Header(_ map:)` | Bulk set from `[Field: String]` or `[String: String]`. | `Header([.accept: "application/json"])` |
 | `Header(_ encodable:)` | Bulk set from a flat `Encodable` model. | `Header(MyHeadersModel())` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
-| `Authorization(bearer:)` | `Authorization: Bearer …` | `Authorization(bearer: token)` |
-| `Authorization(username:password:)` | `Authorization: Basic …` (Base64-encoded) | `Authorization(username: u, password: p)` |
+| `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
+| `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
+| `Authorization.token(_:)` | `Authorization: Token …` (e.g. Django REST) | `Authorization.token(apiKey)` |
+| `Authorization.other(_:credentials:)` | `Authorization: <Scheme> <credentials>` | `Authorization.other("HOBA", credentials: "…")` |
+| `Authorization.raw(_:)` | Verbatim value, no scheme prefix | `Authorization.raw("opaque-key")` |
+| `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
 | `ContentType.JSON` (etc.) | Convenience block that sets `Content-Type`. | `ContentType.JSON` |
 
 ### Body — one type, many factories
@@ -179,7 +183,7 @@ extension UserRepository {
                 Method.GET
                 BaseURL(baseURL)
                 Endpoint("/v1/users/\(id)")
-                if let t = tokenProvider() { Authorization(bearer: t) }
+                if let t = tokenProvider() { Authorization.bearer(t) }
             },
             refreshToken: { token in
                 Method.POST
@@ -263,9 +267,12 @@ flowchart LR
 
     %% Auth
     RB --> AuthGroup["Authorization"]
-    AuthGroup --> A1["Authorization(bearer: token)"]
-    AuthGroup --> A2["Authorization(username:password:)"]
-    AuthGroup --> A3["Authorization { inout request in }"]
+    AuthGroup --> A1["Authorization.bearer(token)"]
+    AuthGroup --> A2["Authorization.basic(username:password:)"]
+    AuthGroup --> A3["Authorization.token(apiKey)"]
+    AuthGroup --> A4["Authorization.other(scheme, credentials:)"]
+    AuthGroup --> A5["Authorization.raw(value)"]
+    AuthGroup --> A6["Authorization.custom { inout request in }"]
 
     %% Body
     RB --> BodyGroup["RequestBody"]

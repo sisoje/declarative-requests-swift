@@ -329,7 +329,7 @@ import Testing
 
 @Test func authBearer() throws {
     let request = try RequestBlock {
-        Authorization(bearer: "x")
+        Authorization.bearer("x")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
     #expect(tok == "Bearer x")
@@ -337,7 +337,7 @@ import Testing
 
 @Test func authUserPass() throws {
     let request = try RequestBlock {
-        Authorization(username: "x", password: "y")
+        Authorization.basic(username: "x", password: "y")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
     #expect(tok == "Basic eDp5")
@@ -350,7 +350,7 @@ import Testing
         Endpoint("/v1/data")
         Header(.accept, "application/json")
         RequestBody.json(["key": "value"])
-        Authorization { request in
+        Authorization.custom { request in
             let bodyHash = (request.httpBody ?? Data()).count
             request.setValue("Signed \(bodyHash)", forHTTPHeaderField: "Authorization")
         }

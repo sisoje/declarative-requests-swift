@@ -2,64 +2,128 @@ import Foundation
 
 /// Sets the `Authorization` header.
 ///
-/// Use ``init(bearer:)`` for OAuth-style bearer tokens,
-/// ``init(username:password:)`` for HTTP Basic credentials, or
-/// ``init(_:)`` for custom authentication schemes that need to inspect the
-/// request before computing the header value.
+/// Pick the factory that matches your authentication scheme. Each one
+/// formats the header value for you:
 ///
 /// ```swift
-/// // Bearer token:
-/// Authorization(bearer: accessToken)
+/// // OAuth 2.0 bearer token (RFC 6750):
+/// Authorization.bearer(accessToken)
 /// // → Authorization: Bearer <token>
 ///
-/// // Basic auth:
-/// Authorization(username: "alice", password: "s3cret")
+/// // HTTP Basic (RFC 7617) — encodes username:password to Base64 for you:
+/// Authorization.basic(username: "alice", password: "s3cret")
 /// // → Authorization: Basic YWxpY2U6czNjcmV0
 ///
+/// // Token auth (e.g. Django REST Framework):
+/// Authorization.token(apiKey)
+/// // → Authorization: Token <key>
+///
+/// // Arbitrary "<Scheme> <credentials>" pair:
+/// Authorization.other("HOBA", credentials: "...")
+/// // → Authorization: HOBA ...
+///
+/// // Verbatim value — no scheme prefix:
+/// Authorization.raw("my-opaque-key-12345")
+/// // → Authorization: my-opaque-key-12345
+///
 /// // Custom authenticator — receives the request built so far:
-/// Authorization { request in
+/// Authorization.custom { request in
 ///     let signature = hmac(request.allHTTPHeaderFields, secret: key)
 ///     request.setValue("HMAC \(signature)", forHTTPHeaderField: "Authorization")
 /// }
 /// ```
-public struct Authorization: RequestBuildable {
-    /// Create an `Authorization` block using HTTP Basic credentials.
+public enum Authorization {}
+
+public extension Authorization {
+    /// Sets `Authorization: Bearer <token>` (RFC 6750).
     ///
-    /// The credentials are joined with a colon, UTF-8 encoded, and Base64-encoded
-    /// per RFC 7617.
+    /// The token string is written verbatim after `Bearer `.
+    ///
+    /// ```swift
+    /// Authorization.bearer(accessToken)
+    /// // → Authorization: Bearer eyJhbGci...
+    /// ```
+    ///
+    /// - Parameter token: The bearer token.
+    static func bearer(_ token: String) -> some RequestBuildable {
+        set("Bearer \(token)")
+    }
+
+    /// Sets `Authorization: Basic <base64>` (RFC 7617).
+    ///
+    /// The username and password are joined with a colon, UTF-8 encoded, and
+    /// Base64-encoded automatically.
+    ///
+    /// ```swift
+    /// Authorization.basic(username: "alice", password: "s3cret")
+    /// // → Authorization: Basic YWxpY2U6czNjcmV0
+    /// ```
     ///
     /// - Parameters:
     ///   - username: The username.
     ///   - password: The password.
-    public init(username: String, password: String) {
-        let credentials = "\(username):\(password)"
-        let data = Data(credentials.utf8)
-        let base64 = data.base64EncodedString()
-        let value = "Basic \(base64)"
-        apply = { state in
-            state.request.setValue(value, forHTTPHeaderField: Header.Field.authorization.rawValue)
-        }
+    static func basic(username: String, password: String) -> some RequestBuildable {
+        let base64 = Data("\(username):\(password)".utf8).base64EncodedString()
+        return set("Basic \(base64)")
     }
 
-    /// Create an `Authorization` block using a bearer token.
+    /// Sets `Authorization: Token <token>`.
     ///
-    /// - Parameter token: The bearer token. Written verbatim after `Bearer `.
-    public init(bearer token: String) {
-        let value = "Bearer \(token)"
-        apply = { state in
-            state.request.setValue(value, forHTTPHeaderField: Header.Field.authorization.rawValue)
-        }
+    /// Used by frameworks like Django REST Framework and some CI systems.
+    ///
+    /// ```swift
+    /// Authorization.token(apiKey)
+    /// // → Authorization: Token abc123
+    /// ```
+    ///
+    /// - Parameter token: The token string.
+    static func token(_ token: String) -> some RequestBuildable {
+        set("Token \(token)")
     }
 
-    /// Create an `Authorization` block with a custom authenticator closure.
+    /// Sets `Authorization: <scheme> <credentials>` for a scheme not covered
+    /// by the other factories.
     ///
-    /// The closure receives the in-progress `URLRequest` as an `inout` parameter
-    /// after all preceding blocks have been applied. Use this for authentication
-    /// schemes that derive credentials from the request itself — for example,
-    /// HMAC signatures computed over headers or the request body.
+    /// ```swift
+    /// Authorization.other("HOBA", credentials: "...")
+    /// // → Authorization: HOBA ...
     ///
-    /// Place this block **after** all headers, query items, and body blocks so
-    /// the request is fully formed when the closure runs.
+    /// Authorization.other("Negotiate", credentials: negotiateToken)
+    /// // → Authorization: Negotiate <token>
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - scheme: The scheme name (e.g. `"HOBA"`, `"Negotiate"`, `"Digest"`).
+    ///   - credentials: The credentials string written after the scheme name.
+    static func other(_ scheme: String, credentials: String) -> some RequestBuildable {
+        set("\(scheme) \(credentials)")
+    }
+
+    /// Sets the `Authorization` header to a verbatim string with no scheme
+    /// prefix.
+    ///
+    /// Use this for APIs that expect an opaque key or token without a named
+    /// scheme:
+    ///
+    /// ```swift
+    /// Authorization.raw("my-opaque-api-key-12345")
+    /// // → Authorization: my-opaque-api-key-12345
+    /// ```
+    ///
+    /// - Parameter value: The exact header value.
+    static func raw(_ value: String) -> some RequestBuildable {
+        set(value)
+    }
+
+    /// Sets the `Authorization` header via a custom authenticator closure.
+    ///
+    /// The closure receives the in-progress `URLRequest` as an `inout`
+    /// parameter after all preceding blocks have been applied. Use this for
+    /// authentication schemes that derive credentials from the request itself
+    /// — for example, HMAC signatures computed over headers or the body.
+    ///
+    /// Place this block **after** all headers, query items, and body blocks
+    /// so the request is fully formed when the closure runs.
     ///
     /// ```swift
     /// let request = try URLRequest {
@@ -68,7 +132,7 @@ public struct Authorization: RequestBuildable {
     ///     Endpoint("/v1/data")
     ///     Header(.contentType, "application/json")
     ///     RequestBody.json(payload)
-    ///     Authorization { request in
+    ///     Authorization.custom { request in
     ///         let body = request.httpBody ?? Data()
     ///         let hash = SHA256.hash(data: body).description
     ///         request.setValue("SignedHash \(hash)",
@@ -79,15 +143,17 @@ public struct Authorization: RequestBuildable {
     ///
     /// - Parameter authenticator: A closure that inspects and mutates the
     ///   in-progress request to apply custom authorization.
-    public init(_ authenticator: @escaping (inout URLRequest) throws -> Void) {
-        apply = { state in
+    static func custom(_ authenticator: @escaping (inout URLRequest) throws -> Void) -> some RequestBuildable {
+        RequestBlock { state in
             try authenticator(&state.request)
         }
     }
+}
 
-    private let apply: RequestStateTransformClosure
-
-    public var body: some RequestBuildable {
-        RequestBlock(apply)
+private extension Authorization {
+    static func set(_ value: String) -> RequestBlock {
+        RequestBlock { state in
+            state.request.setValue(value, forHTTPHeaderField: Header.Field.authorization.rawValue)
+        }
     }
 }

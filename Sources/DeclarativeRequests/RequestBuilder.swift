@@ -24,7 +24,7 @@ extension Sequence where Element == RequestStateTransformClosure {
 ///     BaseURL("https://api.example.com")
 ///     Endpoint("/users")
 ///     if hasToken {
-///         Authorization(bearer: token)
+///         Authorization.bearer(token)
 ///     }
 ///     for header in extraHeaders {
 ///         Header(.custom(header.name), header.value)

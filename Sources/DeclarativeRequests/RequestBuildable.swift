@@ -19,7 +19,7 @@ import Foundation
 ///
 ///     var body: some RequestBuildable {
 ///         Method.POST
-///         Authorization(bearer: token)
+///         Authorization.bearer(token)
 ///         RequestBody.json(payload)
 ///     }
 /// }
