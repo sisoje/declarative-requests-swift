@@ -6,23 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
-  unit-tests:
+  test:
     runs-on: macos-latest
-    steps:
-    - uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: 'latest'
-    - uses: actions/checkout@v5
-    - name: Run unit tests
-      run: swift test --filter DeclarativeRequestsTests
-
-  integration-tests:
-    runs-on: macos-latest
-    timeout-minutes: 30
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
     - uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -34,5 +22,5 @@ jobs:
         key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
         restore-keys: |
           spm-${{ runner.os }}-
-    - name: Run integration tests
-      run: swift test --filter VaporTests
+    - name: Run tests
+      run: swift test
