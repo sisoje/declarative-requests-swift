@@ -41,7 +41,7 @@ the data you have.
 |---|---|---|
 | `BaseURL(_:)` | Sets host/scheme; preserves any path/query already declared. | `BaseURL("https://api.example.com")` |
 | `Endpoint(_:)` | Replaces the URL path. | `Endpoint("/v1/users")` |
-| `Path(_:...)` | Appends slash-joined segments to the existing path. | `Path("users", "\(id)", "posts")` |
+| `Path(_:...)` | Joins slash-separated segments into the path using RFC 3986 reference resolution (like Python's `urljoin`). Bare segments append, leading `/` resets to root, `..`/`.` traverse. | `Path("users", "\(id)", "posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
