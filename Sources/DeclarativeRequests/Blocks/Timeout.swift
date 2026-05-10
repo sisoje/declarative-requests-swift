@@ -8,7 +8,7 @@ import Foundation
 /// ```swift
 /// let request = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Endpoint("/slow-endpoint")
+///     Path("/slow-endpoint")
 ///     Timeout(120)  // 2 minutes
 /// }
 /// ```

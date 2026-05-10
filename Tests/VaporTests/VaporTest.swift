@@ -14,7 +14,7 @@ struct VaporTests {
     func multipartUpload() async throws {
         let request = try URLRequest(url: server.app.baseUrl) {
             Method.POST
-            Endpoint("/upload")
+            Path("/upload")
 
             RequestBody.multipart {
                 MultipartPart.field(name: "test", value: "test content")
@@ -54,7 +54,7 @@ struct VaporTests {
 
         let request = try URLRequest(url: server.app.baseUrl) {
             Method.POST
-            Endpoint("/echo-json")
+            Path("/echo-json")
             RequestBody.json(payload)
         }
         let (_, response) = try await URLSession.shared.data(for: request)
@@ -70,7 +70,7 @@ struct VaporTests {
     func urlEncodedBodyWireFormat() async throws {
         let request = try URLRequest(url: server.app.baseUrl) {
             Method.POST
-            Endpoint("/echo-form")
+            Path("/echo-form")
             RequestBody.urlEncoded([
                 URLQueryItem(name: "grant_type", value: "password"),
                 URLQueryItem(name: "username", value: "alice"),
@@ -94,7 +94,7 @@ struct VaporTests {
     func headerNamesOnWire() async throws {
         let request = try URLRequest(url: server.app.baseUrl) {
             Method.GET
-            Endpoint("/echo-headers")
+            Path("/echo-headers")
             Header(.accept, "application/json")
             Header(.userAgent, "DeclarativeRequests/1.0")
             Header("X-Trace-Id", "abc123")
@@ -123,7 +123,7 @@ struct VaporTests {
         for strategy in [RequestBody.MultipartStrategy.inMemory, .streamed()] {
             let request = try URLRequest(url: server.app.baseUrl) {
                 Method.POST
-                Endpoint("/upload")
+                Path("/upload")
                 RequestBody.multipart(boundary: "BNDY", strategy: strategy) {
                     MultipartPart.field(name: "title", value: "snapshot")
                     MultipartPart.file(name: "blob", fileURL: tmp, type: .Stream)
@@ -161,7 +161,7 @@ struct VaporTests {
 
         let request = try URLRequest(url: server.app.baseUrl) {
             Method.POST
-            Endpoint("/upload-multi")
+            Path("/upload-multi")
             RequestBody.multipart(boundary: "MULTI") {
                 MultipartPart.field(name: "user", value: "alice")
                 MultipartPart.file(name: "first", fileURL: a, type: .PlainText)
@@ -208,7 +208,7 @@ struct URLSessionExtensionTests {
         let (data, response) = try await URLSession.shared.data {
             Method.GET
             BaseURL(baseURL)
-            Endpoint("/ping")
+            Path("/ping")
         }
         #expect((response as? HTTPURLResponse)?.statusCode == 200)
         #expect(String(decoding: data, as: UTF8.self) == "pong")
@@ -220,7 +220,7 @@ struct URLSessionExtensionTests {
         let user: EchoServer.User = try await URLSession.shared.decode(EchoServer.User.self) {
             Method.GET
             BaseURL(baseURL)
-            Endpoint("/users/42")
+            Path("/users/42")
         }
         #expect(user.id == 42)
         #expect(user.name == "User-42")
@@ -233,7 +233,7 @@ struct URLSessionExtensionTests {
         let echoed: EchoServer.Echo = try await URLSession.shared.decode(EchoServer.Echo.self) {
             Method.POST
             BaseURL(baseURL)
-            Endpoint("/echo")
+            Path("/echo")
             RequestBody.json(payload)
         }
         #expect(echoed == payload)

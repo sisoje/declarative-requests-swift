@@ -11,7 +11,7 @@ import Foundation
 /// ```swift
 /// let request = try URLRequest {
 ///     BaseURL("https://uploads.example.com")
-///     Endpoint("/sync")
+///     Path("/sync")
 ///     NetworkServiceType(.background)
 /// }
 /// ```

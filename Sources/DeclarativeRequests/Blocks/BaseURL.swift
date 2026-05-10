@@ -10,10 +10,10 @@ import Foundation
 /// // Either order produces the same final URL:
 /// let a = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Endpoint("/users")
+///     Path("/users")
 /// }
 /// let b = try URLRequest {
-///     Endpoint("/users")
+///     Path("/users")
 ///     BaseURL("https://api.example.com")
 /// }
 /// ```

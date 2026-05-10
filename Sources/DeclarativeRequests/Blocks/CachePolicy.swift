@@ -9,7 +9,7 @@ import Foundation
 /// ```swift
 /// let request = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Endpoint("/feed")
+///     Path("/feed")
 ///     CachePolicy(.reloadIgnoringLocalCacheData)
 /// }
 /// ```

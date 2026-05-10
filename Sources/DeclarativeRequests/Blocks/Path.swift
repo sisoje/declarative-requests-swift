@@ -6,7 +6,7 @@ import Foundation
 ///
 /// `Path` is for *navigating* the URL: it appends to, traverses through, or
 /// resets the path that's already on the request. To replace the path
-/// outright with a literal value, use ``Endpoint``.
+/// A leading `/` replaces the path outright — equivalent to an absolute path.
 ///
 /// ```swift
 /// // Relative — appends:

@@ -10,7 +10,7 @@ import Foundation
 /// ```swift
 /// let request = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Endpoint("/oauth/token")
+///     Path("/oauth/token")
 ///     HTTPShouldHandleCookies(false)
 /// }
 /// ```

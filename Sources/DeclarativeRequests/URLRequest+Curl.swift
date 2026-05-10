@@ -12,7 +12,7 @@ public extension URLRequest {
     /// let request = try URLRequest {
     ///     Method.POST
     ///     BaseURL("https://api.example.com")
-    ///     Endpoint("/login")
+    ///     Path("/login")
     ///     Header(.accept, "application/json")
     ///     RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     /// }
