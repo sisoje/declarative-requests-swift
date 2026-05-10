@@ -228,6 +228,77 @@ flowchart LR
     end
 ```
 
+## Block map
+
+Every block and its variants at a glance:
+
+```mermaid
+flowchart LR
+    RB["@RequestBuilder { }"]
+
+    %% URL & Path
+    RB --> URL_GROUP["URL & Path"]
+    URL_GROUP --> BaseURL["BaseURL(_ string)"]
+    URL_GROUP --> Endpoint["Endpoint(_ path)"]
+    URL_GROUP --> Path["Path(_ segments...)"]
+    URL_GROUP --> Query
+    Query --> Q1["Query(_ name, _ value)"]
+    Query --> Q2["Query(_ encodable)"]
+
+    %% Method
+    RB --> MethodGroup["Method"]
+    MethodGroup --> MSTD[".GET  .POST  .PUT\n.DELETE  .PATCH  .HEAD\n.OPTIONS  .TRACE  .CONNECT"]
+    MethodGroup --> MCUSTOM[".custom(_ string)"]
+
+    %% Headers
+    RB --> HeaderGroup["Headers"]
+    HeaderGroup --> Header
+    Header --> H1["Header(_ field, _ value)"]
+    Header --> H2["Header(_ name, _ value)"]
+    Header --> H3["Header(_ fieldMap)"]
+    Header --> H4["Header(_ stringMap)"]
+    Header --> H5["Header(_ encodable)"]
+    Header --> HMode["mode: .set | .add"]
+    HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
+    HeaderGroup --> ContentType
+    ContentType --> CTJSON[".JSON  .XML  .HTML\n.PlainText  .CSV  .PDF\n.PNG  .JPEG  .GIF  .MP4\n.Stream  … 40+ cases"]
+
+    %% Auth
+    RB --> AuthGroup["Authorization"]
+    AuthGroup --> A1["Authorization(bearer: token)"]
+    AuthGroup --> A2["Authorization(username:password:)"]
+    AuthGroup --> A3["Authorization { inout request in }"]
+
+    %% Body
+    RB --> BodyGroup["RequestBody"]
+    BodyGroup --> B1[".data(_ data, type:)"]
+    BodyGroup --> B2[".string(_ string, type:)"]
+    BodyGroup --> B3[".json(_ encodable)"]
+    BodyGroup --> B4[".urlEncoded(_ items)"]
+    BodyGroup --> B5[".urlEncoded(_ encodable)"]
+    BodyGroup --> B6[".stream(_ inputStream)"]
+    BodyGroup --> B7[".multipart { parts }"]
+    B7 --> MP["MultipartPart"]
+    MP --> MP1[".field(name:value:)"]
+    MP --> MP2[".data(name:filename:data:type:)"]
+    MP --> MP3[".file(name:fileURL:type:)"]
+    B7 --> MS["strategy:"]
+    MS --> MS1[".inMemory"]
+    MS --> MS2[".streamed(bufferSize:)"]
+
+    %% Networking knobs
+    RB --> NetGroup["Networking Knobs"]
+    NetGroup --> Timeout["Timeout(_ seconds)"]
+    NetGroup --> CachePolicy["CachePolicy(_ policy)"]
+    NetGroup --> NST["NetworkServiceType(_ type)"]
+    NetGroup --> HSHC["HTTPShouldHandleCookies(_ flag)"]
+    NetGroup --> AllowAccess
+    AllowAccess --> AA1[".cellular(Bool)"]
+    AllowAccess --> AA2[".expensiveNetwork(Bool)"]
+    AllowAccess --> AA3[".constrainedNetwork(Bool)"]
+    AllowAccess --> AA4[".ultraConstrainedNetwork(Bool)"]
+```
+
 ## Key concepts
 
 - **`RequestBuildable`** — the protocol every block conforms to.
