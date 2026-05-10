@@ -35,17 +35,7 @@ import Foundation
 ///
 /// Like every other request property, the body is *replaced* if multiple
 /// `RequestBody.*` blocks are declared — the last one wins.
-public struct RequestBody: RequestBuildable {
-    let apply: (RequestState) throws -> Void
-
-    init(_ apply: @escaping (RequestState) throws -> Void) {
-        self.apply = apply
-    }
-
-    public var body: some RequestBuildable {
-        RequestBlock(apply)
-    }
-}
+public enum RequestBody {}
 
 public extension RequestBody {
     /// A `Data` body, optionally tagged with a `Content-Type`.
@@ -54,8 +44,8 @@ public extension RequestBody {
     ///   - data: The body bytes.
     ///   - type: The content type to set on the request, or `nil` to leave any
     ///     existing `Content-Type` untouched.
-    static func data(_ data: Data, type: ContentType? = nil) -> RequestBody {
-        RequestBody { state in
+    static func data(_ data: Data, type: ContentType? = nil) -> some RequestBuildable {
+        RequestBlock { state in
             state.request.httpBody = data
             if let type {
                 state.request.setValue(type.rawValue, forHTTPHeaderField: Header.Field.contentType.rawValue)
@@ -68,8 +58,11 @@ public extension RequestBody {
     /// - Parameters:
     ///   - string: The body text.
     ///   - type: The content type to set. Defaults to ``ContentType/PlainText``.
-    static func string(_ string: String, type: ContentType = .PlainText) -> RequestBody {
-        .data(Data(string.utf8), type: type)
+    static func string(_ string: String, type: ContentType = .PlainText) -> some RequestBuildable {
+        RequestBlock { state in
+            state.request.httpBody = Data(string.utf8)
+            state.request.setValue(type.rawValue, forHTTPHeaderField: Header.Field.contentType.rawValue)
+        }
     }
 
     /// JSON-encodes `value` into the body and sets `Content-Type: application/json`.
@@ -78,8 +71,8 @@ public extension RequestBody {
     /// (date strategy, key strategy, output formatting) you set there is applied.
     ///
     /// - Parameter value: The value to encode.
-    static func json(_ value: any Encodable) -> RequestBody {
-        RequestBody { state in
+    static func json(_ value: any Encodable) -> some RequestBuildable {
+        RequestBlock { state in
             state.request.httpBody = try state.encoder.encode(value)
             state.request.setValue(ContentType.JSON.rawValue, forHTTPHeaderField: Header.Field.contentType.rawValue)
         }
@@ -91,8 +84,8 @@ public extension RequestBody {
     /// (`a=1&a=2&b=3`).
     ///
     /// - Parameter items: The form items to encode.
-    static func urlEncoded(_ items: [URLQueryItem]) -> RequestBody {
-        RequestBody { state in
+    static func urlEncoded(_ items: [URLQueryItem]) -> some RequestBuildable {
+        RequestBlock { state in
             var components = URLComponents()
             components.queryItems = items
             state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
@@ -115,8 +108,8 @@ public extension RequestBody {
     /// ```
     ///
     /// - Parameter encodable: The model to encode.
-    static func urlEncoded(_ encodable: any Encodable) -> RequestBody {
-        RequestBody { state in
+    static func urlEncoded(_ encodable: any Encodable) -> some RequestBuildable {
+        RequestBlock { state in
             let items = try EncodableQueryItems(encodable: encodable, encoder: state.encoder).items
             var components = URLComponents()
             components.queryItems = items
@@ -142,8 +135,8 @@ public extension RequestBody {
     /// - Parameter stream: An autoclosure that produces an `InputStream`. If it
     ///   returns `nil`, the block throws ``DeclarativeRequestsError/badStream``
     ///   when applied.
-    static func stream(_ stream: @autoclosure @escaping () throws -> InputStream?) -> RequestBody {
-        RequestBody { state in
+    static func stream(_ stream: @autoclosure @escaping () throws -> InputStream?) -> some RequestBuildable {
+        RequestBlock { state in
             guard let s = try stream() else {
                 throw DeclarativeRequestsError.badStream
             }

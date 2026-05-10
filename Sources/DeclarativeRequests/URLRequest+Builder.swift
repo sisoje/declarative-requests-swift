@@ -11,7 +11,7 @@ public extension URLRequest {
     /// let api = URL(string: "https://api.example.com")!
     /// let request = try URLRequest(url: api) {
     ///     Method.GET
-    ///     Path("v1", "users", userId)
+    ///     Endpoint("v1", "users", userId)
     ///     Header(.accept, "application/json")
     /// }
     /// ```
@@ -23,7 +23,7 @@ public extension URLRequest {
     /// let request = try URLRequest {
     ///     Method.GET
     ///     BaseURL("https://api.example.com")
-    ///     Path("/health")
+    ///     Endpoint("/health")
     /// }
     /// ```
     ///
@@ -62,7 +62,7 @@ public extension URLRequest {
     /// ```swift
     /// let request = try URLRequest(string: "https://api.example.com") {
     ///     Method.POST
-    ///     Path("/login")
+    ///     Endpoint("/login")
     ///     RequestBody.json(credentials)
     /// }
     /// ```

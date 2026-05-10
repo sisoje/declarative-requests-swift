@@ -4,21 +4,21 @@ import Foundation
 /// reference resolution — the same algorithm as Python's
 /// `urllib.parse.urljoin` or JavaScript's `new URL(reference, base)`.
 ///
-/// `Path` is for *navigating* the URL: it appends to, traverses through, or
+/// `Endpoint` is for *navigating* the URL: it appends to, traverses through, or
 /// resets the path that's already on the request. To replace the path
 /// A leading `/` replaces the path outright — equivalent to an absolute path.
 ///
 /// ```swift
 /// // Relative — appends:
-/// BaseURL("https://api.example.com/v1") + Path("users", "\(id)")
+/// BaseURL("https://api.example.com/v1") + Endpoint("users", "\(id)")
 /// //   → https://api.example.com/v1/users/123
 ///
 /// // Absolute — resets to root:
-/// BaseURL("https://api.example.com/v1") + Path("/health")
+/// BaseURL("https://api.example.com/v1") + Endpoint("/health")
 /// //   → https://api.example.com/health
 ///
 /// // Dot-traversal — `..` and `.` are collapsed:
-/// BaseURL("https://api.example.com/a/b") + Path("../c")
+/// BaseURL("https://api.example.com/a/b") + Endpoint("../c")
 /// //   → https://api.example.com/a/c
 /// ```
 ///
@@ -26,25 +26,25 @@ import Foundation
 /// pre-joined string are interchangeable:
 ///
 /// ```swift
-/// Path("v1", "users", "\(id)")          // → "v1/users/123"
-/// Path("v1/users/\(id)")                // → "v1/users/123" (same)
+/// Endpoint("v1", "users", "\(id)")          // → "v1/users/123"
+/// Endpoint("v1/users/\(id)")                // → "v1/users/123" (same)
 /// ```
 ///
 /// > Note: The base path is treated as a directory, so `BaseURL("…/v1")` and
 /// > `BaseURL("…/v1/")` both append cleanly. (Strict RFC 3986 would replace
 /// > the last segment of a non-slash-terminated base.) A leading `/` on the
-/// > reference always means *absolute* — `Path("/users")` and `Path("users")`
+/// > reference always means *absolute* — `Endpoint("/users")` and `Endpoint("users")`
 /// > are not equivalent.
-public struct Path: RequestBuildable {
+public struct Endpoint: RequestBuildable {
     let reference: String
 
-    /// Create a `Path` block from a variadic list of segments. Segments are
+    /// Create an `Endpoint` block from a variadic list of segments. Segments are
     /// joined with `/` to form the reference.
     public init(_ segments: String...) {
         self.init(segments)
     }
 
-    /// Create a `Path` block from an array of segments.
+    /// Create an `Endpoint` block from an array of segments.
     public init(_ segments: [String]) {
         reference = segments.joined(separator: "/")
     }

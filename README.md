@@ -20,7 +20,7 @@ Content-Type: application/json
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Path("/v1/login")
+    Endpoint("/v1/login")
     Header(.accept, "application/json")
     Authorization(bearer: token)
     RequestBody.json(LoginRequest(email: email, password: password))
@@ -40,7 +40,7 @@ the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `BaseURL(_:)` | Sets host/scheme; preserves any path/query already declared. | `BaseURL("https://api.example.com")` |
-| `Path(_:...)` | Resolves segments against the current path using RFC 3986 reference resolution (like Python's `urljoin`). Bare segments append, leading `/` resets to root, `..`/`.` traverse. | `Path("users", "\(id)", "posts")` |
+| `Endpoint(_:...)` | Resolves segments against the current path using RFC 3986 reference resolution (like Python's `urljoin`). Bare segments append, leading `/` resets to root, `..`/`.` traverse. | `Endpoint("users", "\(id)", "posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
@@ -95,7 +95,7 @@ once.
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Path("/upload")
+    Endpoint("/upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
         MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
@@ -122,7 +122,7 @@ If you already have a `URL`, hand it to the initializer:
 ```swift
 let request = try URLRequest(url: api) {
     Method.GET
-    Path("v1", "users", userId)
+    Endpoint("v1", "users", userId)
     Header(.accept, "application/json")
 }
 ```
@@ -132,7 +132,7 @@ Or skip constructing the `URL` yourself:
 ```swift
 let request = try URLRequest(string: "https://api.example.com") {
     Method.POST
-    Path("/login")
+    Endpoint("/login")
     RequestBody.json(credentials)
 }
 ```
@@ -148,7 +148,7 @@ For a one-line build-and-send through `URLSession`:
 let (data, response) = try await URLSession.shared.data {
     Method.GET
     BaseURL("https://api.example.com")
-    Path("/users/123")
+    Endpoint("/users/123")
 }
 
 // Decoding directly:
@@ -156,7 +156,7 @@ struct User: Decodable { let id: Int; let name: String }
 let user = try await URLSession.shared.decode(User.self) {
     Method.GET
     BaseURL("https://api.example.com")
-    Path("/users/123")
+    Endpoint("/users/123")
 }
 ```
 
@@ -178,13 +178,13 @@ extension UserRepository {
             getUser: { id in
                 Method.GET
                 BaseURL(baseURL)
-                Path("/v1/users/\(id)")
+                Endpoint("/v1/users/\(id)")
                 if let t = tokenProvider() { Authorization(bearer: t) }
             },
             refreshToken: { token in
                 Method.POST
                 BaseURL(baseURL)
-                Path("/v1/auth/refresh")
+                Endpoint("/v1/auth/refresh")
                 RequestBody.json(["token": token])
             }
         )
@@ -235,10 +235,10 @@ Every block and its variants at a glance:
 flowchart LR
     RB["@RequestBuilder { }"]
 
-    %% URL & Path
-    RB --> URL_GROUP["URL & Path"]
+    %% URL & Endpoint
+    RB --> URL_GROUP["URL & Endpoint"]
     URL_GROUP --> BaseURL["BaseURL(_ string)"]
-    URL_GROUP --> Path["Path(_ segments...)"]
+    URL_GROUP --> Endpoint["Endpoint(_ segments...)"]
     URL_GROUP --> Query
     Query --> Q1["Query(_ name, _ value)"]
     Query --> Q2["Query(_ encodable)"]

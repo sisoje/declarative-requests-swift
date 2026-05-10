@@ -7,7 +7,7 @@
 /// ```swift
 /// let request = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Path("/sync")
+///     Endpoint("/sync")
 ///     AllowAccess.cellular(true)
 ///     AllowAccess.expensiveNetwork(false)   // skip if user is on metered Wi-Fi
 ///     AllowAccess.constrainedNetwork(false) // skip in Low Data Mode

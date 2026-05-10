@@ -3,17 +3,17 @@ import Foundation
 /// Sets the base URL the request resolves against.
 ///
 /// `BaseURL` resolves the in-progress URL components against the supplied URL.
-/// Path and query components declared by other blocks are preserved across the
+/// Endpoint and query components declared by other blocks are preserved across the
 /// resolution, so the order of declarations doesn't matter for typical cases:
 ///
 /// ```swift
 /// // Either order produces the same final URL:
 /// let a = try URLRequest {
 ///     BaseURL("https://api.example.com")
-///     Path("/users")
+///     Endpoint("/users")
 /// }
 /// let b = try URLRequest {
-///     Path("/users")
+///     Endpoint("/users")
 ///     BaseURL("https://api.example.com")
 /// }
 /// ```

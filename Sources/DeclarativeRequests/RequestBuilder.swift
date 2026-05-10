@@ -22,7 +22,7 @@ extension Sequence where Element == RequestStateTransformClosure {
 /// let request = try URLRequest {           // compiler invokes RequestBuilder
 ///     Method.POST
 ///     BaseURL("https://api.example.com")
-///     Path("/users")
+///     Endpoint("/users")
 ///     if hasToken {
 ///         Authorization(bearer: token)
 ///     }

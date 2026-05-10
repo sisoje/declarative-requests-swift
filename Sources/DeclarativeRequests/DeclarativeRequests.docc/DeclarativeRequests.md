@@ -16,7 +16,7 @@ the raw HTTP request.
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Path("/v1/login")
+    Endpoint("/v1/login")
     Header(.accept, "application/json")
     Authorization(bearer: token)
     RequestBody.json(LoginRequest(email: email, password: password))
@@ -47,20 +47,20 @@ There are several entry points, all equivalent:
 let request = try URLRequest {
     Method.GET
     BaseURL("https://api.example.com")
-    Path("/health")
+    Endpoint("/health")
 }
 
 // From an existing URL:
 let request = try URLRequest(url: existingURL) {
     Method.GET
-    Path("v1", "users", userId)
+    Endpoint("v1", "users", userId)
 }
 
 // Build and send in one call:
 let (data, response) = try await URLSession.shared.data {
     Method.GET
     BaseURL("https://api.example.com")
-    Path("/users/123")
+    Endpoint("/users/123")
 }
 ```
 
@@ -121,12 +121,12 @@ extension UserRepository {
             getUser: { id in
                 Method.GET
                 BaseURL(baseURL)
-                Path("/v1/users/\(id)")
+                Endpoint("/v1/users/\(id)")
             },
             refreshToken: { token in
                 Method.POST
                 BaseURL(baseURL)
-                Path("/v1/auth/refresh")
+                Endpoint("/v1/auth/refresh")
                 RequestBody.json(["token": token])
             }
         )
@@ -147,7 +147,7 @@ blocks so the request is fully formed when the closure runs:
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Path("/v1/data")
+    Endpoint("/v1/data")
     Header(.contentType, "application/json")
     RequestBody.json(payload)
     Authorization { request in
@@ -169,7 +169,7 @@ switch to `.streamed()` so memory stays bounded:
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Path("/upload")
+    Endpoint("/upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
         MultipartPart.data(name: "avatar", filename: "a.png",
@@ -208,7 +208,7 @@ print(request.curlCommand)
 ### URL and path
 
 - ``BaseURL``
-- ``Path``
+- ``Endpoint``
 - ``Query``
 
 ### Method, headers, and auth

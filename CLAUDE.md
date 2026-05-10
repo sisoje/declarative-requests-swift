@@ -46,7 +46,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 ### Block conventions
 
 - **Last write wins** for properties (method, URL, body). To accumulate (cookies, query items, additive headers), the block reads-then-writes the existing value.
-- **`BaseURL` order doesn't matter** — it resolves *components* against a base URL, preserving any path/query already declared. `Path` does RFC 3986 reference resolution (urljoin) — bare segments append (treating the base path as a directory), leading `/` resets to root, `..`/`.` traverse.
+- **`BaseURL` order doesn't matter** — it resolves *components* against a base URL, preserving any path/query already declared. `Endpoint` does RFC 3986 reference resolution (urljoin) — bare segments append (treating the base path as a directory), leading `/` resets to root, `..`/`.` traverse.
 - **`RequestState[\.keyPath, value]` subscript** is the canonical way to write a one-line block (used by `Method`, `Timeout`, `AllowAccess`, etc.). New blocks should use it instead of writing closures by hand.
 - **Encodable-driven blocks** route through `state.encoder` so the user's encoder configuration (date strategy, key strategy) is respected. Headers built from `Encodable` reject nested objects/arrays since headers must be flat.
 - **`RequestBody.stream(_:)`** takes an `@autoclosure` so the `InputStream` is recreated on each build (streams are single-use).

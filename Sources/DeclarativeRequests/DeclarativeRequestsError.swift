@@ -9,7 +9,7 @@ public enum DeclarativeRequestsError: Error, Equatable, LocalizedError {
     /// declared in the builder.
     ///
     /// Typically thrown by ``BaseURL`` when given an invalid string, or by
-    /// ``Path`` when no base URL has been set.
+    /// ``Endpoint`` when no base URL has been set.
     case badUrl
 
     /// A ``RequestBody/stream(_:)`` block could not produce or open its `InputStream`.

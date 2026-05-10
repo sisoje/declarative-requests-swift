@@ -27,7 +27,7 @@ import Testing
 @Test func urlStringBuilderTest() throws {
     let request = try URLRequest(string: "https://google.com") {
         Method.POST
-        Path("/getLanguage")
+        Endpoint("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
     }
@@ -48,7 +48,7 @@ import Testing
     let request = try RequestBlock {
         Method.POST
         BaseURL("https://google.com")
-        Path("/getLanguage")
+        Endpoint("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
     }.request
@@ -76,7 +76,7 @@ import Testing
         BaseURL("https://google.com")
 
         for i in 1 ... count {
-            Path("/getLanguage")
+            Endpoint("/getLanguage")
             Query("count", "\(i)")
         }
     }
@@ -95,7 +95,7 @@ import Testing
         BaseURL("https://google.com")
 
         if isFirst {
-            Path("/first")
+            Endpoint("/first")
             Query("isFirst", "1")
         }
     }
@@ -114,10 +114,10 @@ import Testing
         BaseURL("https://google.com")
 
         if isFirst {
-            Path("/first")
+            Endpoint("/first")
             Query("isFirst", "1")
         } else {
-            Path("/second")
+            Endpoint("/second")
         }
     }
 
@@ -253,12 +253,12 @@ import Testing
     let repository = Repository(
         refreshToken: { accessToken in
             Method.POST
-            Path("/refreshToken")
+            Endpoint("/refreshToken")
             RequestBody.json(["token": accessToken])
         },
         getUser: { userId in
             Method.GET
-            Path("/user")
+            Endpoint("/user")
             Query("userId", userId)
         }
     )
@@ -347,7 +347,7 @@ import Testing
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Path("/v1/data")
+        Endpoint("/v1/data")
         Header(.accept, "application/json")
         RequestBody.json(["key": "value"])
         Authorization { request in
@@ -366,18 +366,18 @@ import Testing
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Path("/login")
+        Endpoint("/login")
     }
     #expect(request.httpMethod == "POST")
     #expect(request.url?.absoluteString == "https://api.example.com/login")
 }
 
-// MARK: - Path
+// MARK: - Endpoint
 
 @Test func pathAppendsToBase() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Path("users", "123", "posts")
+        Endpoint("users", "123", "posts")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/users/123/posts")
 }
@@ -385,7 +385,7 @@ import Testing
 @Test func pathPreservesBasePathPrefix() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
-        Path("users")
+        Endpoint("users")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users")
 }
@@ -393,7 +393,7 @@ import Testing
 @Test func pathLeadingSlashIsAbsolute() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/blabla")
-        Path("/test")
+        Endpoint("/test")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/test")
 }
@@ -401,7 +401,7 @@ import Testing
 @Test func pathDotDotTraverses() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b")
-        Path("../c")
+        Endpoint("../c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/c")
 }
@@ -409,7 +409,7 @@ import Testing
 @Test func pathDotDotFromDirectory() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b/")
-        Path("../c")
+        Endpoint("../c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/c")
 }
@@ -417,7 +417,7 @@ import Testing
 @Test func pathSingleDotIsNoOp() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b")
-        Path("./c")
+        Endpoint("./c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/b/c")
 }
@@ -425,8 +425,8 @@ import Testing
 @Test func pathChainsAccumulate() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Path("v1")
-        Path("users", "123")
+        Endpoint("v1")
+        Endpoint("users", "123")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users/123")
 }
@@ -434,8 +434,8 @@ import Testing
 @Test func pathSecondAbsoluteResets() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Path("v1", "users")
-        Path("/health")
+        Endpoint("v1", "users")
+        Endpoint("/health")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/health")
 }
@@ -443,7 +443,7 @@ import Testing
 @Test func pathSingleSlashResetsToRoot() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1/users")
-        Path("/")
+        Endpoint("/")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/")
 }
@@ -452,7 +452,7 @@ import Testing
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
         Query("token", "abc")
-        Path("users")
+        Endpoint("users")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users?token=abc")
 }
@@ -460,8 +460,8 @@ import Testing
 @Test func pathEmptyIsNoOp() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
-        Path("")
-        Path([])
+        Endpoint("")
+        Endpoint([])
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1")
 }
@@ -469,7 +469,7 @@ import Testing
 @Test func pathDotDotTraversesPastBase() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b/c/d")
-        Path("../../../g")
+        Endpoint("../../../g")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/g")
 }
@@ -865,7 +865,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Path("/login")
+        Endpoint("/login")
         Header(.accept, "application/json")
         RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     }
@@ -994,7 +994,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let url = URL(string: "https://api.example.com")!
     let request = try url.buildRequest {
         Method.PUT
-        Path("/widgets/1")
+        Endpoint("/widgets/1")
     }
     #expect(request.httpMethod == "PUT")
     #expect(request.url?.absoluteString == "https://api.example.com/widgets/1")

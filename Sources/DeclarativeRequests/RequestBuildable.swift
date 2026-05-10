@@ -9,7 +9,7 @@ import Foundation
 /// lower-level blocks, terminating in primitive ``RequestBlock`` leaves.
 ///
 /// You rarely need to write a custom conformance — the built-in blocks
-/// (``BaseURL``, ``Path``, ``Method``, ``Header``, ``RequestBody``, …)
+/// (``BaseURL``, ``Endpoint``, ``Method``, ``Header``, ``RequestBody``, …)
 /// cover most cases. When you do, return your composition from `body`:
 ///
 /// ```swift
@@ -44,7 +44,7 @@ public extension RequestBuildable {
     /// let request = try RequestBlock {
     ///     Method.GET
     ///     BaseURL("https://api.example.com")
-    ///     Path("/health")
+    ///     Endpoint("/health")
     /// }.request
     /// ```
     ///

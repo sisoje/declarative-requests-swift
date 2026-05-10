@@ -44,10 +44,10 @@ public extension RequestBody {
         boundary: String? = nil,
         strategy: MultipartStrategy = .inMemory,
         @MultipartBuilder _ parts: () -> [MultipartPart]
-    ) -> RequestBody {
+    ) -> some RequestBuildable {
         let parts = parts()
         let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
-        return RequestBody { state in
+        return RequestBlock { state in
             switch strategy {
             case .inMemory:
                 try applyInMemory(parts: parts, boundary: boundary, state: state)

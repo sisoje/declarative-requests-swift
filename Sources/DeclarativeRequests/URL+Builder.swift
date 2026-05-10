@@ -9,7 +9,7 @@ public extension URL {
     /// let api = URL(string: "https://api.example.com")!
     /// let request = try api.buildRequest {
     ///     Method.GET
-    ///     Path("v1", "users", userId)
+    ///     Endpoint("v1", "users", userId)
     ///     Header(.accept, "application/json")
     /// }
     /// ```

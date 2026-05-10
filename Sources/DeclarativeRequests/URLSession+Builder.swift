@@ -9,7 +9,7 @@ public extension URLSession {
     /// let (data, response) = try await URLSession.shared.data {
     ///     Method.GET
     ///     BaseURL("https://api.example.com")
-    ///     Path("/users/123")
+    ///     Endpoint("/users/123")
     /// }
     /// ```
     ///
@@ -30,7 +30,7 @@ public extension URLSession {
     /// let user = try await URLSession.shared.decode(User.self) {
     ///     Method.GET
     ///     BaseURL("https://api.example.com")
-    ///     Path("/users/123")
+    ///     Endpoint("/users/123")
     /// }
     /// ```
     ///
