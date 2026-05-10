@@ -14,7 +14,7 @@ import Testing
 }
 
 @Test func baseUrlTest() throws {
-    let baseUrl = URL(string: "https://google.com")!
+    let baseUrl = try #require(URL(string: "https://google.com"))
     let request = try URLRequest(url: baseUrl) {
         Method.POST
         RequestBody.json([1])
@@ -71,7 +71,7 @@ import Testing
     #expect(request.httpMethod == "sisoje")
 }
 
-@Test(arguments: [1, 2]) func countTest(count: Int) async throws {
+@Test(arguments: [1, 2]) func countTest(count: Int) throws {
     let builder = RequestBlock {
         BaseURL("https://google.com")
 
@@ -90,7 +90,7 @@ import Testing
     }
 }
 
-@Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) async throws {
+@Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) throws {
     let builder = RequestBlock {
         BaseURL("https://google.com")
 
@@ -109,7 +109,7 @@ import Testing
     }
 }
 
-@Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) async throws {
+@Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) throws {
     let builder = RequestBlock {
         BaseURL("https://google.com")
 
@@ -130,7 +130,7 @@ import Testing
     }
 }
 
-@Test func urlEncodedBodySingleKeyValue() async throws {
+@Test func urlEncodedBodySingleKeyValue() throws {
     let builder = RequestBlock {
         RequestBody.urlEncoded([URLQueryItem(name: "key", value: "value")])
     }
@@ -144,7 +144,7 @@ import Testing
     #expect(items[0].value == "value")
 }
 
-@Test func urlEncodedBodyDuplicateNames() async throws {
+@Test func urlEncodedBodyDuplicateNames() throws {
     let builder = RequestBlock {
         RequestBody.urlEncoded([
             URLQueryItem(name: "color", value: "red"),
@@ -164,7 +164,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "size" && $0.value == "large" }))
 }
 
-@Test func urlEncodedBodyDictionary() async throws {
+@Test func urlEncodedBodyDictionary() throws {
     let builder = RequestBlock {
         RequestBody.urlEncoded(["name": "john", "age": "25"])
     }
@@ -178,7 +178,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "age" && $0.value == "25" }))
 }
 
-@Test func urlEncodedBodyEncodable() async throws {
+@Test func urlEncodedBodyEncodable() throws {
     struct User: Codable {
         let id: Int
         let name: String
@@ -196,7 +196,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
 }
 
-@Test func urlEncodedBodyLastWins() async throws {
+@Test func urlEncodedBodyLastWins() throws {
     let builder = RequestBlock {
         RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
         RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
@@ -211,7 +211,7 @@ import Testing
     #expect(items[0].value == "2")
 }
 
-@Test func urlEncodedBodyBuiltFromLoop() async throws {
+@Test func urlEncodedBodyBuiltFromLoop() throws {
     let items = (1 ... 6).map { URLQueryItem(name: "count", value: "\($0)") }
     let builder = RequestBlock {
         RequestBody.urlEncoded(items)
@@ -228,7 +228,7 @@ import Testing
     }
 }
 
-@Test func queryEncodable() async throws {
+@Test func queryEncodable() throws {
     struct User: Codable {
         let id: Int
         let name: String
@@ -238,7 +238,7 @@ import Testing
     }
     let source = RequestState()
     try builder.transform(source)
-    let queryItems = URLComponents(url: source.request.url!, resolvingAgainstBaseURL: true)!.queryItems!
+    let queryItems = try #require(URLComponents(url: #require(source.request.url), resolvingAgainstBaseURL: true)?.queryItems)
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))
@@ -293,7 +293,7 @@ import Testing
     let request = try Query(Model()).request
     let rs = RequestState(request: request)
     let q1 = Set(rs.queryItems)
-    let q2 = Set(URLComponents(string: "?num2=2&str2=2&b=true")!.queryItems!)
+    let q2 = try Set(#require(URLComponents(string: "?num2=2&str2=2&b=true")?.queryItems))
     #expect(q1 == q2)
 }
 
@@ -304,7 +304,7 @@ import Testing
     }.request
     let rs = RequestState(request: request)
     let q1 = Set(rs.queryItems)
-    let q2 = Set(URLComponents(string: "?x=y&1=2")!.queryItems!)
+    let q2 = try Set(#require(URLComponents(string: "?x=y&1=2")?.queryItems))
     #expect(q1 == q2)
 }
 
@@ -314,7 +314,7 @@ import Testing
     }
     let request = try Query(Model.some()).request
     let q1 = Set(RequestState(request: request).queryItems)
-    let q2 = Set(URLComponents(string: "?x=5&y=a")!.queryItems!)
+    let q2 = try Set(#require(URLComponents(string: "?x=5&y=a")?.queryItems))
     #expect(q1 == q2)
 }
 
@@ -327,7 +327,7 @@ import Testing
     #expect(rs.cookies == ["x": "y", "1": "2"])
 }
 
-@Test func authBearer() async throws {
+@Test func authBearer() throws {
     let request = try RequestBlock {
         Authorization(bearer: "x")
     }.request
@@ -335,7 +335,7 @@ import Testing
     #expect(tok == "Bearer x")
 }
 
-@Test func authUserPass() async throws {
+@Test func authUserPass() throws {
     let request = try RequestBlock {
         Authorization(username: "x", password: "y")
     }.request
@@ -725,7 +725,7 @@ import Testing
             MultipartPart.field(name: "k", value: "v")
         }
     }
-    let expected = inMemory.httpBody!.count
+    let expected = try #require(inMemory.httpBody?.count)
 
     let streamed = try URLRequest {
         RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
@@ -761,7 +761,7 @@ import Testing
             MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
         }
     }
-    let expected = inMemory.httpBody!
+    let expected = try #require(inMemory.httpBody)
 
     let streamed = try URLRequest {
         RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
@@ -769,7 +769,7 @@ import Testing
             MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
         }
     }
-    let actual = try drainStream(streamed.httpBodyStream!, timeout: 5)
+    let actual = try drainStream(#require(streamed.httpBodyStream), timeout: 5)
 
     #expect(actual == expected)
     #expect(streamed.value(forHTTPHeaderField: "Content-Length") == "\(expected.count)")
@@ -964,7 +964,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func urlRequestInitAppliesCustomCacheAndTimeout() throws {
     let request = try URLRequest(
-        url: URL(string: "https://api.example.com")!,
+        url: #require(URL(string: "https://api.example.com")),
         cachePolicy: .reloadIgnoringLocalCacheData,
         timeoutInterval: 5
     ) {
@@ -991,7 +991,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 // MARK: - URL.buildRequest
 
 @Test func urlBuildRequest() throws {
-    let url = URL(string: "https://api.example.com")!
+    let url = try #require(URL(string: "https://api.example.com"))
     let request = try url.buildRequest {
         Method.PUT
         Endpoint("/widgets/1")

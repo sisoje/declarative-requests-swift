@@ -62,12 +62,6 @@ struct MockServer {
         let lifecycler = ResourceCleaner(app: app)
         return MockServer(app: app, interceptor: interceptor, appLifecycler: lifecycler)
     }
-
-    private init(app: Application, interceptor: VaporArchive, appLifecycler: ResourceCleaner) {
-        self.app = app
-        self.interceptor = interceptor
-        self.appLifecycler = appLifecycler
-    }
 }
 
 struct VaporInterceptor: AsyncMiddleware {

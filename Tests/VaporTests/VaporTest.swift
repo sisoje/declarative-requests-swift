@@ -28,14 +28,14 @@ struct VaporTests {
         let (vaporRequest, vaporResponse, err) = await server.interceptor.get(response)
         #expect(vaporResponse.status.code == 500)
         #expect(err?.localizedDescription == "RouteNotFound.404: Not Found")
-        #expect((response as! HTTPURLResponse).statusCode == 500)
+        #expect((response as? HTTPURLResponse)?.statusCode == 500)
         #expect(vaporRequest.url.path == "/upload")
         #expect(vaporRequest.method == .POST)
         #expect(vaporRequest.headers.contentType?.type == "multipart")
         #expect(vaporRequest.headers.contentType?.subType == "form-data")
         #expect(vaporRequest.headers.contentType?.parameters["boundary"]?.isEmpty == false)
-        #expect(vaporRequest.headers.cookie!["Key"]?.string == "Value")
-        #expect(vaporRequest.headers.cookie!["Key2"]?.string == "Value2")
+        #expect(vaporRequest.headers.cookie?["Key"]?.string == "Value")
+        #expect(vaporRequest.headers.cookie?["Key2"]?.string == "Value2")
 
         struct TestForm: Content {
             let test: String

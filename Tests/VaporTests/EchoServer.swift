@@ -35,9 +35,4 @@ struct EchoServer {
         let lifecycler = ResourceCleaner(app: app)
         return EchoServer(app: app, appLifecycler: lifecycler)
     }
-
-    private init(app: Application, appLifecycler: ResourceCleaner) {
-        self.app = app
-        self.appLifecycler = appLifecycler
-    }
 }
