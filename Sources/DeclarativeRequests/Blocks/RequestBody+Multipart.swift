@@ -51,7 +51,7 @@ public extension RequestBody {
             switch strategy {
             case .inMemory:
                 try applyInMemory(parts: parts, boundary: boundary, state: state)
-            case .streamed(let bufferSize):
+            case let .streamed(bufferSize):
                 try applyStreamed(parts: parts, boundary: boundary, bufferSize: bufferSize, state: state)
             }
         }
@@ -132,11 +132,11 @@ private func applyInMemory(parts: [MultipartPart], boundary: String, state: Requ
 private extension MultipartPart {
     func append(to form: inout MultipartForm) throws {
         switch self {
-        case .field(let name, let value):
+        case let .field(name, value):
             form.addField(named: name, value: value)
-        case .data(let name, let filename, let payload, let type):
+        case let .data(name, filename, payload, type):
             form.addFile(named: name, filename: filename, data: payload, mimeType: type.rawValue)
-        case .file(let name, let fileURL, let type, let filename):
+        case let .file(name, fileURL, type, filename):
             let bytes: Data
             do {
                 bytes = try Data(contentsOf: fileURL)
@@ -238,13 +238,13 @@ private enum MultipartLength {
 
     private static func lengthOf(part: MultipartPart, boundary: String) throws -> Int64 {
         switch part {
-        case .field(let name, let value):
+        case let .field(name, value):
             let header = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"\r\n\r\n"
             return Int64(header.utf8.count) + Int64(value.utf8.count) + 2
-        case .data(let name, let filename, let payload, let type):
+        case let .data(name, filename, payload, type):
             let header = fileHeader(name: name, filename: filename, type: type, boundary: boundary)
             return Int64(header.utf8.count) + Int64(payload.count) + 2
-        case .file(let name, let fileURL, let type, let filename):
+        case let .file(name, fileURL, type, filename):
             let resolved = filename ?? fileURL.lastPathComponent
             let header = fileHeader(name: name, filename: resolved, type: type, boundary: boundary)
             let attrs: [FileAttributeKey: Any]
@@ -296,14 +296,14 @@ private final class MultipartStreamProducer: NSObject, StreamDelegate {
         var sources: [Source] = []
         for part in parts {
             switch part {
-            case .field(let name, let value):
+            case let .field(name, value):
                 let chunk = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"\r\n\r\n\(value)\r\n"
                 sources.append(.data(Data(chunk.utf8)))
-            case .data(let name, let filename, let payload, let type):
+            case let .data(name, filename, payload, type):
                 sources.append(.data(Data(MultipartLength.fileHeader(name: name, filename: filename, type: type, boundary: boundary).utf8)))
                 sources.append(.data(payload))
                 sources.append(.data(Data("\r\n".utf8)))
-            case .file(let name, let fileURL, let type, let filename):
+            case let .file(name, fileURL, type, filename):
                 let resolved = filename ?? fileURL.lastPathComponent
                 sources.append(.data(Data(MultipartLength.fileHeader(name: name, filename: resolved, type: type, boundary: boundary).utf8)))
                 sources.append(.file(fileURL))
@@ -378,10 +378,10 @@ private final class MultipartStreamProducer: NSObject, StreamDelegate {
     private func nextChunk() -> Data? {
         while sourceIndex < sources.count {
             switch sources[sourceIndex] {
-            case .data(let blob):
+            case let .data(blob):
                 sourceIndex += 1
                 return blob
-            case .file(let url):
+            case let .file(url):
                 if fileStream == nil {
                     guard let stream = InputStream(url: url) else {
                         sourceIndex += 1
