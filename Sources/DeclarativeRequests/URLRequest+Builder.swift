@@ -23,7 +23,7 @@ public extension URLRequest {
     /// let request = try URLRequest {
     ///     Method.GET
     ///     BaseURL("https://api.example.com")
-    ///     Endpoint("/health")
+    ///     Path("/health")
     /// }
     /// ```
     ///
@@ -62,7 +62,7 @@ public extension URLRequest {
     /// ```swift
     /// let request = try URLRequest(string: "https://api.example.com") {
     ///     Method.POST
-    ///     Endpoint("/login")
+    ///     Path("/login")
     ///     RequestBody.json(credentials)
     /// }
     /// ```

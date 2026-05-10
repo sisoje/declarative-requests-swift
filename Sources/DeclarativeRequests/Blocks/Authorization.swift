@@ -65,7 +65,7 @@ public struct Authorization: RequestBuildable {
     /// let request = try URLRequest {
     ///     Method.POST
     ///     BaseURL("https://api.example.com")
-    ///     Endpoint("/v1/data")
+    ///     Path("/v1/data")
     ///     Header(.contentType, "application/json")
     ///     RequestBody.json(payload)
     ///     Authorization { request in

@@ -16,7 +16,7 @@
 ///    ```swift
 ///    let block = RequestBlock {
 ///        Method.POST
-///        Endpoint("/users")
+///        Path("/users")
 ///        RequestBody.json(payload)
 ///    }
 ///    ```
@@ -39,7 +39,7 @@ public struct RequestBlock: RequestBuildable {
     /// ```swift
     /// let block = RequestBlock {
     ///     Method.GET
-    ///     Endpoint("/users")
+    ///     Path("/users")
     /// }
     /// let request = try block.request
     /// ```

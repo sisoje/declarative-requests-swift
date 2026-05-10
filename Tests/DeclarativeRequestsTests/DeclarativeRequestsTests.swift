@@ -27,7 +27,7 @@ import Testing
 @Test func urlStringBuilderTest() throws {
     let request = try URLRequest(string: "https://google.com") {
         Method.POST
-        Endpoint("/getLanguage")
+        Path("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
     }
@@ -48,7 +48,7 @@ import Testing
     let request = try RequestBlock {
         Method.POST
         BaseURL("https://google.com")
-        Endpoint("/getLanguage")
+        Path("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
     }.request
@@ -76,7 +76,7 @@ import Testing
         BaseURL("https://google.com")
 
         for i in 1 ... count {
-            Endpoint("/getLanguage")
+            Path("/getLanguage")
             Query("count", "\(i)")
         }
     }
@@ -95,7 +95,7 @@ import Testing
         BaseURL("https://google.com")
 
         if isFirst {
-            Endpoint("/first")
+            Path("/first")
             Query("isFirst", "1")
         }
     }
@@ -114,10 +114,10 @@ import Testing
         BaseURL("https://google.com")
 
         if isFirst {
-            Endpoint("/first")
+            Path("/first")
             Query("isFirst", "1")
         } else {
-            Endpoint("/second")
+            Path("/second")
         }
     }
 
@@ -253,12 +253,12 @@ import Testing
     let repository = Repository(
         refreshToken: { accessToken in
             Method.POST
-            Endpoint("/refreshToken")
+            Path("/refreshToken")
             RequestBody.json(["token": accessToken])
         },
         getUser: { userId in
             Method.GET
-            Endpoint("/user")
+            Path("/user")
             Query("userId", userId)
         }
     )
@@ -347,7 +347,7 @@ import Testing
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Endpoint("/v1/data")
+        Path("/v1/data")
         Header(.accept, "application/json")
         RequestBody.json(["key": "value"])
         Authorization { request in
@@ -366,7 +366,7 @@ import Testing
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Endpoint("/login")
+        Path("/login")
     }
     #expect(request.httpMethod == "POST")
     #expect(request.url?.absoluteString == "https://api.example.com/login")
@@ -865,7 +865,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        Endpoint("/login")
+        Path("/login")
         Header(.accept, "application/json")
         RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     }
@@ -994,7 +994,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let url = URL(string: "https://api.example.com")!
     let request = try url.buildRequest {
         Method.PUT
-        Endpoint("/widgets/1")
+        Path("/widgets/1")
     }
     #expect(request.httpMethod == "PUT")
     #expect(request.url?.absoluteString == "https://api.example.com/widgets/1")
