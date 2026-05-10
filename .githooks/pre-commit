@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# Run SwiftFormat
-echo "Running SwiftFormat..."
-swiftformat --header strip --patternlet inline .
