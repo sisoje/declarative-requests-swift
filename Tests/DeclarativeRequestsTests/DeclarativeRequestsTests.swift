@@ -238,7 +238,7 @@ import Testing
     }
     let source = RequestState()
     try builder.transform(source)
-    let queryItems = try #require(URLComponents(url: #require(source.request.url), resolvingAgainstBaseURL: true)?.queryItems)
+    let queryItems = URLComponents(url: source.request.url!, resolvingAgainstBaseURL: true)!.queryItems!
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))
@@ -964,7 +964,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func urlRequestInitAppliesCustomCacheAndTimeout() throws {
     let request = try URLRequest(
-        url: #require(URL(string: "https://api.example.com")),
+        url: URL(string: "https://api.example.com"),
         cachePolicy: .reloadIgnoringLocalCacheData,
         timeoutInterval: 5
     ) {
