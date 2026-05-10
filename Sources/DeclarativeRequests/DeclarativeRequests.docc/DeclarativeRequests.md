@@ -64,6 +64,25 @@ let (data, response) = try await URLSession.shared.data {
 }
 ```
 
+### Control flow
+
+The ``RequestBuilder`` result builder supports `if`, `if-else`, `switch`,
+and `for` — use them directly inside the builder closure:
+
+```swift
+let request = try URLRequest {
+    BaseURL("https://api.example.com")
+
+    if let token = tokenProvider() {
+        Authorization(bearer: token)
+    }
+
+    for (key, value) in extraHeaders {
+        Header(key, value)
+    }
+}
+```
+
 ### Custom blocks
 
 Conform to ``RequestBuildable`` and return built-in blocks from `body`:
@@ -83,6 +102,99 @@ struct AuthenticatedJSON: RequestBuildable {
 
 The recursion terminates automatically at ``RequestBlock`` leaves — no
 additional boilerplate required.
+
+### Repository pattern
+
+Declare an endpoint surface as a struct of `@RequestBuilder` closures
+and materialize requests on demand. Keeps URL construction out of
+call sites and makes endpoints easy to mock in tests:
+
+```swift
+struct UserRepository {
+    @RequestBuilder var getUser: (_ id: String) -> any RequestBuildable
+    @RequestBuilder var refreshToken: (_ token: String) -> any RequestBuildable
+}
+
+extension UserRepository {
+    static func live(baseURL: URL) -> Self {
+        .init(
+            getUser: { id in
+                Method.GET
+                BaseURL(baseURL)
+                Endpoint("/v1/users/\(id)")
+            },
+            refreshToken: { token in
+                Method.POST
+                BaseURL(baseURL)
+                Endpoint("/v1/auth/refresh")
+                RequestBody.json(["token": token])
+            }
+        )
+    }
+}
+
+let request = try repo.getUser("42").request
+```
+
+### Custom authentication
+
+For signing schemes that derive credentials from the request itself —
+like HMAC signatures computed over headers or the body — use the
+``Authorization/init(_:)`` authenticator closure. Place it after all other
+blocks so the request is fully formed when the closure runs:
+
+```swift
+let request = try URLRequest {
+    Method.POST
+    BaseURL("https://api.example.com")
+    Endpoint("/v1/data")
+    Header(.contentType, "application/json")
+    RequestBody.json(payload)
+    Authorization { request in
+        let body = request.httpBody ?? Data()
+        let signature = hmac(body, secret: key)
+        request.setValue("Signed \(signature)",
+                        forHTTPHeaderField: "Authorization")
+    }
+}
+```
+
+### Multipart uploads
+
+Build multipart bodies with ``MultipartPart`` values inside a
+``RequestBody/multipart(boundary:strategy:parts:)`` block. For large files,
+switch to `.streamed()` so memory stays bounded:
+
+```swift
+let request = try URLRequest {
+    Method.POST
+    BaseURL("https://api.example.com")
+    Endpoint("/upload")
+    RequestBody.multipart {
+        MultipartPart.field(name: "user", value: "alice")
+        MultipartPart.data(name: "avatar", filename: "a.png",
+                           data: pngBytes, type: .PNG)
+        for url in fileURLs {
+            MultipartPart.file(name: "files", fileURL: url, type: .Stream)
+        }
+    }
+}
+
+// Streamed — memory-efficient for very large uploads:
+RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
+    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .MP4)
+}
+```
+
+### Debugging
+
+Every `URLRequest` exposes a copy-pasteable `curl` equivalent:
+
+```swift
+print(request.curlCommand)
+// curl -X POST -H 'Content-Type: application/json'
+//   --data-binary '{"x":1}' 'https://api.example.com/foo'
+```
 
 ## Topics
 
