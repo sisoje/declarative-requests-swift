@@ -36,9 +36,9 @@ public enum DeclarativeRequestsError: Error, Equatable, LocalizedError {
             "The URL is missing or could not be constructed."
         case .badStream:
             "The input stream could not be opened."
-        case let .badMultipart(reason):
+        case .badMultipart(let reason):
             "Multipart body could not be built: \(reason)"
-        case let .encodingFailed(reason):
+        case .encodingFailed(let reason):
             "Encoding failed: \(reason)"
         }
     }

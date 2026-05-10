@@ -78,7 +78,7 @@ public struct Header: RequestBuildable {
             case .host: "Host"
             case .acceptLanguage: "Accept-Language"
             case .acceptEncoding: "Accept-Encoding"
-            case let .custom(value): value
+            case .custom(let value): value
             }
         }
     }
