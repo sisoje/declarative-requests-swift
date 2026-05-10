@@ -18,12 +18,17 @@ actor VaporArchive {
     }
 }
 
-final class ResourceCleaner {
-    let cleanup: () -> Void
+final class ResourceCleaner: @unchecked Sendable {
+    private let app: Application
 
     init(app: Application) {
+        self.app = app
         try! app.server.start()
-        cleanup = {
+    }
+
+    deinit {
+        let app = self.app
+        Thread.detachNewThread {
             let semaphore = DispatchSemaphore(value: 0)
             Task {
                 await app.server.shutdown()
@@ -32,10 +37,6 @@ final class ResourceCleaner {
             }
             semaphore.wait()
         }
-    }
-
-    deinit {
-        cleanup()
     }
 }
 
