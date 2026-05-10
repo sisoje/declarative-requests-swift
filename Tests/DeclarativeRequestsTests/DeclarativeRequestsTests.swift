@@ -373,21 +373,88 @@ import Testing
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users")
 }
 
-@Test func pathTrimsAndJoinsSlashes() throws {
+@Test func pathLeadingSlashIsAbsolute() throws {
     let request = try URLRequest {
-        BaseURL("https://api.example.com")
-        Path("/users/", "/123/")
+        BaseURL("https://api.example.com/blabla")
+        Path("/test")
     }
-    #expect(request.url?.absoluteString == "https://api.example.com/users/123")
+    #expect(request.url?.absoluteString == "https://api.example.com/test")
 }
 
-@Test func multiplePathTrimsAndJoinsSlashes() throws {
+@Test func pathDotDotTraverses() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/a/b")
+        Path("../c")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/a/c")
+}
+
+@Test func pathDotDotFromDirectory() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/a/b/")
+        Path("../c")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/a/c")
+}
+
+@Test func pathSingleDotIsNoOp() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/a/b")
+        Path("./c")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/a/b/c")
+}
+
+@Test func pathChainsAccumulate() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Path("/users/")
-        Path("/123/")
+        Path("v1")
+        Path("users", "123")
     }
-    #expect(request.url?.absoluteString == "https://api.example.com/users/123")
+    #expect(request.url?.absoluteString == "https://api.example.com/v1/users/123")
+}
+
+@Test func pathSecondAbsoluteResets() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com")
+        Path("v1", "users")
+        Path("/health")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/health")
+}
+
+@Test func pathSingleSlashResetsToRoot() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/v1/users")
+        Path("/")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/")
+}
+
+@Test func pathPreservesQuery() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/v1")
+        Query("token", "abc")
+        Path("users")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/v1/users?token=abc")
+}
+
+@Test func pathEmptyIsNoOp() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/v1")
+        Path("")
+        Path([])
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/v1")
+}
+
+@Test func pathDotDotTraversesPastBase() throws {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com/a/b/c/d")
+        Path("../../../g")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/a/g")
 }
 
 // MARK: - RequestBody (raw / string)
