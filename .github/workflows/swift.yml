@@ -18,11 +18,27 @@ jobs:
       with:
         xcode-version: 'latest'
     - uses: actions/checkout@v5
+    - uses: actions/cache@v4
+      with:
+        path: |
+          DerivedData/SourcePackages
+          .swiftpm
+        key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+        restore-keys: |
+          spm-${{ runner.os }}-
+    - uses: actions/cache@v4
+      with:
+        path: DerivedData/Build
+        key: build-${{ runner.os }}-${{ hashFiles('Package.resolved', 'Sources/**/*.swift', 'Tests/**/*.swift') }}
+        restore-keys: |
+          build-${{ runner.os }}-${{ hashFiles('Package.resolved') }}-
+          build-${{ runner.os }}-
     - name: Run tests
       run: |
         xcodebuild test \
           -scheme DeclarativeRequests-Package \
           -destination 'platform=macOS' \
+          -derivedDataPath DerivedData \
           -resultBundlePath TestResults.xcresult
     - uses: kishikawakatsumi/xcresulttool@v1
       with:
