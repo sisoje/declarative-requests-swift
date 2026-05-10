@@ -10,12 +10,14 @@ jobs:
   build:
 
     runs-on: macos-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: 'latest'
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Run tests
       run: |
         xcodebuild test \
