@@ -1,14 +1,20 @@
 import Foundation
 
+extension URL {
+    static var zero: URL {
+        URLComponents().url!
+    }
+}
+
 public final class RequestState {
     init(
-        request: URLRequest = URLRequest(url: URLComponents().url!),
+        request: URLRequest = URLRequest(url: .zero),
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.request = request
         self.encoder = encoder
     }
-    
+
     public var request: URLRequest
 
     public var encoder: JSONEncoder
@@ -35,37 +41,47 @@ public final class RequestState {
         }
     }
 
-    var urlComponents: URLComponents? {
-        request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) }
+    private var urlComponents: URLComponents {
+        request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) } ?? URLComponents()
     }
 
-    func setBaseURL(_ url: URL) {
-        request.url = urlComponents?.url(relativeTo: url)
-    }
-    
-    var path: [String] {
+    var baseURL: URL {
         get {
-            urlComponents?.path.components(separatedBy: "/") ?? []
+            urlComponents.url ?? .zero
         }
         set {
-            setPath(newValue.joined(separator: "/"))
+            request.url = urlComponents.url(relativeTo: newValue)
         }
     }
 
-    func setPath(_ path: String) {
-        var urlComponents = urlComponents
-        urlComponents?.path = path
-        request.url = urlComponents?.url
+    var path: [String] {
+        get {
+            stringPath.components(separatedBy: "/")
+        }
+        set {
+            stringPath = newValue.joined(separator: "/")
+        }
+    }
+
+    var stringPath: String {
+        get {
+            urlComponents.path
+        }
+        set {
+            var urlComponents = urlComponents
+            urlComponents.path = newValue
+            request.url = urlComponents.url
+        }
     }
 
     var queryItems: [URLQueryItem] {
         get {
-            urlComponents?.queryItems ?? []
+            urlComponents.queryItems ?? []
         }
         set {
             var urlComponents = urlComponents
-            urlComponents?.queryItems = newValue
-            request.url = urlComponents?.url
+            urlComponents.queryItems = newValue
+            request.url = urlComponents.url
         }
     }
 
