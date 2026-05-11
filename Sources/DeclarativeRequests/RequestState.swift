@@ -1,14 +1,8 @@
 import Foundation
 
-extension URL {
-    static var zero: URL {
-        URLComponents().url!
-    }
-}
-
 public final class RequestState {
     init(
-        request: URLRequest = URLRequest(url: .zero),
+        request: URLRequest = URLRequest(url: .placeholder),
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.request = request
@@ -47,7 +41,7 @@ public final class RequestState {
 
     var baseURL: URL {
         get {
-            urlComponents.url ?? .zero
+            urlComponents.url ?? .placeholder
         }
         set {
             request.url = urlComponents.url(relativeTo: newValue)
