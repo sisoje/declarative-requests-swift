@@ -48,16 +48,16 @@ public final class RequestState {
         }
     }
 
-    var path: [String] {
+    var pathArray: [String] {
         get {
-            stringPath.components(separatedBy: "/")
+            pathString.components(separatedBy: "/")
         }
         set {
-            stringPath = newValue.joined(separator: "/")
+            pathString = newValue.joined(separator: "/")
         }
     }
 
-    var stringPath: String {
+    var pathString: String {
         get {
             urlComponents.path
         }
