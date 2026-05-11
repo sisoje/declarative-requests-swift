@@ -151,7 +151,8 @@ public extension Authorization {
 }
 
 private extension Authorization {
-    static func set(_ value: String) -> RequestBlock {
-        Header.authorization.setValue(value)
-    }
+    // inline this:         Header.authorization.setValue(value)
+//    static func set(_ value: String) -> RequestBlock {
+//        Header.authorization.setValue(value)
+//    }
 }
