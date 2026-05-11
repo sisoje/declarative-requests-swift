@@ -10,8 +10,8 @@ block:
 ```swift
 RequestBody.multipart {
     MultipartPart.field(name: "user", value: "alice")
-    MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
-    MultipartPart.file(name: "doc", fileURL: localFile, type: .PDF)
+    MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .png)
+    MultipartPart.file(name: "doc", fileURL: localFile, type: .pdf)
 }
 ```
 

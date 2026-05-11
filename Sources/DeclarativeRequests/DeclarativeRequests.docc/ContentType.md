@@ -1,94 +1,28 @@
 # ``ContentType``
 
-A typed identifier for an HTTP `Content-Type` value.
+Sets the HTTP `Content-Type` header from a ``MIMEType``.
 
 ## Overview
 
-Used directly as a block to set the `Content-Type` header, and as a
-parameter on body blocks like ``RequestBody`` and ``MultipartPart`` to
-label payload bytes:
+Use `ContentType` as a block to set the `Content-Type` header, or pass it
+as a parameter to body blocks like ``RequestBody`` and ``MultipartPart``:
 
 ```swift
-// As a block:
-ContentType.JSON  // sets Content-Type: application/json
+// As a block — pass any MIMEType:
+ContentType(.json)  // sets Content-Type: application/json
 
-// As a value passed to other blocks:
-RequestBody.data(svgData, type: .SVG)
-MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
+// With parameters:
+ContentType(.json.with(.charset(.utf8)))
+// sets Content-Type: application/json; charset=utf-8
 ```
+
+`ContentType` follows **last-write-wins** semantics — declaring it
+multiple times replaces the previous value. MIME type constants come
+from ``MIMEType`` directly — `ContentType` has no constants of its own.
 
 ## Topics
 
-### Application
+### Creating
 
-- ``URLEncoded``
-- ``JSON``
-- ``Stream``
-- ``PDF``
-- ``XML``
-- ``ZIP``
-- ``ZIP7``
-- ``GZIP``
-- ``DOC``
-- ``XLS``
-- ``PPT``
-- ``DOCX``
-- ``XLSX``
-- ``PPTX``
-- ``M3U8``
-
-### Text
-
-- ``HTML``
-- ``PlainText``
-- ``CSS``
-- ``CSV``
-- ``JS``
-- ``Calendar``
-
-### Image
-
-- ``JPEG``
-- ``PNG``
-- ``GIF``
-- ``SVG``
-- ``WebP``
-- ``TIFF``
-- ``BMP``
-- ``ICO``
-
-### Audio
-
-- ``MP3``
-- ``WAV``
-- ``OGGAudio``
-- ``AAC``
-- ``M4A``
-- ``MIDI``
-- ``M3U``
-
-### Video
-
-- ``MP4``
-- ``MPEG``
-- ``WebM``
-- ``OGGVideo``
-- ``AVI``
-- ``TS``
-
-### Font
-
-- ``WOFF``
-- ``WOFF2``
-- ``TTF``
-- ``OTF``
-
-### Composing
-
-- ``body``
-- ``request``
-
-### Raw Value
-
-- ``rawValue``
-- ``init(rawValue:)``
+- ``init(_:)``
+- ``mimeType``

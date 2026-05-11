@@ -496,7 +496,7 @@ import Testing
 
 @Test func bodyExplicitContentType() throws {
     let request = try URLRequest {
-        RequestBody.data(Data("<x/>".utf8), type: .XML)
+        RequestBody.data(Data("<x/>".utf8), type: .xml)
     }
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
 }
@@ -615,7 +615,7 @@ import Testing
     let payload = Data([0x89, 0x50, 0x4E, 0x47])
     let request = try URLRequest {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: .PNG)
+            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: .png)
         }
     }
     let body = request.httpBody ?? Data()
@@ -652,7 +652,7 @@ import Testing
 
     let request = try URLRequest {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.file(name: "doc", fileURL: tmp, type: .Stream)
+            MultipartPart.file(name: "doc", fileURL: tmp, type: .octetStream)
         }
     }
     let body = request.httpBody ?? Data()
@@ -735,7 +735,7 @@ import Testing
     let inMemory = try URLRequest {
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "title", value: "movie")
-            MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
+            MultipartPart.file(name: "video", fileURL: tmp, type: .Video.mp4)
         }
     }
     let expected = try #require(inMemory.httpBody)
@@ -743,7 +743,7 @@ import Testing
     let streamed = try URLRequest {
         RequestBody.multipart(boundary: "TEST", strategy: .streamed()) {
             MultipartPart.field(name: "title", value: "movie")
-            MultipartPart.file(name: "video", fileURL: tmp, type: .MP4)
+            MultipartPart.file(name: "video", fileURL: tmp, type: .Video.mp4)
         }
     }
     let actual = try drainStream(#require(streamed.httpBodyStream), timeout: 5)
@@ -844,7 +844,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
         BaseURL("https://api.example.com")
         Endpoint("/login")
         Header.accept.setValue("application/json")
-        RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
+        RequestBody.string("{\"user\":\"alice\"}", type: .json)
     }
     let curl = request.curlCommand
     #expect(curl.contains("curl"))
@@ -975,9 +975,58 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func contentTypeBlockSetsHeader() throws {
     let request = try URLRequest {
-        ContentType.JSON
+        ContentType(.json)
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+}
+
+@Test func contentTypeFromCustomMIMEType() throws {
+    let request = try URLRequest {
+        ContentType(.json.with(.charset(.utf8)))
+    }
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json; charset=utf-8")
+}
+
+@Test func contentTypeLastWriteWins() throws {
+    let request = try URLRequest {
+        ContentType(.json)
+        ContentType(.xml)
+    }
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/xml")
+}
+
+// MARK: - Accept
+
+@Test func acceptSingleType() throws {
+    let request = try URLRequest {
+        Accept(.json)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+}
+
+@Test func acceptMultipleTypesAccumulate() throws {
+    let request = try URLRequest {
+        Accept(.json)
+        Accept(.xml)
+        Accept(.html)
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json, application/xml, text/html")
+}
+
+@Test func acceptWithQualityParameters() throws {
+    let request = try URLRequest {
+        Accept(.json)
+        Accept(.xml.with(.quality(0.8)))
+        Accept(.html.with(.quality(0.5)))
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json, application/xml; q=0.8, text/html; q=0.5")
+}
+
+@Test func acceptWithCharsetParameter() throws {
+    let request = try URLRequest {
+        Accept(.html.with(.charset(.utf8)))
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "text/html; charset=utf-8")
 }
 
 // MARK: - Method (every standard case)
@@ -997,7 +1046,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
-        RequestBody.data(binary, type: .Stream)
+        RequestBody.data(binary, type: .octetStream)
     }
     let curl = request.curlCommand
     #expect(curl.contains("# binary body of 4 bytes omitted"))

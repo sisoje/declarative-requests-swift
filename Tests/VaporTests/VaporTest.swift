@@ -126,7 +126,7 @@ struct VaporTests {
                 Endpoint("/upload")
                 RequestBody.multipart(boundary: "BNDY", strategy: strategy) {
                     MultipartPart.field(name: "title", value: "snapshot")
-                    MultipartPart.file(name: "blob", fileURL: tmp, type: .Stream)
+                    MultipartPart.file(name: "blob", fileURL: tmp, type: .octetStream)
                 }
             }
             let (_, response) = try await URLSession.shared.data(for: request)
@@ -164,8 +164,8 @@ struct VaporTests {
             Endpoint("/upload-multi")
             RequestBody.multipart(boundary: "MULTI") {
                 MultipartPart.field(name: "user", value: "alice")
-                MultipartPart.file(name: "first", fileURL: a, type: .PlainText)
-                MultipartPart.file(name: "second", fileURL: b, type: .Stream)
+                MultipartPart.file(name: "first", fileURL: a, type: .plainText)
+                MultipartPart.file(name: "second", fileURL: b, type: .octetStream)
             }
         }
         let (_, response) = try await URLSession.shared.data(for: request)

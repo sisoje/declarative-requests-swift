@@ -7,9 +7,9 @@ A `multipart/form-data` body assembled from the supplied parts.
 ```swift
 RequestBody.multipart {
     MultipartPart.field(name: "user", value: "alice")
-    MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
+    MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .png)
     for url in fileURLs {
-        MultipartPart.file(name: "files", fileURL: url, type: .Stream)
+        MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
     }
 }
 ```

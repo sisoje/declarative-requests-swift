@@ -173,16 +173,16 @@ let request = try URLRequest {
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
         MultipartPart.data(name: "avatar", filename: "a.png",
-                           data: pngBytes, type: .PNG)
+                           data: pngBytes, type: .png)
         for url in fileURLs {
-            MultipartPart.file(name: "files", fileURL: url, type: .Stream)
+            MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
         }
     }
 }
 
 // Streamed — memory-efficient for very large uploads:
 RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
-    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .MP4)
+    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .Video.mp4)
 }
 ```
 

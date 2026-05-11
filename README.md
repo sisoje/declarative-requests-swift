@@ -61,7 +61,8 @@ the data you have.
 | `Authorization.other(_:credentials:)` | `Authorization: <Scheme> <credentials>` | `Authorization.other("HOBA", credentials: "…")` |
 | `Authorization.raw(_:)` | Verbatim value, no scheme prefix | `Authorization.raw("opaque-key")` |
 | `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
-| `ContentType.JSON` (etc.) | Convenience block that sets `Content-Type`. | `ContentType.JSON` |
+| `ContentType(_:)` | Sets `Content-Type` from a `MIMEType`. | `ContentType(.json)` |
+| `Accept(_:)` | Accumulates `Accept` header values. | `Accept(.json)` |
 
 ### Body — one type, many factories
 
@@ -102,9 +103,9 @@ let request = try URLRequest {
     Endpoint("/upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
-        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
+        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .png)
         for url in fileURLs {
-            MultipartPart.file(name: "files", fileURL: url, type: .Stream)
+            MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
         }
     }
 }
@@ -115,7 +116,7 @@ For very large uploads, switch to streaming so memory use stays bounded:
 ```swift
 RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
     MultipartPart.field(name: "title", value: "Vacation 2026")
-    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .MP4)
+    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .Video.mp4)
 }
 ```
 
