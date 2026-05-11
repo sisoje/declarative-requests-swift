@@ -214,3 +214,34 @@ import Testing
     let b: MIMEType.List = [.json, .xml]
     #expect(a == b)
 }
+
+// MARK: - Real-world constructions
+
+@Test func textPlainWithCharset() {
+    let mime = MIMEType.Text.plain.with(.charset(.utf8))
+    #expect(mime.rawValue == "text/plain; charset=utf-8")
+}
+
+@Test func acceptHeaderWithWildcards() {
+    let list = MIMEType.List(
+        MIMEType("text/*"),
+        MIMEType.Application.json,
+        MIMEType("*/*").with(.quality(0.1))
+    )
+    #expect(list.rawValue == "text/*, application/json, */*; q=0.1")
+}
+
+@Test func htmlWithCharsetAndQuality() {
+    let mime = MIMEType.Text.html
+        .with(.charset(.utf8), .quality(0.9))
+    #expect(mime.rawValue == "text/html; charset=utf-8; q=0.9")
+}
+
+@Test func acceptHeaderWithWeightedTypes() {
+    let list = MIMEType.List(
+        MIMEType.Application.json,
+        MIMEType.Application.xml.with(.quality(0.8)),
+        MIMEType.Text.html.with(.quality(0.5))
+    )
+    #expect(list.rawValue == "application/json, application/xml; q=0.8, text/html; q=0.5")
+}
