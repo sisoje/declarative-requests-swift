@@ -204,34 +204,21 @@ print(request.curlCommand)
 - ``RequestBuilder``
 - ``RequestBlock``
 - ``RequestState``
+- ``RequestStateTransformClosure``
 
-### URL and path
+### Builder Blocks
 
-- ``BaseURL``
-- ``Endpoint``
-- ``Query``
+- <doc:BuilderBlocks>
 
-### Method, headers, and auth
+### Building and Sending Requests
 
-- ``Method``
-- ``Header``
-- ``Cookie``
-- ``Authorization``
-- ``ContentType``
+- <doc:EntryPoints>
 
-### Request body
+### Extensions
 
-- ``RequestBody``
-- ``MultipartPart``
+- ``Foundation/URLRequest``
+- ``Foundation/URL``
 
-### Networking knobs
-
-- ``Timeout``
-- ``CachePolicy``
-- ``NetworkServiceType``
-- ``HTTPShouldHandleCookies``
-- ``AllowAccess``
-
-### Error handling
+### Error Handling
 
 - ``DeclarativeRequestsError``

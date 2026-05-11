@@ -3,43 +3,11 @@ import Foundation
 // MARK: - Public API
 
 public extension RequestBody {
-    /// How the multipart body bytes are produced.
     enum MultipartStrategy {
-        /// Assemble the entire payload in memory, then set it as `httpBody`.
-        /// Simple, but holds the whole body in RAM.
         case inMemory
-
-        /// Stream the payload from disk on demand. Memory use stays bounded to
-        /// roughly `bufferSize` regardless of total payload size, so payloads
-        /// in the hundreds of gigabytes are practical.
-        ///
-        /// - Parameter bufferSize: The chunk size used for both the bound
-        ///   stream pair and for reading from disk. Defaults to 64 KB.
         case streamed(bufferSize: Int = 64 * 1024)
     }
 
-    /// A `multipart/form-data` body assembled from the supplied parts.
-    ///
-    /// ```swift
-    /// RequestBody.multipart {
-    ///     MultipartPart.field(name: "user", value: "alice")
-    ///     MultipartPart.data(name: "avatar", filename: "a.png", data: png, type: .PNG)
-    ///     for url in fileURLs {
-    ///         MultipartPart.file(name: "files", fileURL: url, type: .Stream)
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Sets `Content-Type: multipart/form-data; boundary=…`. With
-    /// ``MultipartStrategy/streamed(bufferSize:)`` it also sets
-    /// `Content-Length` and `httpBodyStream` instead of `httpBody`.
-    ///
-    /// - Parameters:
-    ///   - boundary: The multipart boundary token. Defaults to a random
-    ///     `Boundary-<UUID>` value.
-    ///   - strategy: Whether to assemble in memory (default) or stream from
-    ///     disk for very large payloads.
-    ///   - parts: A `@MultipartBuilder` closure that produces the parts.
     static func multipart(
         boundary: String? = nil,
         strategy: MultipartStrategy = .inMemory,
@@ -58,31 +26,12 @@ public extension RequestBody {
     }
 }
 
-/// A single piece of a `multipart/form-data` payload.
-///
-/// Use the case constructors inside a ``RequestBody/multipart(boundary:strategy:_:)``
-/// block:
-///
-/// ```swift
-/// RequestBody.multipart {
-///     MultipartPart.field(name: "user", value: "alice")
-///     MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .PNG)
-///     MultipartPart.file(name: "doc", fileURL: localFile, type: .PDF)
-/// }
-/// ```
 public enum MultipartPart {
-    /// A simple text field — the multipart equivalent of an HTML
-    /// `<input type="text">`.
     case field(name: String, value: String)
-
-    /// A file part backed by an in-memory `Data` blob.
     case data(name: String, filename: String, data: Data, type: ContentType = .Stream)
-
-    /// A file part loaded from disk (or streamed, depending on strategy).
     case file(name: String, fileURL: URL, type: ContentType = .Stream, filename: String? = nil)
 }
 
-/// Result builder for assembling `[MultipartPart]` inside a ``RequestBody/multipart(boundary:strategy:_:)`` block.
 @resultBuilder
 public enum MultipartBuilder {
     public static func buildBlock(_ components: [MultipartPart]...) -> [MultipartPart] {
