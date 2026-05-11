@@ -26,14 +26,14 @@ public final class RequestState {
     ///   - request: The starting `URLRequest`. Defaults to a request rooted at
     ///     a placeholder URL that ``BaseURL`` is expected to replace.
     ///   - encoder: The `JSONEncoder` used by Encodable-driven blocks.
-    public init(
-        request: URLRequest = URLRequest(url: placeholderURL),
+    init(
+        request: URLRequest = URLRequest(url: URLComponents().url!),
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.request = request
         self.encoder = encoder
     }
-
+    
     /// The in-progress request being built. Blocks read and mutate this directly.
     public var request: URLRequest
 
@@ -96,13 +96,22 @@ public final class RequestState {
             request.url = urlComponents?.url
         }
     }
-}
 
-/// An empty placeholder URL used by ``RequestState`` and
-/// ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)`` when no URL
-/// has been supplied — a ``BaseURL`` block in the builder is expected to
-/// replace it.
-public let placeholderURL = URLComponents().url!
+    var encodedBodyItems: [URLQueryItem] {
+        get {
+            request.httpBody.flatMap { bodyData in
+                var comp = URLComponents()
+                comp.percentEncodedQuery = String(decoding: bodyData, as: UTF8.self)
+                return comp.queryItems
+            } ?? []
+        }
+        set {
+            var comp = URLComponents()
+            comp.queryItems = newValue
+            request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
+        }
+    }
+}
 
 public extension RequestState {
     /// Generate a ``RequestBlock`` that writes a value through a key path on
