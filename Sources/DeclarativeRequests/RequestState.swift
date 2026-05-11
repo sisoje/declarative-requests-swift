@@ -8,7 +8,7 @@ public final class RequestState {
         self.request = request
         self.encoder = encoder
     }
-
+    
     public var request: URLRequest
 
     public var encoder: JSONEncoder
@@ -39,20 +39,23 @@ public final class RequestState {
         request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) }
     }
 
-    func setBaseURL(_ url: URL) throws {
-        guard let url = urlComponents?.url(relativeTo: url) else {
-            throw DeclarativeRequestsError.badUrl
+    func setBaseURL(_ url: URL) {
+        request.url = urlComponents?.url(relativeTo: url)
+    }
+    
+    var path: [String] {
+        get {
+            urlComponents?.path.components(separatedBy: "/") ?? []
         }
-        request.url = url
+        set {
+            setPath(newValue.joined(separator: "/"))
+        }
     }
 
-    func setPath(_ path: String) throws {
+    func setPath(_ path: String) {
         var urlComponents = urlComponents
         urlComponents?.path = path
-        guard let url = urlComponents?.url else {
-            throw DeclarativeRequestsError.badUrl
-        }
-        request.url = url
+        request.url = urlComponents?.url
     }
 
     var queryItems: [URLQueryItem] {
