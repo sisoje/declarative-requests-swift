@@ -219,6 +219,11 @@ print(request.curlCommand)
 - ``Foundation/URLRequest``
 - ``Foundation/URL``
 
+### MIME Types
+
+- ``MIMEType``
+- ``MIMETypeList``
+
 ### Error Handling
 
 - ``DeclarativeRequestsError``
