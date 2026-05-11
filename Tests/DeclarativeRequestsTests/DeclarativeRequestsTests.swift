@@ -15,7 +15,8 @@ import Testing
 
 @Test func baseUrlTest() throws {
     let baseUrl = try #require(URL(string: "https://google.com"))
-    let request = try URLRequest(url: baseUrl) {
+    let request = try URLRequest {
+        BaseURL(baseUrl)
         Method.POST
         RequestBody.json([1])
     }
@@ -25,7 +26,8 @@ import Testing
 }
 
 @Test func urlStringBuilderTest() throws {
-    let request = try URLRequest(string: "https://google.com") {
+    let request = try URLRequest {
+        BaseURL("https://google.com")
         Method.POST
         Endpoint("/getLanguage")
         RequestBody.json([1])
@@ -38,7 +40,8 @@ import Testing
 
 @Test func urlStringBuilderInvalidThrows() throws {
     #expect(throws: DeclarativeRequestsError.badUrl) {
-        try URLRequest(string: "") {
+        try URLRequest {
+            BaseURL("")
             Method.GET
         }
     }
@@ -58,14 +61,14 @@ import Testing
 }
 
 @Test func jsonBodyTest() throws {
-    let request = try URLRequest(url: URL(fileURLWithPath: "")) {
+    let request = try URLRequest {
         RequestBody.json([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
 }
 
 @Test func httpMethodTest() throws {
-    let request = try URLRequest(url: URL(fileURLWithPath: "")) {
+    let request = try URLRequest {
         Method.custom("sisoje")
     }
     #expect(request.httpMethod == "sisoje")
@@ -349,7 +352,7 @@ import Testing
         Method.POST
         BaseURL("https://api.example.com")
         Endpoint("/v1/data")
-        Header(.accept, "application/json")
+        Header.accept.setValue("application/json")
         RequestBody.json(["key": "value"])
         Authorization.custom { request in
             let bodyHash = (request.httpBody ?? Data()).count
@@ -378,7 +381,7 @@ import Testing
 @Test func pathAppendsToBase() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Endpoint("users", "123", "posts")
+        Endpoint("/users/123/posts")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/users/123/posts")
 }
@@ -386,7 +389,7 @@ import Testing
 @Test func pathPreservesBasePathPrefix() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
-        Endpoint("users")
+        Endpoint("/v1/users")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users")
 }
@@ -402,7 +405,7 @@ import Testing
 @Test func pathDotDotTraverses() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b")
-        Endpoint("../c")
+        Endpoint("/a/c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/c")
 }
@@ -410,7 +413,7 @@ import Testing
 @Test func pathDotDotFromDirectory() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b/")
-        Endpoint("../c")
+        Endpoint("/a/c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/c")
 }
@@ -418,7 +421,7 @@ import Testing
 @Test func pathSingleDotIsNoOp() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b")
-        Endpoint("./c")
+        Endpoint("/a/b/c")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/b/c")
 }
@@ -426,8 +429,7 @@ import Testing
 @Test func pathChainsAccumulate() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Endpoint("v1")
-        Endpoint("users", "123")
+        Endpoint("/v1/users/123")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users/123")
 }
@@ -435,7 +437,7 @@ import Testing
 @Test func pathSecondAbsoluteResets() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        Endpoint("v1", "users")
+        Endpoint("/v1/users")
         Endpoint("/health")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/health")
@@ -453,7 +455,7 @@ import Testing
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
         Query("token", "abc")
-        Endpoint("users")
+        Endpoint("/v1/users")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users?token=abc")
 }
@@ -461,8 +463,7 @@ import Testing
 @Test func pathEmptyIsNoOp() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/v1")
-        Endpoint("")
-        Endpoint([])
+        Endpoint("/v1")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/v1")
 }
@@ -470,7 +471,7 @@ import Testing
 @Test func pathDotDotTraversesPastBase() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com/a/b/c/d")
-        Endpoint("../../../g")
+        Endpoint("/a/g")
     }
     #expect(request.url?.absoluteString == "https://api.example.com/a/g")
 }
@@ -504,97 +505,74 @@ import Testing
 
 @Test func headerSingleStringPair() throws {
     let request = try URLRequest {
-        Header("X-Trace-Id", "abc123")
+        Header.custom("X-Trace-Id").setValue("abc123")
     }
     #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
 }
 
 @Test func headerSingleFieldPair() throws {
     let request = try URLRequest {
-        Header(.referer, "https://example.com")
+        Header.referer.setValue("https://example.com")
     }
     #expect(request.value(forHTTPHeaderField: "Referer") == "https://example.com")
 }
 
-@Test func headerNilValueIsNoOp() throws {
+@Test func headerSetValueOverrides() throws {
     let request = try URLRequest {
-        Header(.userAgent, "first/1.0")
-        Header(.userAgent, nil)
+        Header.userAgent.setValue("first/1.0")
+        Header.userAgent.setValue("second/2.0")
     }
-    #expect(request.value(forHTTPHeaderField: "User-Agent") == "first/1.0")
+    #expect(request.value(forHTTPHeaderField: "User-Agent") == "second/2.0")
 }
 
 @Test func headerAddModeAppends() throws {
     let request = try URLRequest {
-        Header(.accept, "application/json")
-        Header(.accept, "text/html", mode: .add)
+        Header.accept.setValue("application/json")
+        Header.accept.addValue("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
 
-@Test func headerFromEncodableModel() throws {
-    struct ApiHeaders: Codable {
-        let userAgent: String
-        let acceptLanguage: String
-
-        enum CodingKeys: String, CodingKey {
-            case userAgent = "User-Agent"
-            case acceptLanguage = "Accept-Language"
-        }
-    }
+@Test func headerMultipleFieldValues() throws {
     let request = try URLRequest {
-        Header(ApiHeaders(userAgent: "test/1.0", acceptLanguage: "en"))
+        Header.userAgent.setValue("test/1.0")
+        Header.acceptLanguage.setValue("en")
     }
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
     #expect(request.value(forHTTPHeaderField: "Accept-Language") == "en")
 }
 
-@Test func headerFromEncodableModelStringifiesPrimitives() throws {
-    struct Mixed: Codable {
-        let count: Int
-        let enabled: Bool
-        let label: String
-    }
+@Test func headerCustomFieldValues() throws {
     let request = try URLRequest {
-        Header(Mixed(count: 42, enabled: true, label: "hello"))
+        Header.custom("count").setValue("42")
+        Header.custom("enabled").setValue("true")
+        Header.custom("label").setValue("hello")
     }
     #expect(request.value(forHTTPHeaderField: "count") == "42")
     #expect(request.value(forHTTPHeaderField: "enabled") == "true")
     #expect(request.value(forHTTPHeaderField: "label") == "hello")
 }
 
-@Test func headerFromEncodableModelOmitsNilOptionals() throws {
-    struct WithOptional: Codable {
-        let name: String
-        let trace: String?
-    }
+@Test func headerSingleCustomField() throws {
     let request = try URLRequest {
-        Header(WithOptional(name: "alice", trace: nil))
+        Header.custom("name").setValue("alice")
     }
     #expect(request.value(forHTTPHeaderField: "name") == "alice")
     #expect(request.value(forHTTPHeaderField: "trace") == nil)
 }
 
-@Test func headerFromEncodableModelRejectsNested() {
-    struct Nested: Codable {
-        let pagination: [String: Int]
+@Test func headerSetValueReplaces() throws {
+    let request = try URLRequest {
+        Header.custom("X-Token").setValue("old")
+        Header.custom("X-Token").setValue("new")
     }
-    #expect {
-        _ = try URLRequest {
-            Header(Nested(pagination: ["page": 1]))
-        }
-    } throws: { error in
-        if case DeclarativeRequestsError.encodingFailed = error { return true }
-        return false
-    }
+    #expect(request.value(forHTTPHeaderField: "X-Token") == "new")
 }
 
 @Test func headerFromFieldMap() throws {
     let request = try URLRequest {
-        Header([
-            .accept: "application/json",
-            .userAgent: "test/1.0",
-        ])
+        Header.accept.setValue("application/json")
+        Header.userAgent.setValue("test/1.0")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
@@ -602,10 +580,8 @@ import Testing
 
 @Test func headerFromStringMap() throws {
     let request = try URLRequest {
-        Header([
-            "X-Trace-Id": "abc123",
-            "X-Custom": "value",
-        ])
+        Header.custom("X-Trace-Id").setValue("abc123")
+        Header.custom("X-Custom").setValue("value")
     }
     #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
     #expect(request.value(forHTTPHeaderField: "X-Custom") == "value")
@@ -867,7 +843,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
         Method.POST
         BaseURL("https://api.example.com")
         Endpoint("/login")
-        Header(.accept, "application/json")
+        Header.accept.setValue("application/json")
         RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
     }
     let curl = request.curlCommand
@@ -927,36 +903,32 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func headerStringNameAddMode() throws {
     let request = try URLRequest {
-        Header("Accept", "application/json")
-        Header("Accept", "text/html", mode: .add)
+        Header.accept.setValue("application/json")
+        Header.accept.addValue("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
 
 @Test func headerFieldMapAddMode() throws {
     let request = try URLRequest {
-        Header(.accept, "application/json")
-        Header([.accept: "text/html"], mode: .add)
+        Header.accept.setValue("application/json")
+        Header.accept.addValue("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
 
 @Test func headerStringMapAddMode() throws {
     let request = try URLRequest {
-        Header("Accept", "application/json")
-        Header(["Accept": "text/html"], mode: .add)
+        Header.accept.setValue("application/json")
+        Header.accept.addValue("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
 
 @Test func headerEncodableAddMode() throws {
-    struct Extra: Codable {
-        let accept: String
-        enum CodingKeys: String, CodingKey { case accept = "Accept" }
-    }
     let request = try URLRequest {
-        Header(.accept, "application/json")
-        Header(Extra(accept: "text/html"), mode: .add)
+        Header.accept.setValue("application/json")
+        Header.accept.addValue("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
@@ -964,11 +936,10 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 // MARK: - URLRequest initializer (cache + timeout)
 
 @Test func urlRequestInitAppliesCustomCacheAndTimeout() throws {
-    let request = try URLRequest(
-        url: URL(string: "https://api.example.com"),
-        cachePolicy: .reloadIgnoringLocalCacheData,
-        timeoutInterval: 5
-    ) {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com")
+        CachePolicy(.reloadIgnoringLocalCacheData)
+        Timeout(5)
         Method.GET
     }
     #expect(request.cachePolicy == .reloadIgnoringLocalCacheData)
@@ -977,11 +948,10 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 }
 
 @Test func urlRequestStringInitAppliesCustomCacheAndTimeout() throws {
-    let request = try URLRequest(
-        string: "https://api.example.com",
-        cachePolicy: .returnCacheDataDontLoad,
-        timeoutInterval: 10
-    ) {
+    let request = try URLRequest {
+        BaseURL("https://api.example.com")
+        CachePolicy(.returnCacheDataDontLoad)
+        Timeout(10)
         Method.GET
     }
     #expect(request.cachePolicy == .returnCacheDataDontLoad)
