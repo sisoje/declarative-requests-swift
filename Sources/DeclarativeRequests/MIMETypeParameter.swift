@@ -96,27 +96,30 @@ extension MIMEType {
     }
 }
 
-public struct MIMETypeList: Hashable, Sendable, ExpressibleByArrayLiteral {
+extension MIMEType {
 
-    public var items: [MIMEType]
+    public struct List: Hashable, Sendable, ExpressibleByArrayLiteral {
 
-    public init(_ items: [MIMEType]) {
-        self.items = items
-    }
+        public var items: [MIMEType]
 
-    public init(_ items: MIMEType...) {
-        self.items = items
-    }
+        public init(_ items: [MIMEType]) {
+            self.items = items
+        }
 
-    public init(arrayLiteral elements: MIMEType...) {
-        self.items = elements
-    }
+        public init(_ items: MIMEType...) {
+            self.items = items
+        }
 
-    public var rawValue: String {
-        items.map(\.rawValue).joined(separator: ", ")
+        public init(arrayLiteral elements: MIMEType...) {
+            self.items = elements
+        }
+
+        public var rawValue: String {
+            items.map(\.rawValue).joined(separator: ", ")
+        }
     }
 }
 
-extension MIMETypeList: CustomStringConvertible {
+extension MIMEType.List: CustomStringConvertible {
     public var description: String { rawValue }
 }
