@@ -46,7 +46,7 @@ public final class RequestState {
     /// `name=value; …` string. Setting an empty dictionary clears the header.
     public var cookies: [String: String] {
         get {
-            request.value(forHTTPHeaderField: Header.Field.cookie.rawValue)?
+            request.value(forHTTPHeaderField: Header.cookie.rawValue)?
                 .split(separator: ";")
                 .reduce(into: [:]) { result, component in
                     let parts = component.split(separator: "=", maxSplits: 1)
@@ -62,7 +62,7 @@ public final class RequestState {
                 .map { "\($0.key)=\($0.value)" }
                 .joined(separator: "; ")
             let value = cookieString.isEmpty ? nil : cookieString
-            request.setValue(value, forHTTPHeaderField: Header.Field.cookie.rawValue)
+            request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
         }
     }
 

@@ -126,7 +126,7 @@ private func applyInMemory(parts: [MultipartPart], boundary: String, state: Requ
         try part.append(to: &form)
     }
     state.request.httpBody = form.bodyData
-    state.request.setValue(form.contentType, forHTTPHeaderField: Header.Field.contentType.rawValue)
+    state.request.setValue(form.contentType, forHTTPHeaderField: Header.contentType.rawValue)
 }
 
 private extension MultipartPart {
@@ -214,7 +214,7 @@ private func applyStreamed(parts: [MultipartPart], boundary: String, bufferSize:
     state.request.httpBodyStream = input
     state.request.setValue(
         "multipart/form-data; boundary=\(boundary)",
-        forHTTPHeaderField: Header.Field.contentType.rawValue
+        forHTTPHeaderField: Header.contentType.rawValue
     )
     state.request.setValue("\(length)", forHTTPHeaderField: "Content-Length")
 

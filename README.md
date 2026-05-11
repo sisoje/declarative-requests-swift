@@ -49,7 +49,7 @@ the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `Method.GET` / `.POST` / `.PUT` / … / `.custom("LINK")` | Sets the HTTP method. | `Method.POST` |
-| `Header(_ field:, _ value:)` | Sets one header by ``Header.Field``. | `Header(.accept, "application/json")` |
+| `Header(_ field:, _ value:)` | Sets one header by ``Header``. | `Header(.accept, "application/json")` |
 | `Header(_ name:, _ value:)` | Sets one header by literal name. | `Header("X-Trace-Id", "abc123")` |
 | `…  mode: .add` | Append (comma-list) instead of replace. | `Header(.accept, "text/html", mode: .add)` |
 | `Header(_ map:)` | Bulk set from `[Field: String]` or `[String: String]`. | `Header([.accept: "application/json"])` |

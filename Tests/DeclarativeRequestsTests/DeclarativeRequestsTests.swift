@@ -331,7 +331,7 @@ import Testing
     let request = try RequestBlock {
         Authorization.bearer("x")
     }.request
-    let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
     #expect(tok == "Bearer x")
 }
 
@@ -339,7 +339,7 @@ import Testing
     let request = try RequestBlock {
         Authorization.basic(username: "x", password: "y")
     }.request
-    let tok = request.value(forHTTPHeaderField: Header.Field.authorization.rawValue)
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
     #expect(tok == "Basic eDp5")
 }
 
@@ -481,7 +481,7 @@ import Testing
         RequestBody.data(Data("hello".utf8))
     }
     #expect(request.httpBody == Data("hello".utf8))
-    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == nil)
+    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == nil)
 }
 
 @Test func bodyStringSetsPlainTextContentType() throws {
@@ -489,14 +489,14 @@ import Testing
         RequestBody.string("hello")
     }
     #expect(request.httpBody == Data("hello".utf8))
-    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == "text/plain")
+    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/plain")
 }
 
 @Test func bodyExplicitContentType() throws {
     let request = try URLRequest {
         RequestBody.data(Data("<x/>".utf8), type: .XML)
     }
-    #expect(request.value(forHTTPHeaderField: Header.Field.contentType.rawValue) == "application/xml")
+    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
 }
 
 // MARK: - Header
