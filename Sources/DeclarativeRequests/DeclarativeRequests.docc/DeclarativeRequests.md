@@ -222,7 +222,7 @@ print(request.curlCommand)
 ### MIME Types
 
 - ``MIMEType``
-- ``MIMETypeList``
+- ``MIMEType/List``
 
 ### Error Handling
 

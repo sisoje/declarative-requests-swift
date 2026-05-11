@@ -191,26 +191,26 @@ import Testing
     #expect(charset.rawValue == "koi8-r")
 }
 
-// MARK: - MIMETypeList
+// MARK: - MIMEType.List
 
 @Test func mimeTypeListFormatsCommaSeparated() {
-    let list = MIMETypeList(.json, .xml)
+    let list = MIMEType.List(.json, .xml)
     #expect(list.rawValue == "application/json, application/xml")
     #expect(list.description == "application/json, application/xml")
 }
 
 @Test func mimeTypeListFromArrayLiteral() {
-    let list: MIMETypeList = [.json, .html, .xml]
+    let list: MIMEType.List = [.json, .html, .xml]
     #expect(list.items.count == 3)
 }
 
 @Test func mimeTypeListEmpty() {
-    let list = MIMETypeList([])
+    let list = MIMEType.List([])
     #expect(list.rawValue == "")
 }
 
 @Test func mimeTypeListHashable() {
-    let a: MIMETypeList = [.json, .xml]
-    let b: MIMETypeList = [.json, .xml]
+    let a: MIMEType.List = [.json, .xml]
+    let b: MIMEType.List = [.json, .xml]
     #expect(a == b)
 }

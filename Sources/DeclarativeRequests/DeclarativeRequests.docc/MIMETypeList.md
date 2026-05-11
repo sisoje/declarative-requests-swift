@@ -1,22 +1,22 @@
-# ``MIMETypeList``
+# ``MIMEType/List``
 
 An ordered collection of MIME types, typically used for `Accept` headers.
 
 ## Overview
 
-`MIMETypeList` formats multiple ``MIMEType`` values into a
+`MIMEType.List` formats multiple ``MIMEType`` values into a
 comma-separated string suitable for HTTP headers like `Accept`:
 
 ```swift
-let accept = MIMETypeList(.json, .xml)
+let accept = MIMEType.List(.json, .xml)
 accept.rawValue // "application/json, application/xml"
 ```
 
 It conforms to `ExpressibleByArrayLiteral`, so you can use array syntax
-wherever a `MIMETypeList` is expected:
+wherever a `MIMEType.List` is expected:
 
 ```swift
-let types: MIMETypeList = [.json, .html, .xml]
+let types: MIMEType.List = [.json, .html, .xml]
 ```
 
 ## Topics
