@@ -31,6 +31,7 @@ Blocks follow two conventions:
 - ``Cookie``
 - ``Authorization``
 - ``ContentType``
+- ``Accept``
 
 ### Request Body
 

@@ -3,7 +3,7 @@ import Foundation
 public enum RequestBody {}
 
 public extension RequestBody {
-    static func data(_ data: Data, type: ContentType? = nil) -> some RequestBuildable {
+    static func data(_ data: Data, type: MIMEType? = nil) -> some RequestBuildable {
         RequestBlock { state in
             state.request.httpBody = data
             if let type {
@@ -12,7 +12,7 @@ public extension RequestBody {
         }
     }
 
-    static func string(_ string: String, type: ContentType = .PlainText) -> some RequestBuildable {
+    static func string(_ string: String, type: MIMEType = .plainText) -> some RequestBuildable {
         RequestBlock { state in
             state.request.httpBody = Data(string.utf8)
             state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
@@ -22,7 +22,7 @@ public extension RequestBody {
     static func json(_ value: any Encodable) -> some RequestBuildable {
         RequestBlock { state in
             state.request.httpBody = try state.encoder.encode(value)
-            state.request.setValue(ContentType.JSON.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.json.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
@@ -31,7 +31,7 @@ public extension RequestBody {
             var components = URLComponents()
             components.queryItems = items
             state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.request.setValue(ContentType.URLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
@@ -41,7 +41,7 @@ public extension RequestBody {
             var components = URLComponents()
             components.queryItems = items
             state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.request.setValue(ContentType.URLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 

@@ -8,10 +8,10 @@ A UTF-8 string body. Defaults to `Content-Type: text/plain`.
 RequestBody.string("hello")
 // Content-Type: text/plain
 
-RequestBody.string("<html>hi</html>", type: .HTML)
+RequestBody.string("<html>hi</html>", type: .html)
 // Content-Type: text/html
 ```
 
 - Parameters:
   - string: The body text.
-  - type: The content type to set. Defaults to ``ContentType/PlainText``.
+  - type: The MIME type to set. Defaults to ``MIMEType/plainText``.

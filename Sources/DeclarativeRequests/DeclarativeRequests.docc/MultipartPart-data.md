@@ -6,4 +6,4 @@ A file part backed by an in-memory `Data` blob.
   - name: The part name.
   - filename: The filename sent in the `Content-Disposition` header.
   - data: The raw bytes.
-  - type: The MIME type. Defaults to ``ContentType/Stream``.
+  - type: The MIME type. Defaults to ``MIMEType/octetStream``.

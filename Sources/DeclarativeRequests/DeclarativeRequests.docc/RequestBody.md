@@ -29,7 +29,7 @@ RequestBody.stream(InputStream(url: largeFileURL))
 // multipart/form-data:
 RequestBody.multipart {
     MultipartPart.field(name: "title", value: "Vacation")
-    MultipartPart.file(name: "video", fileURL: clipURL, type: .MP4)
+    MultipartPart.file(name: "video", fileURL: clipURL, type: .Video.mp4)
 }
 // ...or streaming for huge files:
 RequestBody.multipart(strategy: .streamed()) { ... }
@@ -51,7 +51,7 @@ A `Data` body, optionally tagged with a `Content-Type`.
 A UTF-8 string body. Defaults to `Content-Type: text/plain`.
 
 - `string`: The body text.
-- `type`: The content type to set. Defaults to ``ContentType/PlainText``.
+- `type`: The MIME type to set. Defaults to ``MIMEType/plainText``.
 
 ### json(_:)
 

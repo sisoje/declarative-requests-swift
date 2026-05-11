@@ -28,8 +28,8 @@ public extension RequestBody {
 
 public enum MultipartPart {
     case field(name: String, value: String)
-    case data(name: String, filename: String, data: Data, type: ContentType = .Stream)
-    case file(name: String, fileURL: URL, type: ContentType = .Stream, filename: String? = nil)
+    case data(name: String, filename: String, data: Data, type: MIMEType = .octetStream)
+    case file(name: String, fileURL: URL, type: MIMEType = .octetStream, filename: String? = nil)
 }
 
 @resultBuilder
@@ -213,7 +213,7 @@ private enum MultipartLength {
         }
     }
 
-    static func fileHeader(name: String, filename: String, type: ContentType, boundary: String) -> String {
+    static func fileHeader(name: String, filename: String, type: MIMEType, boundary: String) -> String {
         "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\nContent-Type: \(type.rawValue)\r\n\r\n"
     }
 }

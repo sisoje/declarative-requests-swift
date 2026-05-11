@@ -15,7 +15,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/login")
     Header(.accept, "application/json")
-    RequestBody.string("{\"user\":\"alice\"}", type: .JSON)
+    RequestBody.string("{\"user\":\"alice\"}", type: .json)
 }
 print(request.curlCommand)
 // curl -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
