@@ -152,8 +152,6 @@ public extension Authorization {
 
 private extension Authorization {
     static func set(_ value: String) -> RequestBlock {
-        RequestBlock { state in
-            state.request.setValue(value, forHTTPHeaderField: Header.Field.authorization.rawValue)
-        }
+        Header.authorization.setValue(value)
     }
 }
