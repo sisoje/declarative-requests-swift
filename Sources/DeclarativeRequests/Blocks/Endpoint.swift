@@ -7,7 +7,7 @@ public struct Endpoint: RequestBuildable {
 
     public var body: some RequestBuildable {
         RequestBlock {
-            try $0.setPath(path)
+            $0.stringPath = path
         }
     }
 }

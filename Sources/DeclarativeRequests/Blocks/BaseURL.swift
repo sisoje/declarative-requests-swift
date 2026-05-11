@@ -16,7 +16,7 @@ public struct BaseURL: RequestBuildable {
             guard let url else {
                 throw DeclarativeRequestsError.badUrl
             }
-            try state.setBaseURL(url)
+            state.baseURL = url
         }
     }
 }
