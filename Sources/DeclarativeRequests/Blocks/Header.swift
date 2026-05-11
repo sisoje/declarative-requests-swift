@@ -27,7 +27,7 @@ public extension Header {
         case .host: "Host"
         case .acceptLanguage: "Accept-Language"
         case .acceptEncoding: "Accept-Encoding"
-        case .custom(let value): value
+        case let .custom(value): value
         }
     }
 

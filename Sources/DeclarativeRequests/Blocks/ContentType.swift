@@ -126,6 +126,6 @@ public enum ContentType: String, RequestBuildable {
     case OTF = "font/otf"
 
     public var body: some RequestBuildable {
-        Header(.contentType, rawValue)
+        Header.contentType.setValue(rawValue)
     }
 }

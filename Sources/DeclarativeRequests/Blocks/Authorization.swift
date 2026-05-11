@@ -46,7 +46,7 @@ public extension Authorization {
     ///
     /// - Parameter token: The bearer token.
     static func bearer(_ token: String) -> some RequestBuildable {
-        set("Bearer \(token)")
+        Header.authorization.setValue("Bearer \(token)")
     }
 
     /// Sets `Authorization: Basic <base64>` (RFC 7617).
@@ -64,7 +64,7 @@ public extension Authorization {
     ///   - password: The password.
     static func basic(username: String, password: String) -> some RequestBuildable {
         let base64 = Data("\(username):\(password)".utf8).base64EncodedString()
-        return set("Basic \(base64)")
+        return Header.authorization.setValue("Basic \(base64)")
     }
 
     /// Sets `Authorization: Token <token>`.
@@ -78,7 +78,7 @@ public extension Authorization {
     ///
     /// - Parameter token: The token string.
     static func token(_ token: String) -> some RequestBuildable {
-        set("Token \(token)")
+        Header.authorization.setValue("Token \(token)")
     }
 
     /// Sets `Authorization: <scheme> <credentials>` for a scheme not covered
@@ -96,7 +96,7 @@ public extension Authorization {
     ///   - scheme: The scheme name (e.g. `"HOBA"`, `"Negotiate"`, `"Digest"`).
     ///   - credentials: The credentials string written after the scheme name.
     static func other(_ scheme: String, credentials: String) -> some RequestBuildable {
-        set("\(scheme) \(credentials)")
+        Header.authorization.setValue("\(scheme) \(credentials)")
     }
 
     /// Sets the `Authorization` header to a verbatim string with no scheme
@@ -112,7 +112,7 @@ public extension Authorization {
     ///
     /// - Parameter value: The exact header value.
     static func raw(_ value: String) -> some RequestBuildable {
-        set(value)
+        Header.authorization.setValue(value)
     }
 
     /// Sets the `Authorization` header via a custom authenticator closure.
@@ -148,11 +148,4 @@ public extension Authorization {
             try authenticator(&state.request)
         }
     }
-}
-
-private extension Authorization {
-    // inline this:         Header.authorization.setValue(value)
-//    static func set(_ value: String) -> RequestBlock {
-//        Header.authorization.setValue(value)
-//    }
 }

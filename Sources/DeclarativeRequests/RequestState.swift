@@ -33,7 +33,7 @@ public final class RequestState {
         self.request = request
         self.encoder = encoder
     }
-    
+
     /// The in-progress request being built. Blocks read and mutate this directly.
     public var request: URLRequest
 
