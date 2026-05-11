@@ -51,24 +51,13 @@ public struct Endpoint: RequestBuildable {
 
     public var body: some RequestBuildable {
         RequestBlock { state in
-            guard !reference.isEmpty else { return }
-            guard let base = state.request.url,
-                  var directoryBase = URLComponents(url: base, resolvingAgainstBaseURL: true)
+            guard !reference.isEmpty,
+                  let base = state.request.url,
+                  let resolved = URL(string: reference, relativeTo: base)?.absoluteURL
             else {
                 throw DeclarativeRequestsError.badUrl
             }
-            if !directoryBase.path.hasSuffix("/") {
-                directoryBase.path += "/"
-            }
-            var ref = URLComponents()
-            ref.path = reference
-            guard let resolutionBase = directoryBase.url,
-                  let resolved = ref.url(relativeTo: resolutionBase)?.absoluteURL,
-                  let resolvedComponents = URLComponents(url: resolved, resolvingAgainstBaseURL: true)
-            else {
-                throw DeclarativeRequestsError.badUrl
-            }
-            try state.setPath(resolvedComponents.path)
+            try state.setPath(resolved.path)
         }
     }
 }
