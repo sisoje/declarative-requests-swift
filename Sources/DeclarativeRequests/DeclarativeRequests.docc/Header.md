@@ -17,7 +17,7 @@ existing ones (useful for multi-value headers like `Cookie`):
 let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
-    Header(.accept, "application/json")          // sugar -- see below
+    Header.accept.setValue("application/json")
     Header.authorization.setValue("Bearer tok")
     Header.custom("X-Request-ID").setValue("42")
 }

@@ -10,7 +10,7 @@ produced and what `Content-Type` (if any) is set on the request:
 
 ```swift
 // Raw bytes (or string) with optional Content-Type:
-RequestBody.data(jpegData, type: .JPEG)
+RequestBody.data(jpegData, type: .jpeg)
 RequestBody.string("hello")                              // text/plain
 
 // Encodable -> JSON, sets Content-Type: application/json
@@ -102,8 +102,8 @@ each build needs its own stream.
 RequestBody.stream(InputStream(url: largeFileURL))
 ```
 
-Note: this does *not* set `Content-Type` -- pair it with a `Header(...)`
-declaration if the server needs one.
+Note: this does *not* set `Content-Type` — pair it with a ``ContentType``
+block or `Header.contentType.setValue(...)` if the server needs one.
 
 - `stream`: An autoclosure that produces an `InputStream`. If it
   returns `nil`, the block throws ``DeclarativeRequestsError/badStream``

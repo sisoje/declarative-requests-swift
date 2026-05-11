@@ -21,13 +21,13 @@ let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("/v1/login")
-    Header(.accept, "application/json")
+    Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
 }
 ```
 
-Each `Header(...)` is one HTTP-line. `RequestBody.json(...)` is the body
+`Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
 section. The block order roughly mirrors the wire order.
 
 ## Block reference
@@ -40,7 +40,7 @@ the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `BaseURL(_:)` | Sets host/scheme; preserves any path/query already declared. | `BaseURL("https://api.example.com")` |
-| `Endpoint(_:...)` | Resolves segments against the current path using RFC 3986 reference resolution (like Python's `urljoin`). Bare segments append, leading `/` resets to root, `..`/`.` traverse. | `Endpoint("users", "\(id)", "posts")` |
+| `Endpoint(_:)` | Resolves the path against the current URL using RFC 3986 reference resolution (like Python's `urljoin`). A leading `/` resets to root, bare segments append. | `Endpoint("/users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
@@ -49,11 +49,9 @@ the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `Method.GET` / `.POST` / `.PUT` / … / `.custom("LINK")` | Sets the HTTP method. | `Method.POST` |
-| `Header(_ field:, _ value:)` | Sets one header by ``Header``. | `Header(.accept, "application/json")` |
-| `Header(_ name:, _ value:)` | Sets one header by literal name. | `Header("X-Trace-Id", "abc123")` |
-| `…  mode: .add` | Append (comma-list) instead of replace. | `Header(.accept, "text/html", mode: .add)` |
-| `Header(_ map:)` | Bulk set from `[Field: String]` or `[String: String]`. | `Header([.accept: "application/json"])` |
-| `Header(_ encodable:)` | Bulk set from a flat `Encodable` model. | `Header(MyHeadersModel())` |
+| `Header.field.setValue(_:)` | Sets a header field, replacing any previous value. | `Header.accept.setValue("application/json")` |
+| `Header.field.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
+| `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
@@ -76,7 +74,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ items:)` | `[URLQueryItem]` | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
-| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `Header(.contentType, …)` if needed |
+| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `ContentType(…)` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s, in-memory | `multipart/form-data; boundary=…` |
 | `RequestBody.multipart(strategy: .streamed()) { parts }` | `MultipartPart`s, streamed from disk | `multipart/form-data; boundary=…` + `Content-Length` |
 
@@ -122,46 +120,24 @@ RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
 
 ## Building from a base URL
 
-If you already have a `URL`, hand it to the initializer:
+If you already have a `URL` value, use `buildRequest`:
 
 ```swift
-let request = try URLRequest(url: api) {
+let request = try api.buildRequest {
     Method.GET
-    Endpoint("v1", "users", userId)
-    Header(.accept, "application/json")
+    Endpoint("/v1/users/\(userId)")
+    Header.accept.setValue("application/json")
 }
 ```
 
-Or skip constructing the `URL` yourself:
+Otherwise declare the URL inside the builder with `BaseURL`:
 
 ```swift
-let request = try URLRequest(string: "https://api.example.com") {
+let request = try URLRequest {
     Method.POST
+    BaseURL("https://api.example.com")
     Endpoint("/login")
     RequestBody.json(credentials)
-}
-```
-
-`url` and `string` are optional — if you omit them, the builder is expected
-to set the URL via `BaseURL(...)`.
-
-## Sending requests
-
-For a one-line build-and-send through `URLSession`:
-
-```swift
-let (data, response) = try await URLSession.shared.data {
-    Method.GET
-    BaseURL("https://api.example.com")
-    Endpoint("/users/123")
-}
-
-// Decoding directly:
-struct User: Decodable { let id: Int; let name: String }
-let user = try await URLSession.shared.decode(User.self) {
-    Method.GET
-    BaseURL("https://api.example.com")
-    Endpoint("/users/123")
 }
 ```
 
@@ -243,7 +219,7 @@ flowchart LR
     %% URL & Endpoint
     RB --> URL_GROUP["URL & Endpoint"]
     URL_GROUP --> BaseURL["BaseURL(_ string)"]
-    URL_GROUP --> Endpoint["Endpoint(_ segments...)"]
+    URL_GROUP --> Endpoint["Endpoint(_ path)"]
     URL_GROUP --> Query
     Query --> Q1["Query(_ name, _ value)"]
     Query --> Q2["Query(_ encodable)"]
@@ -255,16 +231,15 @@ flowchart LR
 
     %% Headers
     RB --> HeaderGroup["Headers"]
-    HeaderGroup --> Header
-    Header --> H1["Header(_ field, _ value)"]
-    Header --> H2["Header(_ name, _ value)"]
-    Header --> H3["Header(_ fieldMap)"]
-    Header --> H4["Header(_ stringMap)"]
-    Header --> H5["Header(_ encodable)"]
-    Header --> HMode["mode: .set | .add"]
+    HeaderGroup --> Header["Header (enum)"]
+    Header --> H1["Header.field.setValue(value)"]
+    Header --> H2["Header.field.addValue(value)"]
+    Header --> H3["Header.custom(name).setValue(value)"]
+    Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
     HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
-    HeaderGroup --> ContentType
-    ContentType --> CTJSON[".JSON  .XML  .HTML\n.PlainText  .CSV  .PDF\n.PNG  .JPEG  .GIF  .MP4\n.Stream  … 40+ cases"]
+    HeaderGroup --> ContentType["ContentType(_ mimeType)"]
+    ContentType --> CTJSON[".json  .xml  .html  .plainText\n.pdf  .png  .jpeg  .octetStream\nApplication.*  Text.*  Image.*\nAudio.*  Video.*  Multipart.*  Font.*"]
+    HeaderGroup --> AcceptBlock["Accept(_ mimeType)"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]

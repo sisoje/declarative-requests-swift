@@ -14,7 +14,7 @@ let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("/login")
-    Header(.accept, "application/json")
+    Header.accept.setValue("application/json")
     RequestBody.string("{\"user\":\"alice\"}", type: .json)
 }
 print(request.curlCommand)

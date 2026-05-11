@@ -17,9 +17,9 @@ let api = URL(string: "https://api.example.com")!
 
 let users = try api.buildRequest {
     Method.GET
-    Endpoint("v1", "users")
+    Endpoint("/v1/users")
     Query("page", "2")
-    Header(.accept, "application/json")
+    Header.accept.setValue("application/json")
 }
 
 let health = try api.buildRequest {

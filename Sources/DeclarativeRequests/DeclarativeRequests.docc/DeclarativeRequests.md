@@ -17,7 +17,7 @@ let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("/v1/login")
-    Header(.accept, "application/json")
+    Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
 }
@@ -50,17 +50,10 @@ let request = try URLRequest {
     Endpoint("/health")
 }
 
-// From an existing URL:
-let request = try URLRequest(url: existingURL) {
+// From an existing URL value:
+let request = try existingURL.buildRequest {
     Method.GET
-    Endpoint("v1", "users", userId)
-}
-
-// Build and send in one call:
-let (data, response) = try await URLSession.shared.data {
-    Method.GET
-    BaseURL("https://api.example.com")
-    Endpoint("/users/123")
+    Endpoint("/v1/users/\(userId)")
 }
 ```
 
@@ -78,7 +71,7 @@ let request = try URLRequest {
     }
 
     for (key, value) in extraHeaders {
-        Header(key, value)
+        Header.custom(key).setValue(value)
     }
 }
 ```
@@ -148,7 +141,6 @@ let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("/v1/data")
-    Header(.contentType, "application/json")
     RequestBody.json(payload)
     Authorization.custom { request in
         let body = request.httpBody ?? Data()

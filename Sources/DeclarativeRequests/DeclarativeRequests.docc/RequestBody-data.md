@@ -5,7 +5,7 @@ A `Data` body, optionally tagged with a `Content-Type`.
 ## Overview
 
 ```swift
-RequestBody.data(jpegData, type: .JPEG)
+RequestBody.data(jpegData, type: .jpeg)
 ```
 
 If `type` is `nil`, any existing `Content-Type` header is left untouched.

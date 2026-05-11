@@ -19,7 +19,7 @@ let request = try URLRequest {
 let api = URL(string: "https://api.example.com")!
 let request = try api.buildRequest {
     Method.GET
-    Endpoint("v1", "users", userId)
+    Endpoint("/v1/users/\(userId)")
 }
 
 // Inspect the wire format:

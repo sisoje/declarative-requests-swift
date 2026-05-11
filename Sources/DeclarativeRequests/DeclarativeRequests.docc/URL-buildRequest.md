@@ -10,8 +10,8 @@ This is the most ergonomic entry point when you already have a `URL` value:
 let api = URL(string: "https://api.example.com")!
 let request = try api.buildRequest {
     Method.GET
-    Endpoint("v1", "users", userId)
-    Header(.accept, "application/json")
+    Endpoint("/v1/users/\(userId)")
+    Header.accept.setValue("application/json")
 }
 ```
 

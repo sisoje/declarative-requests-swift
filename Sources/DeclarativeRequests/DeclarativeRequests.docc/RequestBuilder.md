@@ -18,7 +18,7 @@ let request = try URLRequest {           // compiler invokes RequestBuilder
         Authorization.bearer(token)
     }
     for header in extraHeaders {
-        Header(.custom(header.name), header.value)
+        Header.custom(header.name).setValue(header.value)
     }
 }
 ```
