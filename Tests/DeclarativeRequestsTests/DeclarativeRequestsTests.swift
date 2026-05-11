@@ -238,7 +238,8 @@ import Testing
     }
     let source = RequestState()
     try builder.transform(source)
-    let queryItems = URLComponents(url: source.request.url!, resolvingAgainstBaseURL: true)!.queryItems!
+    let url = try #require(source.request.url)
+    let queryItems = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems)
 
     #expect(queryItems.contains(where: { $0.name == "id" && $0.value == "123" }))
     #expect(queryItems.contains(where: { $0.name == "name" && $0.value == "john" }))

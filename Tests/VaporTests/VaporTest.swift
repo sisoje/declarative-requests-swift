@@ -12,7 +12,7 @@ struct VaporTests {
 
     @Test("Multipart upload sends correct wire bytes")
     func multipartUpload() async throws {
-        let request = try URLRequest(url: server.app.baseUrl) {
+        let request = try server.app.baseUrl.buildRequest {
             Method.POST
             Endpoint("/upload")
 
@@ -52,7 +52,7 @@ struct VaporTests {
         }
         let payload = Payload(name: "alice", count: 42)
 
-        let request = try URLRequest(url: server.app.baseUrl) {
+        let request = try server.app.baseUrl.buildRequest {
             Method.POST
             Endpoint("/echo-json")
             RequestBody.json(payload)
@@ -68,7 +68,7 @@ struct VaporTests {
 
     @Test("URL-encoded body arrives parseable on the wire")
     func urlEncodedBodyWireFormat() async throws {
-        let request = try URLRequest(url: server.app.baseUrl) {
+        let request = try server.app.baseUrl.buildRequest {
             Method.POST
             Endpoint("/echo-form")
             RequestBody.urlEncoded([
@@ -92,13 +92,13 @@ struct VaporTests {
 
     @Test("Headers reach the server with their canonical names")
     func headerNamesOnWire() async throws {
-        let request = try URLRequest(url: server.app.baseUrl) {
+        let request = try server.app.baseUrl.buildRequest {
             Method.GET
             Endpoint("/echo-headers")
-            Header(.accept, "application/json")
-            Header(.userAgent, "DeclarativeRequests/1.0")
-            Header("X-Trace-Id", "abc123")
-            Header(.accept, "text/html", mode: .add)
+            Header.accept.setValue("application/json")
+            Header.userAgent.setValue("DeclarativeRequests/1.0")
+            Header.custom("X-Trace-Id").setValue("abc123")
+            Header.accept.addValue("text/html")
         }
         let (_, response) = try await URLSession.shared.data(for: request)
         let (vaporRequest, _, _) = await server.interceptor.get(response)
@@ -121,7 +121,7 @@ struct VaporTests {
         defer { try? FileManager.default.removeItem(at: tmp) }
 
         for strategy in [RequestBody.MultipartStrategy.inMemory, .streamed()] {
-            let request = try URLRequest(url: server.app.baseUrl) {
+            let request = try server.app.baseUrl.buildRequest {
                 Method.POST
                 Endpoint("/upload")
                 RequestBody.multipart(boundary: "BNDY", strategy: strategy) {
@@ -159,7 +159,7 @@ struct VaporTests {
             try? FileManager.default.removeItem(at: b)
         }
 
-        let request = try URLRequest(url: server.app.baseUrl) {
+        let request = try server.app.baseUrl.buildRequest {
             Method.POST
             Endpoint("/upload-multi")
             RequestBody.multipart(boundary: "MULTI") {
@@ -205,11 +205,12 @@ struct URLSessionExtensionTests {
     @Test("URLSession.data { … } sends the built request and returns the response")
     func sessionDataExtension() async throws {
         let baseURL = server.app.baseUrl
-        let (data, response) = try await URLSession.shared.data {
+        let request = try URLRequest {
             Method.GET
             BaseURL(baseURL)
             Endpoint("/ping")
         }
+        let (data, response) = try await URLSession.shared.data(for: request)
         #expect((response as? HTTPURLResponse)?.statusCode == 200)
         #expect(String(decoding: data, as: UTF8.self) == "pong")
     }
@@ -217,11 +218,13 @@ struct URLSessionExtensionTests {
     @Test("URLSession.decode(_:_:) decodes a JSON response")
     func sessionDecodeExtension() async throws {
         let baseURL = server.app.baseUrl
-        let user: EchoServer.User = try await URLSession.shared.decode(EchoServer.User.self) {
+        let request = try URLRequest {
             Method.GET
             BaseURL(baseURL)
             Endpoint("/users/42")
         }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let user = try JSONDecoder().decode(EchoServer.User.self, from: data)
         #expect(user.id == 42)
         #expect(user.name == "User-42")
     }
@@ -230,12 +233,14 @@ struct URLSessionExtensionTests {
     func sessionDecodeRoundTripsJSONBody() async throws {
         let baseURL = server.app.baseUrl
         let payload = EchoServer.Echo(message: "hello", count: 7)
-        let echoed: EchoServer.Echo = try await URLSession.shared.decode(EchoServer.Echo.self) {
+        let request = try URLRequest {
             Method.POST
             BaseURL(baseURL)
             Endpoint("/echo")
             RequestBody.json(payload)
         }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let echoed = try JSONDecoder().decode(EchoServer.Echo.self, from: data)
         #expect(echoed == payload)
     }
 }
