@@ -33,6 +33,25 @@ Blocks follow two conventions:
 - ``ContentType``
 - ``Accept``
 
+### Grouped Headers
+
+- ``Headers``
+- ``HeadersBuilder``
+- ``HeaderBuildable``
+- ``SingleValueHeader``
+- ``HeaderMode``
+- ``RawHeader``
+- ``AcceptHeader``
+- ``ContentTypeHeader``
+- ``UserAgentHeader``
+- ``AuthorizationHeader``
+- ``HostHeader``
+- ``OriginHeader``
+- ``RefererHeader``
+- ``AcceptLanguageHeader``
+- ``AcceptEncodingHeader``
+- ``CustomHeader``
+
 ### Request Body
 
 - ``RequestBody``

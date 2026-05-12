@@ -587,6 +587,163 @@ import Testing
     #expect(request.value(forHTTPHeaderField: "X-Custom") == "value")
 }
 
+// MARK: - Headers { ... } grouping
+
+@Test func headersGroupApplies() throws {
+    let request = try URLRequest {
+        Headers {
+            AcceptHeader("application/json")
+            UserAgentHeader("DR/1.0")
+            CustomHeader("X-Trace-Id", "abc123")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+    #expect(request.value(forHTTPHeaderField: "User-Agent") == "DR/1.0")
+    #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
+}
+
+@Test func headersGroupAcceptsMIMEType() throws {
+    let request = try URLRequest {
+        Headers {
+            AcceptHeader(.json)
+            ContentTypeHeader(.json)
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == MIMEType.json.rawValue)
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == MIMEType.json.rawValue)
+}
+
+@Test func headersGroupSetDefaultReplacesExisting() throws {
+    // UserAgentHeader is set-default — second one overwrites the first.
+    let request = try URLRequest {
+        Headers {
+            UserAgentHeader("first/1.0")
+            UserAgentHeader("second/2.0")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "User-Agent") == "second/2.0")
+}
+
+@Test func headersGroupAppendingModifierAccumulates() throws {
+    // AcceptHeader is set-default, but .appending() flips it to add-mode.
+    let request = try URLRequest {
+        Headers {
+            AcceptHeader("application/json")
+            AcceptHeader("text/html").appending()
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+}
+
+@Test func headersGroupCustomAddDefaultAccumulates() throws {
+    let request = try URLRequest {
+        Headers {
+            CustomHeader("X-Tag", "a")
+            CustomHeader("X-Tag", "b")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "X-Tag") == "a,b")
+}
+
+@Test func headersGroupCustomReplacingModifierOverwrites() throws {
+    let request = try URLRequest {
+        Headers {
+            CustomHeader("X-Token", "old")
+            CustomHeader("X-Token", "new").replacing()
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "X-Token") == "new")
+}
+
+@Test func headersGroupMixesWithDirectHeaders() throws {
+    let request = try URLRequest {
+        Header.accept.setValue("application/json")
+        Headers {
+            UserAgentHeader("DR/1.0")
+            AcceptHeader("text/html").appending()
+        }
+        Header.custom("X-Trace-Id").setValue("abc123")
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
+    #expect(request.value(forHTTPHeaderField: "User-Agent") == "DR/1.0")
+    #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
+}
+
+@Test func headersGroupAcceptsRawHeader() throws {
+    // RawHeader (the escape hatch) is still a HeaderBuildable.
+    let request = try URLRequest {
+        Headers {
+            Header.accept.setValue("application/json")
+            Header.custom("X-Trace-Id").setValue("abc123")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+    #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
+}
+
+@Test func authorizationHeaderRaw() throws {
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.raw("rawValue") }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "rawValue")
+}
+
+@Test func authorizationHeaderBearer() throws {
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.bearer("jwt.token.here") }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer jwt.token.here")
+}
+
+@Test func authorizationHeaderToken() throws {
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.token("abc123") }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Token abc123")
+}
+
+@Test func authorizationHeaderBasicEncodesUserPass() throws {
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.basic(username: "alice", password: "secret") }
+    }
+    let expected = "Basic \(Data("alice:secret".utf8).base64EncodedString())"
+    #expect(request.value(forHTTPHeaderField: "Authorization") == expected)
+}
+
+@Test func authorizationHeaderBasicHandlesColonInPassword() throws {
+    // Passwords legitimately contain colons — the factory must keep them intact rather than
+    // splitting/escaping, so the server can recover user vs. password by splitting on the FIRST colon.
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.basic(username: "alice", password: "a:b:c") }
+    }
+    let expected = "Basic \(Data("alice:a:b:c".utf8).base64EncodedString())"
+    #expect(request.value(forHTTPHeaderField: "Authorization") == expected)
+}
+
+@Test func authorizationHeaderArbitraryScheme() throws {
+    let request = try URLRequest {
+        Headers { AuthorizationHeader.scheme("ApiKey", value: "k-1") }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "ApiKey k-1")
+}
+
+@Test func headersGroupSupportsConditional() throws {
+    let authorized = true
+    let request = try URLRequest {
+        Headers {
+            AcceptHeader("application/json")
+            if authorized {
+                AuthorizationHeader.bearer("token")
+            }
+            for tag in ["a", "b"] {
+                CustomHeader("X-Tag", tag)
+            }
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer token")
+    #expect(request.value(forHTTPHeaderField: "X-Tag") == "a,b")
+}
+
 // MARK: - RequestBody.multipart (in-memory)
 
 @Test func multipartBodyHasFormDataContentType() throws {

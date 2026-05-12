@@ -31,15 +31,15 @@ public extension Header {
         }
     }
 
-    func addValue(_ value: String) -> some RequestBuildable {
-        RequestBlock {
-            $0.request.addValue(value, forHTTPHeaderField: rawValue)
+    func addValue(_ value: String) -> RawHeader {
+        RawHeader { [rawValue] state in
+            state.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
-    func setValue(_ value: String) -> some RequestBuildable {
-        RequestBlock {
-            $0.request.setValue(value, forHTTPHeaderField: rawValue)
+    func setValue(_ value: String) -> RawHeader {
+        RawHeader { [rawValue] state in
+            state.request.setValue(value, forHTTPHeaderField: rawValue)
         }
     }
 }
