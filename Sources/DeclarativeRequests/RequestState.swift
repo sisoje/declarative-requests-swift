@@ -12,6 +12,8 @@ public final class RequestState {
     public var request: URLRequest
 
     public var encoder: JSONEncoder
+    
+    public var shouldAddHeaders = true
 
     public var cookies: [String: String] {
         get {
