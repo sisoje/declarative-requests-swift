@@ -92,7 +92,7 @@ explicitly with `.replacing()` / `.appending()`:
 
 | Node | Default mode | Notes |
 |---|---|---|
-| `AcceptHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. Use `.appending()` to accumulate. |
+| `AcceptHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. Use `.appending()` to accumulate, `.quality(_:)` for a weighted entry. |
 | `ContentTypeHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. |
 | `UserAgentHeader(_:)` | `set` | Last one wins. |
 | `AuthorizationHeader.bearer(_:)` / `.basic(username:password:)` / `.token(_:)` / `.scheme(_:value:)` / `.raw(_:)` | `set` | Matches the top-level `Authorization` factories. |

@@ -11,6 +11,21 @@ Headers {
 }
 ```
 
+Combine with ``SingleValueHeader/appending()`` and ``quality(_:)`` to build a
+weighted list:
+
+```swift
+Headers {
+    AcceptHeader(.json)
+    AcceptHeader(.html).quality(0.8).appending()
+}
+// Accept: application/json, text/html; q=0.8
+```
+
+Calling ``quality(_:)`` more than once replaces the previous weight rather than
+stacking — per RFC 9110 §5.6.6 a parameter name appears at most once. Other
+MIME parameters (e.g. `charset`) are preserved.
+
 Initialize either from a ``MIMEType`` (preferred) or a raw string.
 
 ## Topics
@@ -19,3 +34,7 @@ Initialize either from a ``MIMEType`` (preferred) or a raw string.
 
 - ``init(_:)-(MIMEType)``
 - ``init(_:)-(String)``
+
+### Quality
+
+- ``quality(_:)``

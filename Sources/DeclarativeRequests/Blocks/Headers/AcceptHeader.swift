@@ -18,4 +18,12 @@ public struct AcceptHeader: SingleValueHeader {
     public init(_ raw: String) {
         self.init(value: raw, mode: .set)
     }
+
+    public func quality(_ q: Double) -> AcceptHeader {
+        let parts = value.split(separator: ";").map { $0.trimmingCharacters(in: .whitespaces) }
+        let base = parts.first ?? value
+        let preserved = parts.dropFirst().filter { !$0.lowercased().hasPrefix("q=") }
+        let withoutQ = ([base] + preserved).joined(separator: "; ")
+        return AcceptHeader(value: MIMEType(withoutQ).with(.quality(q)).rawValue, mode: mode)
+    }
 }
