@@ -7,7 +7,7 @@ A key-value pair appended after the MIME type essence.
 Parameters appear after the semicolon in a MIME type string — for
 example `charset=utf-8` in `text/html; charset=utf-8`. Use the
 factory methods to build them type-safely, then attach them with
-``MIMEType/with(_:)-4lb08``:
+``MIMEType/with(_:)-(MIMEType.Parameter)``:
 
 ```swift
 let html = MIMEType.html
@@ -30,8 +30,8 @@ For parameters not covered by the built-in factories, use
 
 ### Factory Methods
 
-- ``charset(_:)-swift.type.method``
-- ``charset(_:)-swift.type.method``
+- ``charset(_:)-(MIMEType.Charset)``
+- ``charset(_:)-(String)``
 - ``quality(_:)``
 - ``boundary(_:)``
 - ``version(_:)``

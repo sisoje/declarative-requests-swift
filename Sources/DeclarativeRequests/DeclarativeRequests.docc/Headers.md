@@ -4,7 +4,7 @@ Groups one or more header nodes into a single composite block.
 
 ## Overview
 
-`Headers` accepts only ``HeaderBuildable`` values via its ``HeadersBuilder`` — anything
+`Headers` accepts only ``HeaderBuildable`` values via its `@HeadersBuilder` — anything
 else is a compile-time error. Use it to keep header declarations visually together inside
 a request, or to group them conditionally:
 

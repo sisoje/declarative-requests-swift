@@ -6,7 +6,7 @@ A composable piece of a request specification.
 
 `RequestBuildable` is the protocol every block in the DSL conforms to. Each block
 describes a transformation that will be applied to a ``RequestState`` when the
-final ``URLRequest`` is built. Blocks compose recursively through their `body`,
+final `URLRequest` is built. Blocks compose recursively through their `body`,
 the same way SwiftUI views compose: a higher-level block returns one or more
 lower-level blocks, terminating in primitive ``RequestBlock`` leaves.
 
@@ -27,7 +27,7 @@ struct AuthenticatedJSON: RequestBuildable {
 }
 ```
 
-To produce a final ``URLRequest``, call ``request`` on any conforming value.
+To produce a final `URLRequest`, call ``request`` on any conforming value.
 
 ### Body
 

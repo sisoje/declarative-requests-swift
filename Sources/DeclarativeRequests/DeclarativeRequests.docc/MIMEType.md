@@ -39,7 +39,7 @@ mime.parameters    // ["charset": "utf-8"]
 
 ### Adding parameters
 
-Append parameters with ``with(_:)-swift.method`` using the type-safe
+Append parameters with ``with(_:)-(MIMEType.Parameter)`` using the type-safe
 ``MIMEType/Parameter`` builders:
 
 ```swift
@@ -94,9 +94,9 @@ let literal: MIMEType = "application/vnd.myapp+json"
 
 ### Composing
 
-- ``with(_:)-4lb08``
-- ``with(_:)-7nt2l``
-- ``with(_:)-7egqw``
+- ``with(_:)-(MIMEType.Parameter)``
+- ``with(_:)-(MIMEType.Parameter...)``
+- ``with(_:)-([MIMEType.Parameter])``
 
 ### Namespaces
 

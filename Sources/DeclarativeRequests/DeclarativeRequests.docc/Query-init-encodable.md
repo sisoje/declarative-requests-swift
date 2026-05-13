@@ -1,4 +1,4 @@
-# ``Query/init(_:)``
+# ``Query/init(_:)-(Encodable)``
 
 Append items derived from an `Encodable` model.
 

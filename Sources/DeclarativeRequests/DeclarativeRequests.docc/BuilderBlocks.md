@@ -5,7 +5,7 @@ Composable pieces that describe each part of an HTTP request.
 ## Overview
 
 Every block conforms to ``RequestBuildable`` and maps to one piece of the
-raw HTTP request. Declare them top to bottom inside a ``RequestBuilder``
+raw HTTP request. Declare them top to bottom inside a `@RequestBuilder`
 closure and each block's transform is applied in order.
 
 Blocks follow two conventions:
@@ -36,11 +36,9 @@ Blocks follow two conventions:
 ### Grouped Headers
 
 - ``Headers``
-- ``HeadersBuilder``
 - ``HeaderBuildable``
 - ``SingleValueHeader``
 - ``HeaderMode``
-- ``RawHeader``
 - ``AcceptHeader``
 - ``ContentTypeHeader``
 - ``UserAgentHeader``
@@ -57,7 +55,6 @@ Blocks follow two conventions:
 - ``RequestBody``
 - ``MultipartPart``
 - ``RequestBody/MultipartStrategy``
-- ``MultipartBuilder``
 
 ### Networking Configuration
 

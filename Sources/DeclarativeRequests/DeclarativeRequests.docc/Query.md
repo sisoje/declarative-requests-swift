@@ -48,7 +48,7 @@ nested keys becoming the names. Booleans serialize as `"true"`/`"false"`.
 
 ### Creating a Query
 - ``init(_:_:)``
-- ``init(_:)-1ctm6``
+- ``init(_:)-(Encodable)``
 
 ### Composing
 

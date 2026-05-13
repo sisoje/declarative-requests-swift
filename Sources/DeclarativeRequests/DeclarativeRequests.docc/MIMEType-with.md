@@ -1,4 +1,4 @@
-# ``MIMEType/with(_:)-4lb08``
+# ``MIMEType/with(_:)-(MIMEType.Parameter)``
 
 Appends a ``MIMEType/Parameter`` to the MIME type string.
 

@@ -1,10 +1,10 @@
 # ``MIMEType/Charset``
 
-A character encoding identifier used with ``MIMEType/Parameter/charset(_:)-swift.type.method``.
+A character encoding identifier used with ``MIMEType/Parameter/charset(_:)-(MIMEType.Charset)``.
 
 ## Overview
 
-Pass a `Charset` to ``MIMEType/Parameter/charset(_:)-swift.type.method``
+Pass a `Charset` to ``MIMEType/Parameter/charset(_:)-(MIMEType.Charset)``
 to produce a `charset` parameter:
 
 ```swift

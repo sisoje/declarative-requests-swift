@@ -26,7 +26,7 @@ reduce to. You construct one in two ways:
    ```
 
 The latter form is the entry point for building a request from a list of blocks
-without going through ``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``.
+without going through ``Foundation/URLRequest/init(builder:)``.
 
 > Important: ``body`` is unused for a `RequestBlock` (it is a leaf). Calling it
 > traps; the result builder routes around it via the `transform` closure.

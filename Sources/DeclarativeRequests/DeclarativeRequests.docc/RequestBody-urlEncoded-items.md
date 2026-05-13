@@ -1,13 +1,11 @@
-# ``RequestBody/urlEncoded(_:)``
+# ``RequestBody/urlEncoded(_:)-([URLQueryItem])``
 
-A `application/x-www-form-urlencoded` body.
+A `application/x-www-form-urlencoded` body assembled from explicit query items.
 
 ## Overview
 
-There are two overloads of `urlEncoded`:
-
-**URLQueryItem array** -- Items are encoded in the supplied order;
-duplicate names are preserved (`a=1&a=2&b=3`).
+Items are encoded in the supplied order; duplicate names are preserved
+(`a=1&a=2&b=3`). Sets `Content-Type: application/x-www-form-urlencoded`.
 
 ```swift
 RequestBody.urlEncoded([
@@ -16,15 +14,4 @@ RequestBody.urlEncoded([
 ])
 ```
 
-**Encodable model** -- Top-level fields become form items. Nested arrays
-use bracket-indexed keys (`tags[0]=a&tags[1]=b`). Booleans serialize as
-`"true"`/`"false"`. Dictionary keys are emitted in alphabetical order so
-the body is deterministic.
-
-```swift
-RequestBody.urlEncoded(loginForm)
-RequestBody.urlEncoded(["grant_type": "password", "username": "alice"])
-```
-
-- Parameters:
-  - items: The form items (or encodable model) to encode.
+- Parameter items: The form items to encode.

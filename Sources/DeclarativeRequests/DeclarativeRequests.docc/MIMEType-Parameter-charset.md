@@ -1,4 +1,4 @@
-# ``MIMEType/Parameter/charset(_:)-swift.type.method``
+# ``MIMEType/Parameter/charset(_:)-(MIMEType.Charset)``
 
 Creates a `charset` parameter from a ``MIMEType/Charset`` value.
 

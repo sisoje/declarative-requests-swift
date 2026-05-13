@@ -23,8 +23,8 @@ let types: MIMEType.List = [.json, .html, .xml]
 
 ### Initializers
 
-- ``init(_:)-2b1mf``
-- ``init(_:)-61oau``
+- ``init(_:)-([MIMEType])``
+- ``init(_:)-(MIMEType...)``
 
 ### Properties
 

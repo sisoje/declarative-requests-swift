@@ -1,13 +1,11 @@
-# ``BaseURL/init(_:)``
+# ``BaseURL/init(_:)-(URL?)``
 
-Create a `BaseURL` from a `URL` value or a string.
+Create a `BaseURL` from a `URL` value.
 
 ## Overview
 
-Two overloads are available:
+Passing `nil` produces a block that throws ``DeclarativeRequestsError/badUrl``
+at build time — useful when you're computing a URL from an optional and want
+the failure to surface as a thrown error rather than a crash.
 
-- `init(_ url: URL?)` accepts a `URL` value. Passing `nil` produces a block
-  that throws ``DeclarativeRequestsError/badUrl`` at build time.
-- `init(_ string: String)` parses the string via `URL(string:)`. If the
-  string is not a valid URL, the block throws
-  ``DeclarativeRequestsError/badUrl`` at build time.
+- Parameter url: The base URL, or `nil` to throw at build time.

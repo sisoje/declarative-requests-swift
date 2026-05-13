@@ -7,6 +7,7 @@ public enum HeaderMode: Sendable, Hashable {
     case add
 }
 
+@_documentation(visibility: internal)
 public struct RawHeader: HeaderBuildable {
     let perform: RequestStateTransformClosure
 
@@ -31,6 +32,7 @@ public struct Headers: RequestBuildable {
     }
 }
 
+@_documentation(visibility: internal)
 @resultBuilder
 public enum HeadersBuilder {
     public static func buildExpression(_ expression: any HeaderBuildable) -> [any HeaderBuildable] {
@@ -95,6 +97,7 @@ public struct AcceptHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -114,6 +117,7 @@ public struct ContentTypeHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -133,6 +137,7 @@ public struct UserAgentHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -171,6 +176,7 @@ public struct HostHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -186,6 +192,7 @@ public struct OriginHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -201,6 +208,7 @@ public struct RefererHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -216,6 +224,7 @@ public struct AcceptLanguageHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode
@@ -231,6 +240,7 @@ public struct AcceptEncodingHeader: SingleValueHeader {
     public let value: String
     public let mode: HeaderMode
 
+    @_documentation(visibility: internal)
     public init(value: String, mode: HeaderMode) {
         self.value = value
         self.mode = mode

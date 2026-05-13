@@ -20,7 +20,7 @@ let b = try URLRequest {
 }
 ```
 
-``URL/buildRequest(builder:)`` wraps this for you when you already have a
+``Foundation/URL/buildRequest(builder:)`` wraps this for you when you already have a
 `URL` value, so reach for `BaseURL` when you're staying inside a
 `URLRequest { ... }` builder closure or want to override the URL late in a
 composition.
@@ -47,8 +47,8 @@ If the string can't be parsed by `URL(string:)`, the block throws
 ## Topics
 
 ### Creating a BaseURL
-- ``init(_:)-4bwg2``
-- ``init(_:)-9jejp``
+- ``init(_:)-(URL?)``
+- ``init(_:)-(String)``
 
 ### Composing
 

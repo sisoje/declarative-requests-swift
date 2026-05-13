@@ -35,7 +35,7 @@ method, URL, headers, body.
 - **Compose with `body`.** Every block conforms to ``RequestBuildable`` and
   can return other blocks from its `body`, just like a SwiftUI `View`.
   Custom blocks are plain structs — no registration or boilerplate.
-- **Control flow built in.** The ``RequestBuilder`` result builder supports
+- **Control flow built in.** The `@RequestBuilder` result builder supports
   `if`, `if-else`, `switch`, `for`, and `if #available` out of the box.
 
 ### Building and sending
@@ -59,7 +59,7 @@ let request = try existingURL.buildRequest {
 
 ### Control flow
 
-The ``RequestBuilder`` result builder supports `if`, `if-else`, `switch`,
+The `@RequestBuilder` result builder supports `if`, `if-else`, `switch`,
 and `for` — use them directly inside the builder closure:
 
 ```swift
@@ -129,6 +129,35 @@ extension UserRepository {
 let request = try repo.getUser("42").request
 ```
 
+### Grouped headers
+
+Top-level ``Header`` and ``Authorization`` blocks work directly inside a request.
+When you'd rather keep header declarations visually together — or vary an entire
+group conditionally — wrap them in ``Headers`` and use the typed header nodes.
+The grouping builder only accepts ``HeaderBuildable`` values; passing anything
+else is a compile-time error:
+
+```swift
+let request = try URLRequest {
+    Method.GET
+    BaseURL("https://api.example.com")
+    Endpoint("/users")
+
+    Headers {
+        AcceptHeader(.json)
+        UserAgentHeader("MyApp/1.0")
+        AuthorizationHeader.bearer(token)
+        CustomHeader("X-Trace-Id", "abc123")
+        if isStaging {
+            CustomHeader("X-Env", "staging")
+        }
+    }
+}
+```
+
+Each typed node has a default mode (most are set, ``CustomHeader`` is add). Flip
+it explicitly with `.replacing()` or `.appending()` when you need the other one.
+
 ### Custom authentication
 
 For signing schemes that derive credentials from the request itself —
@@ -154,8 +183,12 @@ let request = try URLRequest {
 ### Multipart uploads
 
 Build multipart bodies with ``MultipartPart`` values inside a
-``RequestBody/multipart(boundary:strategy:parts:)`` block. For large files,
-switch to `.streamed()` so memory stays bounded:
+``RequestBody/multipart(boundary:strategy:_:)`` block. The encoder follows
+RFC 7578: form-field and filename parameters are quoted, `\` and `"` are
+escaped, CR/LF in names is stripped (no header injection), and a boundary
+containing whitespace or special characters is quoted in the `Content-Type`
+header. For large files, switch to `.streamed()` so memory stays bounded —
+that path also sets `Content-Length` up front by stat'ing each file:
 
 ```swift
 let request = try URLRequest {
@@ -193,10 +226,8 @@ print(request.curlCommand)
 ### Essentials
 
 - ``RequestBuildable``
-- ``RequestBuilder``
 - ``RequestBlock``
 - ``RequestState``
-- ``RequestStateTransformClosure``
 
 ### Builder Blocks
 

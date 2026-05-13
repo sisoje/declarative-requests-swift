@@ -11,6 +11,7 @@ extension Sequence where Element == RequestStateTransformClosure {
     }
 }
 
+@_documentation(visibility: internal)
 @resultBuilder
 public struct RequestBuilder {}
 

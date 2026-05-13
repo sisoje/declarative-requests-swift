@@ -116,7 +116,7 @@ block or `Header.contentType.setValue(...)` if the server needs one.
 - ``data(_:type:)``
 - ``string(_:type:)``
 - ``json(_:)``
-- ``urlEncoded(_:)-3uhox``
-- ``urlEncoded(_:)-5ko3k``
+- ``urlEncoded(_:)-([URLQueryItem])``
+- ``urlEncoded(_:)-(Encodable)``
 - ``stream(_:)``
 - ``multipart(boundary:strategy:_:)``

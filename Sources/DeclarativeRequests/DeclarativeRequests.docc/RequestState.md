@@ -5,31 +5,14 @@ The mutable scratchpad threaded through every block while a request is being bui
 ## Overview
 
 `RequestState` holds the in-progress `URLRequest` plus the encoder used by
-Encodable-driven blocks (``RequestBody/json(_:)``, ``RequestBody/urlEncoded(_:)-(any_Encodable)``,
-``Query``, ``Header/init(_:mode:)-(any_Encodable,_)``). Each ``RequestBuildable``
-mutates this state through a ``RequestStateTransformClosure`` and the next
+Encodable-driven blocks (``RequestBody/json(_:)``, the Encodable overload of
+``RequestBody/urlEncoded(_:)-(Encodable)``, and ``Query``). Each ``RequestBuildable``
+mutates this state through a `RequestStateTransformClosure` and the next
 block sees the result.
 
-You typically don't construct a `RequestState` yourself — call
-``RequestBuildable/request`` (or one of the convenience entry points like
-``URLRequest/init(url:cachePolicy:timeoutInterval:builder:)``) and the
-framework manages the lifecycle. Constructing one explicitly is useful for
-tests:
-
-```swift
-let state = RequestState()
-try block.transform(state)
-XCTAssertEqual(state.request.httpMethod, "POST")
-```
-
-### init(request:encoder:)
-
-Create a new state.
-
-- Parameters:
-  - request: The starting `URLRequest`. Defaults to a request rooted at
-    a placeholder URL that ``BaseURL`` is expected to replace.
-  - encoder: The `JSONEncoder` used by Encodable-driven blocks.
+You don't construct a `RequestState` yourself — call ``RequestBuildable/request``
+(or one of the convenience entry points like ``Foundation/URLRequest/init(builder:)``)
+and the framework manages the lifecycle for you.
 
 ### request
 
@@ -70,9 +53,6 @@ You can use it the same way to write your own one-liner blocks.
 - Returns: A ``RequestBlock`` that performs the assignment when applied.
 
 ## Topics
-
-### Creating a State
-- ``init(request:encoder:)``
 
 ### Properties
 - ``request``

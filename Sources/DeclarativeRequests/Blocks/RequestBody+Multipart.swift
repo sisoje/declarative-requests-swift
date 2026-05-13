@@ -1,7 +1,5 @@
 import Foundation
 
-// MARK: - Public API
-
 public extension RequestBody {
     enum MultipartStrategy {
         case inMemory
@@ -16,11 +14,12 @@ public extension RequestBody {
         let parts = parts()
         let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
         return RequestBlock { state in
+            let sources = try encode(parts: parts, boundary: boundary)
             switch strategy {
             case .inMemory:
-                try applyInMemory(parts: parts, boundary: boundary, state: state)
+                try applyInMemory(sources: sources, boundary: boundary, state: state)
             case let .streamed(bufferSize):
-                try applyStreamed(parts: parts, boundary: boundary, bufferSize: bufferSize, state: state)
+                try applyStreamed(sources: sources, boundary: boundary, bufferSize: bufferSize, state: state)
             }
         }
     }
@@ -32,6 +31,7 @@ public enum MultipartPart {
     case file(name: String, fileURL: URL, type: MIMEType = .octetStream, filename: String? = nil)
 }
 
+@_documentation(visibility: internal)
 @resultBuilder
 public enum MultipartBuilder {
     public static func buildBlock(_ components: [MultipartPart]...) -> [MultipartPart] {
@@ -67,86 +67,119 @@ public enum MultipartBuilder {
     }
 }
 
-// MARK: - In-memory implementation
+private enum ByteSource {
+    case data(Data)
+    case file(URL, size: Int64)
 
-private func applyInMemory(parts: [MultipartPart], boundary: String, state: RequestState) throws {
-    var form = MultipartForm(boundary: boundary)
-    for part in parts {
-        try part.append(to: &form)
-    }
-    state.request.httpBody = form.bodyData
-    state.request.setValue(form.contentType, forHTTPHeaderField: Header.contentType.rawValue)
-}
-
-private extension MultipartPart {
-    func append(to form: inout MultipartForm) throws {
+    var count: Int64 {
         switch self {
-        case let .field(name, value):
-            form.addField(named: name, value: value)
-        case let .data(name, filename, payload, type):
-            form.addFile(named: name, filename: filename, data: payload, mimeType: type.rawValue)
-        case let .file(name, fileURL, type, filename):
-            let bytes: Data
+        case let .data(d): Int64(d.count)
+        case let .file(_, n): n
+        }
+    }
+}
+
+private func encode(parts: [MultipartPart], boundary: String) throws -> [ByteSource] {
+    var sources: [ByteSource] = []
+    for part in parts {
+        sources.append(.data(Data(partHeader(part, boundary: boundary).utf8)))
+        switch part {
+        case let .field(_, value):
+            sources.append(.data(Data(value.utf8)))
+        case let .data(_, _, payload, _):
+            sources.append(.data(payload))
+        case let .file(_, url, _, _):
+            sources.append(.file(url, size: try fileSize(url)))
+        }
+        sources.append(.data(Data("\r\n".utf8)))
+    }
+    sources.append(.data(Data("--\(boundary)--\r\n".utf8)))
+    return sources
+}
+
+private func partHeader(_ part: MultipartPart, boundary: String) -> String {
+    switch part {
+    case let .field(name, _):
+        "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(quoteParam(name))\"\r\n\r\n"
+    case let .data(name, filename, _, type):
+        fileHeader(name: name, filename: filename, type: type, boundary: boundary)
+    case let .file(name, url, type, filename):
+        fileHeader(name: name, filename: filename ?? url.lastPathComponent, type: type, boundary: boundary)
+    }
+}
+
+private func fileHeader(name: String, filename: String, type: MIMEType, boundary: String) -> String {
+    "--\(boundary)\r\n" +
+        "Content-Disposition: form-data; name=\"\(quoteParam(name))\"; filename=\"\(quoteParam(filename))\"\r\n" +
+        "Content-Type: \(type.rawValue)\r\n\r\n"
+}
+
+private func quoteParam(_ s: String) -> String {
+    var out = ""
+    out.unicodeScalars.reserveCapacity(s.unicodeScalars.count)
+    for scalar in s.unicodeScalars {
+        switch scalar {
+        case "\\": out.append("\\\\")
+        case "\"": out.append("\\\"")
+        case "\r", "\n": continue
+        default: out.unicodeScalars.append(scalar)
+        }
+    }
+    return out
+}
+
+private func contentType(boundary: String) -> String {
+    needsQuoting(boundary)
+        ? "multipart/form-data; boundary=\"\(boundary)\""
+        : "multipart/form-data; boundary=\(boundary)"
+}
+
+private func needsQuoting(_ token: String) -> Bool {
+    guard !token.isEmpty else { return true }
+    let tokenChars = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'+_-")
+    return !token.allSatisfy { tokenChars.contains($0) }
+}
+
+private func fileSize(_ url: URL) throws -> Int64 {
+    let attrs: [FileAttributeKey: Any]
+    do {
+        attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+    } catch {
+        throw DeclarativeRequestsError.badMultipart(
+            reason: "Could not stat \(url.lastPathComponent): \(error.localizedDescription)"
+        )
+    }
+    guard let size = (attrs[.size] as? NSNumber)?.int64Value else {
+        throw DeclarativeRequestsError.badMultipart(
+            reason: "File \(url.lastPathComponent) has no .size attribute"
+        )
+    }
+    return size
+}
+
+private func applyInMemory(sources: [ByteSource], boundary: String, state: RequestState) throws {
+    var body = Data()
+    body.reserveCapacity(Int(sources.map(\.count).reduce(0, +)))
+    for src in sources {
+        switch src {
+        case let .data(d):
+            body.append(d)
+        case let .file(url, _):
             do {
-                bytes = try Data(contentsOf: fileURL)
+                body.append(try Data(contentsOf: url))
             } catch {
-                throw DeclarativeRequestsError.badMultipart(reason: "Could not read \(fileURL.lastPathComponent): \(error.localizedDescription)")
+                throw DeclarativeRequestsError.badMultipart(
+                    reason: "Could not read \(url.lastPathComponent): \(error.localizedDescription)"
+                )
             }
-            form.addFile(
-                named: name,
-                filename: filename ?? fileURL.lastPathComponent,
-                data: bytes,
-                mimeType: type.rawValue
-            )
         }
     }
+    state.request.httpBody = body
+    state.request.setValue(contentType(boundary: boundary), forHTTPHeaderField: Header.contentType.rawValue)
 }
 
-private struct MultipartForm {
-    let boundary: String
-    private var data = Data()
-
-    init(boundary: String) {
-        self.boundary = boundary
-    }
-
-    var contentType: String {
-        "multipart/form-data; boundary=\(boundary)"
-    }
-
-    mutating func addField(named name: String, value: String) {
-        data.append("--\(boundary)\r\n")
-        data.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n")
-        data.append("\(value)\r\n")
-    }
-
-    mutating func addFile(named name: String, filename: String, data fileData: Data, mimeType: String) {
-        data.append("--\(boundary)\r\n")
-        data.append("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\n")
-        data.append("Content-Type: \(mimeType)\r\n\r\n")
-        data.append(fileData)
-        data.append("\r\n")
-    }
-
-    var bodyData: Data {
-        var bodyData = data
-        bodyData.append("--\(boundary)--\r\n")
-        return bodyData
-    }
-}
-
-private extension Data {
-    mutating func append(_ string: String) {
-        if let data = string.data(using: .utf8) {
-            append(data)
-        }
-    }
-}
-
-// MARK: - Streamed implementation
-
-private func applyStreamed(parts: [MultipartPart], boundary: String, bufferSize: Int, state: RequestState) throws {
-    let length = try MultipartLength.compute(parts: parts, boundary: boundary)
+private func applyStreamed(sources: [ByteSource], boundary: String, bufferSize: Int, state: RequestState) throws {
+    let totalLength = sources.map(\.count).reduce(0, +)
 
     var input: InputStream?
     var output: OutputStream?
@@ -161,106 +194,26 @@ private func applyStreamed(parts: [MultipartPart], boundary: String, bufferSize:
     }
 
     state.request.httpBodyStream = input
-    state.request.setValue(
-        "multipart/form-data; boundary=\(boundary)",
-        forHTTPHeaderField: Header.contentType.rawValue
-    )
-    state.request.setValue("\(length)", forHTTPHeaderField: "Content-Length")
+    state.request.setValue(contentType(boundary: boundary), forHTTPHeaderField: Header.contentType.rawValue)
+    state.request.setValue("\(totalLength)", forHTTPHeaderField: "Content-Length")
 
-    MultipartStreamProducer(
-        parts: parts,
-        boundary: boundary,
-        output: output,
-        bufferSize: bufferSize
-    ).start()
+    MultipartStreamProducer(sources: sources, output: output, bufferSize: bufferSize).start()
 }
-
-private enum MultipartLength {
-    static func compute(parts: [MultipartPart], boundary: String) throws -> Int64 {
-        var total: Int64 = 0
-        for part in parts {
-            total += try lengthOf(part: part, boundary: boundary)
-        }
-        total += Int64("--\(boundary)--\r\n".utf8.count)
-        return total
-    }
-
-    private static func lengthOf(part: MultipartPart, boundary: String) throws -> Int64 {
-        switch part {
-        case let .field(name, value):
-            let header = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"\r\n\r\n"
-            return Int64(header.utf8.count) + Int64(value.utf8.count) + 2
-        case let .data(name, filename, payload, type):
-            let header = fileHeader(name: name, filename: filename, type: type, boundary: boundary)
-            return Int64(header.utf8.count) + Int64(payload.count) + 2
-        case let .file(name, fileURL, type, filename):
-            let resolved = filename ?? fileURL.lastPathComponent
-            let header = fileHeader(name: name, filename: resolved, type: type, boundary: boundary)
-            let attrs: [FileAttributeKey: Any]
-            do {
-                attrs = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-            } catch {
-                throw DeclarativeRequestsError.badMultipart(
-                    reason: "Could not stat \(fileURL.lastPathComponent): \(error.localizedDescription)"
-                )
-            }
-            guard let size = (attrs[.size] as? NSNumber)?.int64Value else {
-                throw DeclarativeRequestsError.badMultipart(
-                    reason: "File \(fileURL.lastPathComponent) has no .size attribute"
-                )
-            }
-            return Int64(header.utf8.count) + size + 2
-        }
-    }
-
-    static func fileHeader(name: String, filename: String, type: MIMEType, boundary: String) -> String {
-        "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\nContent-Type: \(type.rawValue)\r\n\r\n"
-    }
-}
-
-// MARK: - Streamed producer
 
 private final class MultipartStreamProducer: NSObject, StreamDelegate {
-    enum Source {
-        case data(Data)
-        case file(URL)
-    }
-
     private let bufferSize: Int
     private let output: OutputStream
-    private var sources: [Source]
+    private var sources: [ByteSource]
     private var sourceIndex: Int = 0
     private var fileStream: InputStream?
     private var pending: (data: Data, offset: Int)?
     private var thread: Thread?
     private var done = false
 
-    init(parts: [MultipartPart], boundary: String, output: OutputStream, bufferSize: Int) {
+    init(sources: [ByteSource], output: OutputStream, bufferSize: Int) {
         self.bufferSize = bufferSize
         self.output = output
-        sources = Self.buildSources(parts: parts, boundary: boundary)
-    }
-
-    private static func buildSources(parts: [MultipartPart], boundary: String) -> [Source] {
-        var sources: [Source] = []
-        for part in parts {
-            switch part {
-            case let .field(name, value):
-                let chunk = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"\r\n\r\n\(value)\r\n"
-                sources.append(.data(Data(chunk.utf8)))
-            case let .data(name, filename, payload, type):
-                sources.append(.data(Data(MultipartLength.fileHeader(name: name, filename: filename, type: type, boundary: boundary).utf8)))
-                sources.append(.data(payload))
-                sources.append(.data(Data("\r\n".utf8)))
-            case let .file(name, fileURL, type, filename):
-                let resolved = filename ?? fileURL.lastPathComponent
-                sources.append(.data(Data(MultipartLength.fileHeader(name: name, filename: resolved, type: type, boundary: boundary).utf8)))
-                sources.append(.file(fileURL))
-                sources.append(.data(Data("\r\n".utf8)))
-            }
-        }
-        sources.append(.data(Data("--\(boundary)--\r\n".utf8)))
-        return sources
+        self.sources = sources
     }
 
     func start() {
@@ -330,7 +283,7 @@ private final class MultipartStreamProducer: NSObject, StreamDelegate {
             case let .data(blob):
                 sourceIndex += 1
                 return blob
-            case let .file(url):
+            case let .file(url, _):
                 if fileStream == nil {
                     guard let stream = InputStream(url: url) else {
                         sourceIndex += 1

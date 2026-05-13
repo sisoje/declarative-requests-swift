@@ -62,6 +62,43 @@ the data you have.
 | `ContentType(_:)` | Sets `Content-Type` from a `MIMEType`. | `ContentType(.json)` |
 | `Accept(_:)` | Accumulates `Accept` header values. | `Accept(.json)` |
 
+### Grouped headers
+
+The top-level `Header.*` and `Authorization.*` blocks work directly inside a request.
+When you want to keep header declarations visually together — or vary the whole group
+conditionally — wrap them in `Headers { … }` and use the typed header nodes. The grouping
+builder only accepts ``HeaderBuildable`` values; anything else is a compile-time error.
+
+```swift
+let request = try URLRequest {
+    Method.GET
+    BaseURL("https://api.example.com")
+    Endpoint("/users")
+
+    Headers {
+        AcceptHeader(.json)
+        UserAgentHeader("MyApp/1.0")
+        AuthorizationHeader.bearer(token)
+        CustomHeader("X-Trace-Id", "abc123")
+        if isStaging {
+            CustomHeader("X-Env", "staging")
+        }
+    }
+}
+```
+
+Each typed node defaults to either set or add semantics, and you can flip the mode
+explicitly with `.replacing()` / `.appending()`:
+
+| Node | Default mode | Notes |
+|---|---|---|
+| `AcceptHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. Use `.appending()` to accumulate. |
+| `ContentTypeHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. |
+| `UserAgentHeader(_:)` | `set` | Last one wins. |
+| `AuthorizationHeader.bearer(_:)` / `.basic(username:password:)` / `.token(_:)` / `.scheme(_:value:)` / `.raw(_:)` | `set` | Matches the top-level `Authorization` factories. |
+| `HostHeader` / `OriginHeader` / `RefererHeader` / `AcceptLanguageHeader` / `AcceptEncodingHeader` | `set` | Single-value headers. |
+| `CustomHeader(_ name:, _ value:)` | `add` | Use `.replacing()` to flip to set. |
+
 ### Body — one type, many factories
 
 `RequestBody` is **the** body block. The factory you pick decides how the
@@ -117,6 +154,12 @@ RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
     MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .Video.mp4)
 }
 ```
+
+Both strategies follow RFC 7578: form-field and filename parameters are quoted, `\` and
+`"` characters are escaped, CR/LF in names is stripped (no header injection), and a
+boundary containing whitespace or special characters is quoted in the `Content-Type`
+header. The streamed strategy additionally sets `Content-Length` up front by stat'ing
+each file, so the server sees the full payload size before bytes start flowing.
 
 ## Building from a base URL
 
@@ -240,6 +283,10 @@ flowchart LR
     HeaderGroup --> ContentType["ContentType(_ mimeType)"]
     ContentType --> CTJSON[".json  .xml  .html  .plainText\n.pdf  .png  .jpeg  .octetStream\nApplication.*  Text.*  Image.*\nAudio.*  Video.*  Multipart.*  Font.*"]
     HeaderGroup --> AcceptBlock["Accept(_ mimeType)"]
+    HeaderGroup --> HeadersGroup["Headers { ... }"]
+    HeadersGroup --> HT1["AcceptHeader / ContentTypeHeader\nUserAgentHeader / HostHeader\nOriginHeader / RefererHeader\nAcceptLanguageHeader / AcceptEncodingHeader"]
+    HeadersGroup --> HT2["AuthorizationHeader.bearer / .basic\n.token / .scheme / .raw"]
+    HeadersGroup --> HT3["CustomHeader(name, value)"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]

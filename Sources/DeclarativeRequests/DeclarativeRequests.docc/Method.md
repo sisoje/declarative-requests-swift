@@ -54,5 +54,4 @@ it is in the case the server expects.
 
 ### Raw Value
 
-- ``rawValue``
 - ``init(rawValue:)``
