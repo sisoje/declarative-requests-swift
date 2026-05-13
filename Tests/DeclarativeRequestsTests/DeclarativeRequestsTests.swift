@@ -614,7 +614,6 @@ import Testing
 }
 
 @Test func headersGroupSetDefaultReplacesExisting() throws {
-    // UserAgentHeader is set-default — second one overwrites the first.
     let request = try URLRequest {
         Headers {
             UserAgentHeader("first/1.0")
@@ -625,7 +624,6 @@ import Testing
 }
 
 @Test func headersGroupAppendingModifierAccumulates() throws {
-    // AcceptHeader is set-default, but .appending() flips it to add-mode.
     let request = try URLRequest {
         Headers {
             AcceptHeader("application/json")
@@ -670,7 +668,6 @@ import Testing
 }
 
 @Test func headersGroupAcceptsRawHeader() throws {
-    // RawHeader (the escape hatch) is still a HeaderBuildable.
     let request = try URLRequest {
         Headers {
             Header.accept.setValue("application/json")
@@ -711,8 +708,6 @@ import Testing
 }
 
 @Test func authorizationHeaderBasicHandlesColonInPassword() throws {
-    // Passwords legitimately contain colons — the factory must keep them intact rather than
-    // splitting/escaping, so the server can recover user vs. password by splitting on the FIRST colon.
     let request = try URLRequest {
         Headers { AuthorizationHeader.basic(username: "alice", password: "a:b:c") }
     }
@@ -830,6 +825,80 @@ import Testing
         if case DeclarativeRequestsError.badMultipart = error { return true }
         return false
     }
+}
+
+// MARK: - RFC 7578 escaping & boundary quoting
+
+@Test func multipartEscapesQuoteInFieldName() throws {
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "TEST") {
+            MultipartPart.field(name: "weird\"name", value: "v")
+        }
+    }
+    let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
+    #expect(body.contains("name=\"weird\\\"name\""))
+}
+
+@Test func multipartEscapesBackslashInFilename() throws {
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "TEST") {
+            MultipartPart.data(name: "f", filename: "a\\b.bin", data: Data("x".utf8))
+        }
+    }
+    let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
+    #expect(body.contains("filename=\"a\\\\b.bin\""))
+}
+
+@Test func multipartStripsCRLFInName() throws {
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "TEST") {
+            MultipartPart.field(name: "a\r\nX-Injected: y", value: "v")
+        }
+    }
+    let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
+    #expect(body.contains("name=\"aX-Injected: y\""))
+    #expect(!body.contains("\r\nX-Injected"))
+}
+
+@Test func multipartQuotesBoundaryWithSpaceInContentType() throws {
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "with space") {
+            MultipartPart.field(name: "k", value: "v")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "multipart/form-data; boundary=\"with space\"")
+}
+
+@Test func multipartDoesNotQuoteSimpleBoundary() throws {
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "TEST") {
+            MultipartPart.field(name: "k", value: "v")
+        }
+    }
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "multipart/form-data; boundary=TEST")
+}
+
+@Test func multipartMultipleFilesWithSameName() throws {
+    let a = FileManager.default.temporaryDirectory.appendingPathComponent("rfc-a-\(UUID().uuidString).bin")
+    let b = FileManager.default.temporaryDirectory.appendingPathComponent("rfc-b-\(UUID().uuidString).bin")
+    try Data("AAA".utf8).write(to: a)
+    try Data("BBB".utf8).write(to: b)
+    defer {
+        try? FileManager.default.removeItem(at: a)
+        try? FileManager.default.removeItem(at: b)
+    }
+
+    let request = try URLRequest {
+        RequestBody.multipart(boundary: "TEST") {
+            MultipartPart.file(name: "attachment", fileURL: a)
+            MultipartPart.file(name: "attachment", fileURL: b)
+        }
+    }
+    let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
+    let occurrences = body.components(separatedBy: "name=\"attachment\"").count - 1
+    #expect(occurrences == 2)
+    #expect(body.contains("filename=\"\(a.lastPathComponent)\""))
+    #expect(body.contains("filename=\"\(b.lastPathComponent)\""))
 }
 
 // MARK: - RequestBody.multipart (streamed)
