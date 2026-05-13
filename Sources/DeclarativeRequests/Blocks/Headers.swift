@@ -236,6 +236,17 @@ public struct AcceptLanguageHeader: SingleValueHeader {
     public init(_ value: String) {
         self.init(value: value, mode: .set)
     }
+
+    public init(_ language: Locale.Language) {
+        self.init(value: language.minimalIdentifier, mode: .set)
+    }
+
+    public func quality(_ q: Double) -> AcceptLanguageHeader {
+        let clamped = max(0, min(1, q))
+        let qString = String(format: "%g", clamped)
+        let base = value.split(separator: ";", maxSplits: 1).first.map(String.init) ?? value
+        return AcceptLanguageHeader(value: "\(base);q=\(qString)", mode: mode)
+    }
 }
 
 public struct AcceptEncodingHeader: SingleValueHeader {
