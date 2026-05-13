@@ -1,7 +1,9 @@
 import Foundation
 
+@_documentation(visibility: internal)
 public protocol HeaderBuildable: RequestBuildable {}
 
+@_documentation(visibility: internal)
 public enum HeaderMode: Sendable, Hashable {
     case set
     case add
@@ -69,6 +71,7 @@ public enum HeadersBuilder {
     }
 }
 
+@_documentation(visibility: internal)
 public protocol SingleValueHeader: HeaderBuildable {
     static var headerName: Header { get }
     var value: String { get }

@@ -4,7 +4,7 @@ Groups one or more header nodes into a single composite block.
 
 ## Overview
 
-`Headers` accepts only ``HeaderBuildable`` values via its `@HeadersBuilder` — anything
+`Headers` accepts only header values via its `@HeadersBuilder` — anything
 else is a compile-time error. Use it to keep header declarations visually together inside
 a request, or to group them conditionally:
 
@@ -33,3 +33,16 @@ outside of `Headers { }` at the top level of a request — the grouping is opt-i
 ### Creating
 
 - ``init(_:)``
+
+### Header Fields
+
+- ``AcceptHeader``
+- ``ContentTypeHeader``
+- ``UserAgentHeader``
+- ``AuthorizationHeader``
+- ``HostHeader``
+- ``OriginHeader``
+- ``RefererHeader``
+- ``AcceptLanguageHeader``
+- ``AcceptEncodingHeader``
+- ``CustomHeader``

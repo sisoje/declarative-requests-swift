@@ -28,27 +28,11 @@ Blocks follow two conventions:
 
 - ``Method``
 - ``Header``
+- ``Headers``
 - ``Cookie``
 - ``Authorization``
 - ``ContentType``
 - ``Accept``
-
-### Grouped Headers
-
-- ``Headers``
-- ``HeaderBuildable``
-- ``SingleValueHeader``
-- ``HeaderMode``
-- ``AcceptHeader``
-- ``ContentTypeHeader``
-- ``UserAgentHeader``
-- ``AuthorizationHeader``
-- ``HostHeader``
-- ``OriginHeader``
-- ``RefererHeader``
-- ``AcceptLanguageHeader``
-- ``AcceptEncodingHeader``
-- ``CustomHeader``
 
 ### Request Body
 

@@ -134,8 +134,8 @@ let request = try repo.getUser("42").request
 Top-level ``Header`` and ``Authorization`` blocks work directly inside a request.
 When you'd rather keep header declarations visually together — or vary an entire
 group conditionally — wrap them in ``Headers`` and use the typed header nodes.
-The grouping builder only accepts ``HeaderBuildable`` values; passing anything
-else is a compile-time error:
+The grouping builder only accepts header values; passing anything else is a
+compile-time error:
 
 ```swift
 let request = try URLRequest {
@@ -232,6 +232,10 @@ print(request.curlCommand)
 ### Builder Blocks
 
 - <doc:BuilderBlocks>
+
+### Headers
+
+- ``Headers``
 
 ### Building and Sending Requests
 
