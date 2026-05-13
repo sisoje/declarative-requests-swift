@@ -156,7 +156,7 @@ let request = try URLRequest {
 ```
 
 Each typed node has a default mode (most are set, ``CustomHeader`` is add). Flip
-it explicitly with `.replacing()` or `.appending()` when you need the other one.
+it explicitly with `.headersSet()` or `.headersAdd()` when you need the other one.
 
 ### Custom authentication
 

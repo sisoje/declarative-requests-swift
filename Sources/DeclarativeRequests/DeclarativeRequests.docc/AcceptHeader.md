@@ -1,23 +1,23 @@
 # ``AcceptHeader``
 
-`Accept` header. Set-default — call ``SingleValueHeader/appending()`` to accumulate.
+`Accept` header. Set-default — call ``HeaderBuildable/headersAdd()`` to accumulate.
 
 ## Overview
 
 ```swift
 Headers {
-    AcceptHeader(.json)                  // Accept: application/json
-    AcceptHeader(.html).appending()      // Accept: application/json,text/html
+    AcceptHeader(.json)                       // Accept: application/json
+    AcceptHeader(.html).headersAdd()          // Accept: application/json,text/html
 }
 ```
 
-Combine with ``SingleValueHeader/appending()`` and ``quality(_:)`` to build a
+Combine with ``HeaderBuildable/headersAdd()`` and ``quality(_:)`` to build a
 weighted list:
 
 ```swift
 Headers {
     AcceptHeader(.json)
-    AcceptHeader(.html).quality(0.8).appending()
+    AcceptHeader(.html).quality(0.8).headersAdd()
 }
 // Accept: application/json, text/html; q=0.8
 ```

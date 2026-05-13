@@ -88,16 +88,16 @@ let request = try URLRequest {
 ```
 
 Each typed node defaults to either set or add semantics, and you can flip the mode
-explicitly with `.replacing()` / `.appending()`:
+explicitly with `.headersSet()` / `.headersAdd()`:
 
 | Node | Default mode | Notes |
 |---|---|---|
-| `AcceptHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. Use `.appending()` to accumulate, `.quality(_:)` for a weighted entry. |
+| `AcceptHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. Use `.headersAdd()` to accumulate, `.quality(_:)` for a weighted entry. |
 | `ContentTypeHeader(_:)` | `set` | Pass a `MIMEType` or a raw string. |
 | `UserAgentHeader(_:)` | `set` | Last one wins. |
 | `AuthorizationHeader.bearer(_:)` / `.basic(username:password:)` / `.token(_:)` / `.scheme(_:value:)` / `.raw(_:)` | `set` | Matches the top-level `Authorization` factories. |
 | `HostHeader` / `OriginHeader` / `RefererHeader` / `AcceptLanguageHeader` / `AcceptEncodingHeader` | `set` | Single-value headers. |
-| `CustomHeader(_ name:, _ value:)` | `add` | Use `.replacing()` to flip to set. |
+| `CustomHeader(_ name:, _ value:)` | `add` | Use `.headersSet()` to flip to set. |
 
 ### Body — one type, many factories
 

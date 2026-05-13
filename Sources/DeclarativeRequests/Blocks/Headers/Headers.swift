@@ -3,22 +3,23 @@ import Foundation
 @_documentation(visibility: internal)
 public protocol HeaderBuildable: RequestBuildable {}
 
-@_documentation(visibility: internal)
-public enum HeaderMode: Sendable, Hashable {
-    case set
-    case add
+public extension HeaderBuildable {
+    func headersAdd() -> some HeaderBuildable {
+        HeaderModeOverride(inner: self, shouldAdd: true)
+    }
+
+    func headersSet() -> some HeaderBuildable {
+        HeaderModeOverride(inner: self, shouldAdd: false)
+    }
 }
 
 @_documentation(visibility: internal)
-public struct RawHeader: HeaderBuildable {
-    let perform: RequestStateTransformClosure
-
-    init(_ perform: @escaping RequestStateTransformClosure) {
-        self.perform = perform
-    }
+public struct HeaderModeOverride<Inner: HeaderBuildable>: HeaderBuildable {
+    let inner: Inner
+    let shouldAdd: Bool
 
     public var body: some RequestBuildable {
-        RequestBlock(perform)
+        inner.environment(\.shouldAddHeaders, shouldAdd)
     }
 }
 
@@ -75,22 +76,18 @@ public enum HeadersBuilder {
 public protocol SingleValueHeader: HeaderBuildable {
     static var headerName: Header { get }
     var value: String { get }
-    var mode: HeaderMode { get }
-    init(value: String, mode: HeaderMode)
+    init(value: String)
 }
 
 public extension SingleValueHeader {
-    func appending() -> Self {
-        Self(value: value, mode: .add)
-    }
-
-    func replacing() -> Self {
-        Self(value: value, mode: .set)
-    }
-
     var body: some RequestBuildable {
-        mode == .set
-            ? Self.headerName.setValue(value)
-            : Self.headerName.addValue(value)
+        RequestBlock { state in
+            let shouldAdd = state.shouldAddHeaders ?? false
+            if shouldAdd {
+                state.request.addValue(value, forHTTPHeaderField: Self.headerName.rawValue)
+            } else {
+                state.request.setValue(value, forHTTPHeaderField: Self.headerName.rawValue)
+            }
+        }
     }
 }

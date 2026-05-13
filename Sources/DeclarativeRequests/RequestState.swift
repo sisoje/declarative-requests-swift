@@ -13,7 +13,7 @@ public final class RequestState {
 
     public var encoder: JSONEncoder
     
-    public var shouldAddHeaders = true
+    public var shouldAddHeaders: Bool? = nil
 
     public var cookies: [String: String] {
         get {

@@ -10,13 +10,13 @@ Headers {
 }
 ```
 
-Combine with ``SingleValueHeader/appending()`` and ``quality(_:)`` to build a
+Combine with ``HeaderBuildable/headersAdd()`` and ``quality(_:)`` to build a
 weighted list:
 
 ```swift
 Headers {
     AcceptLanguageHeader(Locale.Language(identifier: "en-US"))
-    AcceptLanguageHeader(Locale.Language(identifier: "fr")).quality(0.8).appending()
+    AcceptLanguageHeader(Locale.Language(identifier: "fr")).quality(0.8).headersAdd()
 }
 // Accept-Language: en-US, fr;q=0.8
 ```

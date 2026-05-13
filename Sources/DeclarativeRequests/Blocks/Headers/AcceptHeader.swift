@@ -3,20 +3,18 @@ import Foundation
 public struct AcceptHeader: SingleValueHeader {
     public static var headerName: Header { .accept }
     public let value: String
-    public let mode: HeaderMode
 
     @_documentation(visibility: internal)
-    public init(value: String, mode: HeaderMode) {
+    public init(value: String) {
         self.value = value
-        self.mode = mode
     }
 
     public init(_ mimeType: MIMEType) {
-        self.init(value: mimeType.rawValue, mode: .set)
+        self.init(value: mimeType.rawValue)
     }
 
     public init(_ raw: String) {
-        self.init(value: raw, mode: .set)
+        self.init(value: raw)
     }
 
     public func quality(_ q: Double) -> AcceptHeader {
@@ -24,6 +22,6 @@ public struct AcceptHeader: SingleValueHeader {
         let base = parts.first ?? value
         let preserved = parts.dropFirst().filter { !$0.lowercased().hasPrefix("q=") }
         let withoutQ = ([base] + preserved).joined(separator: "; ")
-        return AcceptHeader(value: MIMEType(withoutQ).with(.quality(q)).rawValue, mode: mode)
+        return AcceptHeader(value: MIMEType(withoutQ).with(.quality(q)).rawValue)
     }
 }

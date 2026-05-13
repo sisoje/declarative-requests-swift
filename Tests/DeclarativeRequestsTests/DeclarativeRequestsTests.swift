@@ -627,7 +627,7 @@ import Testing
     let request = try URLRequest {
         Headers {
             AcceptHeader("application/json")
-            AcceptHeader("text/html").appending()
+            AcceptHeader("text/html").headersAdd()
         }
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
@@ -647,7 +647,7 @@ import Testing
     let request = try URLRequest {
         Headers {
             CustomHeader("X-Token", "old")
-            CustomHeader("X-Token", "new").replacing()
+            CustomHeader("X-Token", "new").headersSet()
         }
     }
     #expect(request.value(forHTTPHeaderField: "X-Token") == "new")
@@ -658,7 +658,7 @@ import Testing
         Header.accept.setValue("application/json")
         Headers {
             UserAgentHeader("DR/1.0")
-            AcceptHeader("text/html").appending()
+            AcceptHeader("text/html").headersAdd()
         }
         Header.custom("X-Trace-Id").setValue("abc123")
     }
