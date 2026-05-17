@@ -41,35 +41,6 @@ public final class RequestState {
         request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) } ?? URLComponents()
     }
 
-    var baseURL: URL {
-        get {
-            urlComponents.url ?? .placeholder
-        }
-        set {
-            request.url = urlComponents.url(relativeTo: newValue)
-        }
-    }
-
-    var pathArray: [String] {
-        get {
-            pathString.components(separatedBy: "/")
-        }
-        set {
-            pathString = newValue.joined(separator: "/")
-        }
-    }
-
-    var pathString: String {
-        get {
-            urlComponents.path
-        }
-        set {
-            var urlComponents = urlComponents
-            urlComponents.path = newValue
-            request.url = urlComponents.url
-        }
-    }
-
     var queryItems: [URLQueryItem] {
         get {
             urlComponents.queryItems ?? []
