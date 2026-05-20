@@ -56,6 +56,23 @@ let request = try URLRequest {
 // -> https://api.example.com/users?page=1
 ```
 
+## Query items survive reference resolution
+
+`Query` blocks that run before `Endpoint` still appear on the final URL:
+
+```swift
+let request = try URLRequest {
+    BaseURL("https://api.example.com")
+    Query("token", "abc")
+    Endpoint("/v1/users")
+}
+// -> https://api.example.com/v1/users?token=abc
+```
+
+Plain RFC 3986 reference resolution would drop the base's query when the
+reference (the `Endpoint` path) carries none of its own; `Endpoint` carries
+the query forward so block order remains free.
+
 ## Topics
 
 ### Creating an Endpoint
