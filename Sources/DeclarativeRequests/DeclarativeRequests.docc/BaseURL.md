@@ -4,9 +4,11 @@ Sets the base URL the request resolves against.
 
 ## Overview
 
-`BaseURL` resolves the in-progress URL components against the supplied URL.
-Endpoint and query components declared by other blocks are preserved across the
-resolution, so the order of declarations doesn't matter for typical cases:
+`BaseURL` fills in the scheme, user, password, host and port of the request URL
+from the supplied URL. Any path, query items or fragment already set by other
+blocks are preserved, and the base's own path is adopted only if the request
+doesn't have one yet. Because the merge touches only the authority components,
+the order of `BaseURL`, `Endpoint` and `Query` blocks doesn't matter:
 
 ```swift
 // Either order produces the same final URL:
