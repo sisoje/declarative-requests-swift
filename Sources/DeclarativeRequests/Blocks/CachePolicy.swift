@@ -8,6 +8,6 @@ public struct CachePolicy: RequestBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestState[\.request.cachePolicy, policy]
+        RequestState[\.cachePolicy, policy]
     }
 }

@@ -8,6 +8,6 @@ public struct NetworkServiceType: RequestBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestState[\.request.networkServiceType, type]
+        RequestState[\.networkServiceType, type]
     }
 }

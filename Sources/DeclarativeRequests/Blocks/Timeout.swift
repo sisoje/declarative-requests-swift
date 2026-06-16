@@ -8,6 +8,6 @@ public struct Timeout: RequestBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestState[\.request.timeoutInterval, interval]
+        RequestState[\.timeoutInterval, interval]
     }
 }

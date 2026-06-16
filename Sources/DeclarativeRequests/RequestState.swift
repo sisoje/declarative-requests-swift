@@ -1,23 +1,45 @@
 import Foundation
+import SwiftUI
 
-public final class RequestState {
-    init(
+@Observable public final class RequestState: @unchecked Sendable {
+    internal init(
+        baseURL: URL = .placeholder,
+        urlComponents: URLComponents = URLComponents(),
         request: URLRequest = URLRequest(url: .placeholder),
-        encoder: JSONEncoder = JSONEncoder()
+        encoder: JSONEncoder = JSONEncoder(),
+        shouldAddHeaders: Bool = true
     ) {
-        self.request = request
+        self.baseURL = baseURL
+        self.urlComponents = urlComponents
+        self._request = request
         self.encoder = encoder
+        self.shouldAddHeaders = shouldAddHeaders
+    }
+    
+    public var baseURL: URL = .placeholder
+    public var urlComponents: URLComponents = URLComponents()
+
+    private var _request: URLRequest = URLRequest(url: .placeholder)
+    public var request: URLRequest {
+        get {
+            var res = _request
+            res.url = urlComponents.url(relativeTo: baseURL)
+            return res
+        }
+        set {
+            var res = newValue
+            res.url = .placeholder
+            _request = res
+        }
     }
 
-    public var request: URLRequest
+    public var encoder: JSONEncoder = JSONEncoder()
 
-    public var encoder: JSONEncoder
-    
     public var shouldAddHeaders = true
 
     public var cookies: [String: String] {
         get {
-            request.value(forHTTPHeaderField: Header.cookie.rawValue)?
+            _request.value(forHTTPHeaderField: Header.cookie.rawValue)?
                 .split(separator: ";")
                 .reduce(into: [:]) { result, component in
                     let parts = component.split(separator: "=", maxSplits: 1)
@@ -33,29 +55,7 @@ public final class RequestState {
                 .map { "\($0.key)=\($0.value)" }
                 .joined(separator: "; ")
             let value = cookieString.isEmpty ? nil : cookieString
-            request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
-        }
-    }
-
-    private var urlComponents: URLComponents {
-        request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: true) } ?? URLComponents()
-    }
-
-    var baseURL: URL {
-        get {
-            urlComponents.url ?? .placeholder
-        }
-        set {
-            request.url = urlComponents.url(relativeTo: newValue)
-        }
-    }
-
-    var pathArray: [String] {
-        get {
-            pathString.components(separatedBy: "/")
-        }
-        set {
-            pathString = newValue.joined(separator: "/")
+            _request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
         }
     }
 
@@ -64,9 +64,7 @@ public final class RequestState {
             urlComponents.path
         }
         set {
-            var urlComponents = urlComponents
             urlComponents.path = newValue
-            request.url = urlComponents.url
         }
     }
 
@@ -75,15 +73,13 @@ public final class RequestState {
             urlComponents.queryItems ?? []
         }
         set {
-            var urlComponents = urlComponents
             urlComponents.queryItems = newValue
-            request.url = urlComponents.url
         }
     }
 
     var encodedBodyItems: [URLQueryItem] {
         get {
-            request.httpBody.flatMap { bodyData in
+            _request.httpBody.flatMap { bodyData in
                 var comp = URLComponents()
                 comp.percentEncodedQuery = String(decoding: bodyData, as: UTF8.self)
                 return comp.queryItems
@@ -92,15 +88,25 @@ public final class RequestState {
         set {
             var comp = URLComponents()
             comp.queryItems = newValue
-            request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
+            _request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
         }
+    }
+
+    func header(_ name: String) -> HeaderCap {
+        HeaderCap(
+            value: Binding(
+                get: { self._request.value(forHTTPHeaderField: name) },
+                set: { self._request.setValue($0, forHTTPHeaderField: name) }
+            ),
+            addValue: { self._request.addValue($0, forHTTPHeaderField: name) }
+        )
     }
 }
 
 public extension RequestState {
-    static subscript<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestBlock {
+    static subscript<T>(_ keyPath: WritableKeyPath<URLRequest, T>, _ value: @autoclosure @escaping () throws -> T) -> RequestBlock {
         RequestBlock { state in
-            state[keyPath: keyPath] = try value()
+            state.request[keyPath: keyPath] = try value()
         }
     }
 }

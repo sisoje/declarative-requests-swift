@@ -32,14 +32,14 @@ public extension Header {
     }
 
     func addValue(_ value: String) -> RawHeader {
-        RawHeader { [rawValue] state in
-            state.request.addValue(value, forHTTPHeaderField: rawValue)
+        RawHeader { state in
+            state.header(rawValue).addValue(value)
         }
     }
 
     func setValue(_ value: String) -> RawHeader {
-        RawHeader { [rawValue] state in
-            state.request.setValue(value, forHTTPHeaderField: rawValue)
+        RawHeader { state in
+            state.header(rawValue).value = value
         }
     }
 }

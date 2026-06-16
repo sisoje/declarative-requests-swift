@@ -175,7 +175,7 @@ private func applyInMemory(sources: [ByteSource], boundary: String, state: Reque
         }
     }
     state.request.httpBody = body
-    state.request.setValue(contentType(boundary: boundary), forHTTPHeaderField: Header.contentType.rawValue)
+    state.header(Header.contentType.rawValue).value = contentType(boundary: boundary)
 }
 
 private func applyStreamed(sources: [ByteSource], boundary: String, bufferSize: Int, state: RequestState) throws {
@@ -194,8 +194,8 @@ private func applyStreamed(sources: [ByteSource], boundary: String, bufferSize: 
     }
 
     state.request.httpBodyStream = input
-    state.request.setValue(contentType(boundary: boundary), forHTTPHeaderField: Header.contentType.rawValue)
-    state.request.setValue("\(totalLength)", forHTTPHeaderField: "Content-Length")
+    state.header(Header.contentType.rawValue).value = contentType(boundary: boundary)
+    state.header("Content-Length").value = "\(totalLength)"
 
     MultipartStreamProducer(sources: sources, output: output, bufferSize: bufferSize).start()
 }

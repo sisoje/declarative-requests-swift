@@ -8,6 +8,6 @@ public struct HTTPShouldHandleCookies: RequestBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestState[\.request.httpShouldHandleCookies, value]
+        RequestState[\.httpShouldHandleCookies, value]
     }
 }
