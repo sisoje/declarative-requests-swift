@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
-    let req = try RequestBlock {
+    let req = try RequestBuilderGroup {
         AllowAccess.cellular(isAllowed)
         AllowAccess.constrainedNetwork(isAllowed)
         AllowAccess.expensiveNetwork(isAllowed)
@@ -48,7 +48,7 @@ import Testing
 }
 
 @Test func urlRequestTest() throws {
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
@@ -75,7 +75,7 @@ import Testing
 }
 
 @Test(arguments: [1, 2]) func countTest(count: Int) throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         BaseURL("https://google.com")
 
         for i in 1 ... count {
@@ -94,7 +94,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         BaseURL("https://google.com")
 
         if isFirst {
@@ -113,7 +113,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         BaseURL("https://google.com")
 
         if isFirst {
@@ -134,7 +134,7 @@ import Testing
 }
 
 @Test func urlEncodedBodySingleKeyValue() throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded([URLQueryItem(name: "key", value: "value")])
     }
     let source = RequestState()
@@ -148,7 +148,7 @@ import Testing
 }
 
 @Test func urlEncodedBodyDuplicateNames() throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded([
             URLQueryItem(name: "color", value: "red"),
             URLQueryItem(name: "color", value: "blue"),
@@ -168,7 +168,7 @@ import Testing
 }
 
 @Test func urlEncodedBodyDictionary() throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded(["name": "john", "age": "25"])
     }
     let source = RequestState()
@@ -186,7 +186,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded(User(id: 123, name: "john"))
     }
     let source = RequestState()
@@ -200,7 +200,7 @@ import Testing
 }
 
 @Test func urlEncodedBodyLastWins() throws {
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
         RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
     }
@@ -216,7 +216,7 @@ import Testing
 
 @Test func urlEncodedBodyBuiltFromLoop() throws {
     let items = (1 ... 6).map { URLQueryItem(name: "count", value: "\($0)") }
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         RequestBody.urlEncoded(items)
     }
     let source = RequestState()
@@ -236,7 +236,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestBlock {
+    let builder = RequestBuilderGroup {
         Query(User(id: 123, name: "john"))
     }
     let source = RequestState()
@@ -267,17 +267,17 @@ import Testing
         }
     )
     let request = try repository.getUser("1").request
-    #expect(request.url?.absoluteString == "///user?userId=1")
+    #expect(request.url?.absoluteString == "/user?userId=1")
     #expect(request.httpMethod == "GET")
     let request2 = try repository.refreshToken("1").request
-    #expect(request2.url?.absoluteString == "///refreshToken")
+    #expect(request2.url?.absoluteString == "/refreshToken")
     #expect(request2.httpMethod == "POST")
     #expect(request2.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"token\":\"1\"}")
 }
 
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         RequestBody.stream(InputStream(data: data))
     }.request
     #expect(request.httpBodyStream != nil)
@@ -302,7 +302,7 @@ import Testing
 }
 
 @Test func queryItems() throws {
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         Query("x", "y")
         Query("1", "2")
     }.request
@@ -324,7 +324,7 @@ import Testing
 }
 
 @Test func cookie() throws {
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         Cookie("x", "y")
         Cookie("1", "2")
     }.request
@@ -333,7 +333,7 @@ import Testing
 }
 
 @Test func authBearer() throws {
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         Authorization.bearer("x")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
@@ -341,7 +341,7 @@ import Testing
 }
 
 @Test func authUserPass() throws {
-    let request = try RequestBlock {
+    let request = try RequestBuilderGroup {
         Authorization.basic(username: "x", password: "y")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)

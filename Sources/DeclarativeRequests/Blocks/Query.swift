@@ -14,7 +14,7 @@ public struct Query: RequestBuildable {
     let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
-        RequestBlock { state in
+        RequestStateTransformer { state in
             state.queryItems += try items(state.encoder)
         }
     }

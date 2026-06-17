@@ -12,7 +12,7 @@ public struct BaseURL: RequestBuildable {
     let url: URL?
 
     public var body: some RequestBuildable {
-        RequestBlock { state in
+        RequestStateTransformer { state in
             guard let url else {
                 throw DeclarativeRequestsError.badUrl
             }

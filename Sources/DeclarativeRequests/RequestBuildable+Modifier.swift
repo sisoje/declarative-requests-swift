@@ -1,8 +1,8 @@
 import Foundation
 
 public extension RequestBuildable {
-    func environment<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: T) -> RequestBlock {
-        RequestBlock { state in
+    func environment<T>(_ keyPath: ReferenceWritableKeyPath<RequestState, T>, _ value: T) -> RequestStateTransformer {
+        RequestStateTransformer { state in
             let original = state[keyPath: keyPath]
             state[keyPath: keyPath] = value
             defer { state[keyPath: keyPath] = original }
@@ -10,11 +10,11 @@ public extension RequestBuildable {
         }
     }
 
-    func headersAdd() -> RequestBlock {
+    func headersAdd() -> RequestStateTransformer {
         environment(\.shouldAddHeaders, true)
     }
 
-    func headersSet() -> RequestBlock {
+    func headersSet() -> RequestStateTransformer {
         environment(\.shouldAddHeaders, false)
     }
 }

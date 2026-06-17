@@ -13,7 +13,7 @@ public extension RequestBody {
     ) -> some RequestBuildable {
         let parts = parts()
         let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
-        return RequestBlock { state in
+        return RequestStateTransformer { state in
             let sources = try encode(parts: parts, boundary: boundary)
             switch strategy {
             case .inMemory:

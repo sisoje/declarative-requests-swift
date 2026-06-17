@@ -8,7 +8,7 @@ public struct Accept: RequestBuildable, Sendable {
     }
 
     public var body: some RequestBuildable {
-        RequestBlock { state in
+        RequestStateTransformer { state in
             state.header(Header.accept.rawValue).addValue(mimeType.rawValue)
         }
     }

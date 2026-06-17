@@ -18,7 +18,7 @@ public struct RawHeader: HeaderBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestBlock(perform)
+        RequestStateTransformer(perform)
     }
 }
 
@@ -30,7 +30,7 @@ public struct Headers: RequestBuildable {
     }
 
     public var body: some RequestBuildable {
-        RequestBlock(blocks.map(\.transform).reduced)
+        RequestStateTransformer(blocks.map(\.transform).reduced)
     }
 }
 

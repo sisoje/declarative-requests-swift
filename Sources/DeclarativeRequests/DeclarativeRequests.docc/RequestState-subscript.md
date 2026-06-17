@@ -9,7 +9,7 @@ This subscript is the primary way internal blocks like ``Method`` and
 
 ```swift
 public var body: some RequestBuildable {
-    RequestState[\.request.timeoutInterval, interval]
+    RequestMutation[\.request.timeoutInterval, interval]
 }
 ```
 

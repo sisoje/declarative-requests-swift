@@ -10,10 +10,10 @@ public enum Method: String, RequestBuildable {
     case PATCH
 
     public var body: some RequestBuildable {
-        RequestState[\.httpMethod, rawValue]
+        RequestMutation[\.httpMethod, rawValue]
     }
 
     public static func custom(_ method: String) -> some RequestBuildable {
-        RequestState[\.httpMethod, method]
+        RequestMutation[\.httpMethod, method]
     }
 }
