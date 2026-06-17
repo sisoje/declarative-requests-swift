@@ -9,5 +9,3 @@ public struct RequestStateTransformer: RequestBuildable {
         let _ = fatalError("dont call body of StateTransformationNode")
     }
 }
-
-

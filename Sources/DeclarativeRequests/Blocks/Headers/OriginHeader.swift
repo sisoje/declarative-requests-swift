@@ -1,7 +1,10 @@
 import Foundation
 
 public struct OriginHeader: SingleValueHeader {
-    public static var headerName: Header { .origin }
+    public static var headerName: Header {
+        .origin
+    }
+
     public let value: String
     public let mode: HeaderMode
 

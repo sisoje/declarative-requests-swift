@@ -1,7 +1,10 @@
 import Foundation
 
 public struct RefererHeader: SingleValueHeader {
-    public static var headerName: Header { .referer }
+    public static var headerName: Header {
+        .referer
+    }
+
     public let value: String
     public let mode: HeaderMode
 

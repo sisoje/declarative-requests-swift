@@ -1,7 +1,10 @@
 import Foundation
 
 public struct ContentTypeHeader: SingleValueHeader {
-    public static var headerName: Header { .contentType }
+    public static var headerName: Header {
+        .contentType
+    }
+
     public let value: String
     public let mode: HeaderMode
 

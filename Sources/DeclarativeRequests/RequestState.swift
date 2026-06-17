@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 @Observable public final class RequestState: @unchecked Sendable {
-    internal init(
+    init(
         baseURL: URL = .placeholder,
         urlComponents: URLComponents = URLComponents(),
         request: URLRequest = URLRequest(url: .placeholder),
@@ -11,15 +11,15 @@ import SwiftUI
     ) {
         self.baseURL = baseURL
         self.urlComponents = urlComponents
-        self._request = request
+        _request = request
         self.encoder = encoder
         self.shouldAddHeaders = shouldAddHeaders
     }
-    
-    public var baseURL: URL = .placeholder
-    public var urlComponents: URLComponents = URLComponents()
 
-    private var _request: URLRequest = URLRequest(url: .placeholder)
+    public var baseURL: URL = .placeholder
+    public var urlComponents: URLComponents = .init()
+
+    private var _request: URLRequest = .init(url: .placeholder)
     public var request: URLRequest {
         get {
             var res = _request
@@ -33,7 +33,7 @@ import SwiftUI
         }
     }
 
-    public var encoder: JSONEncoder = JSONEncoder()
+    public var encoder: JSONEncoder = .init()
 
     public var shouldAddHeaders = true
 

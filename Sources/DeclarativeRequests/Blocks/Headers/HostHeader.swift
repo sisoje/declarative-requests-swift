@@ -1,7 +1,10 @@
 import Foundation
 
 public struct HostHeader: SingleValueHeader {
-    public static var headerName: Header { .host }
+    public static var headerName: Header {
+        .host
+    }
+
     public let value: String
     public let mode: HeaderMode
 

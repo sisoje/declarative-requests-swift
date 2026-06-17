@@ -1,7 +1,10 @@
 import Foundation
 
 public struct UserAgentHeader: SingleValueHeader {
-    public static var headerName: Header { .userAgent }
+    public static var headerName: Header {
+        .userAgent
+    }
+
     public let value: String
     public let mode: HeaderMode
 

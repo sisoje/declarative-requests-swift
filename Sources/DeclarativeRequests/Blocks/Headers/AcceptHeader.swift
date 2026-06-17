@@ -1,7 +1,10 @@
 import Foundation
 
 public struct AcceptHeader: SingleValueHeader {
-    public static var headerName: Header { .accept }
+    public static var headerName: Header {
+        .accept
+    }
+
     public let value: String
     public let mode: HeaderMode
 

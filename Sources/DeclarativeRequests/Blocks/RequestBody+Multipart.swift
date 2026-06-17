@@ -89,7 +89,7 @@ private func encode(parts: [MultipartPart], boundary: String) throws -> [ByteSou
         case let .data(_, _, payload, _):
             sources.append(.data(payload))
         case let .file(_, url, _, _):
-            sources.append(.file(url, size: try fileSize(url)))
+            try sources.append(.file(url, size: fileSize(url)))
         }
         sources.append(.data(Data("\r\n".utf8)))
     }
@@ -166,7 +166,7 @@ private func applyInMemory(sources: [ByteSource], boundary: String, state: Reque
             body.append(d)
         case let .file(url, _):
             do {
-                body.append(try Data(contentsOf: url))
+                try body.append(Data(contentsOf: url))
             } catch {
                 throw DeclarativeRequestsError.badMultipart(
                     reason: "Could not read \(url.lastPathComponent): \(error.localizedDescription)"

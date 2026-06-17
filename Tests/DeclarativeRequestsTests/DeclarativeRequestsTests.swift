@@ -295,9 +295,11 @@ import Testing
         var b = true
     }
     let request = try Query(Model()).request
-    let rs = URLComponents(url: request.url!, resolvingAgainstBaseURL: true)!
-    let q1 = Set(rs.queryItems!)
-    let q2 = try Set(#require(URLComponents(string: "?num2=2&str2=2&b=true")?.queryItems))
+    let url = try #require(request.url)
+    let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
+    let q1 = try Set(#require(rs.queryItems))
+    let q2comps = try #require(URLComponents(string: "?num2=2&str2=2&b=true"))
+    let q2 = try Set(#require(q2comps.queryItems))
     #expect(q1 == q2)
 }
 
@@ -306,9 +308,11 @@ import Testing
         Query("x", "y")
         Query("1", "2")
     }.request
-    let rs = URLComponents(url: request.url!, resolvingAgainstBaseURL: true)!
-    let q1 = Set(rs.queryItems!)
-    let q2 = try Set(#require(URLComponents(string: "?x=y&1=2")?.queryItems))
+    let url = try #require(request.url)
+    let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
+    let q1 = try Set(#require(rs.queryItems))
+    let q2comps = try #require(URLComponents(string: "?x=y&1=2"))
+    let q2 = try Set(#require(q2comps.queryItems))
     #expect(q1 == q2)
 }
 
@@ -317,9 +321,11 @@ import Testing
         case some(x: Int = 5, y: String = "a")
     }
     let request = try Query(Model.some()).request
-    let rs = URLComponents(url: request.url!, resolvingAgainstBaseURL: true)!
-    let q1 = Set(rs.queryItems!)
-    let q2 = try Set(#require(URLComponents(string: "?x=5&y=a")?.queryItems))
+    let url = try #require(request.url)
+    let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
+    let q1 = try Set(#require(rs.queryItems))
+    let q2comps = try #require(URLComponents(string: "?x=5&y=a"))
+    let q2 = try Set(#require(q2comps.queryItems))
     #expect(q1 == q2)
 }
 
@@ -1296,16 +1302,16 @@ private func expect(
 }
 
 @Test func orderIndependence_baseEndpointQuery() throws {
-    let base    = { BaseURL("https://api.example.com") }
-    let endpt   = { Endpoint("/v1/users") }
-    let query   = { Query("token", "abc") }
+    let base = { BaseURL("https://api.example.com") }
+    let endpt = { Endpoint("/v1/users") }
+    let query = { Query("token", "abc") }
     let perms: [() throws -> URLRequest] = [
-        { try URLRequest { base();  endpt(); query() } },
-        { try URLRequest { base();  query(); endpt() } },
-        { try URLRequest { endpt(); base();  query() } },
-        { try URLRequest { endpt(); query(); base()  } },
-        { try URLRequest { query(); base();  endpt() } },
-        { try URLRequest { query(); endpt(); base()  } },
+        { try URLRequest { base(); endpt(); query() } },
+        { try URLRequest { base(); query(); endpt() } },
+        { try URLRequest { endpt(); base(); query() } },
+        { try URLRequest { endpt(); query(); base() } },
+        { try URLRequest { query(); base(); endpt() } },
+        { try URLRequest { query(); endpt(); base() } },
     ]
     for build in perms {
         try expect(
