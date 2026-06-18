@@ -7,13 +7,11 @@ import SwiftUI
         urlComponents: URLComponents = URLComponents(),
         request: URLRequest = URLRequest(url: .placeholder),
         encoder: JSONEncoder = JSONEncoder(),
-        shouldAddHeaders: Bool = true
     ) {
         self.baseURL = baseURL
         self.urlComponents = urlComponents
         _request = request
         self.encoder = encoder
-        self.shouldAddHeaders = shouldAddHeaders
     }
 
     public var baseURL: URL = .placeholder
@@ -34,8 +32,6 @@ import SwiftUI
     }
 
     public var encoder: JSONEncoder = .init()
-
-    public var shouldAddHeaders = true
 
     public var cookies: [String: String] {
         get {

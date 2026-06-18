@@ -10,11 +10,7 @@ public extension RequestBuildable {
         }
     }
 
-    func headersAdd() -> RequestStateTransformer {
-        environment(\.shouldAddHeaders, true)
-    }
-
-    func headersSet() -> RequestStateTransformer {
-        environment(\.shouldAddHeaders, false)
+    func useEncoder(_ encoder: JSONEncoder) -> RequestStateTransformer {
+        environment(\.encoder, encoder)
     }
 }
