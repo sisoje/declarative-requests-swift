@@ -26,7 +26,7 @@ Content-Type: application/json
 ```swift
 let request = try URLRequest {
     Method.POST
-    Endpoint("/v1/login")
+    Endpoint("v1/login")
     Header.accept.setValue("application/json")
     RequestBody.json(LoginRequest(email: email, password: password))
     Authorization.bearer(token)
@@ -67,10 +67,10 @@ enum UserEndpoint {
         switch self {
         case let .getUser(id):
             Method.GET
-            Endpoint("/v1/users/\(id)")
+            Endpoint("v1/users/\(id)")
         case let .refreshToken(token):
             Method.POST
-            Endpoint("/v1/auth/refresh")
+            Endpoint("v1/auth/refresh")
             RequestBody.json(["token": token])
         }
     }
@@ -145,7 +145,7 @@ Pick the factory or initializer that matches the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com/api")` |
-| `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("/users/\(id)/posts")` |
+| `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
@@ -168,7 +168,7 @@ They go directly in the request — `setValue` replaces, `addValue` accumulates:
 ```swift
 let request = try URLRequest {
     Method.GET
-    Endpoint("/users")
+    Endpoint("users")
 
     MIMEType.json.accept
     Header.userAgent.setValue("MyApp/1.0")
@@ -232,7 +232,7 @@ let request = try RequestBlock {
 ```swift
 let request = try URLRequest {
     Method.POST
-    Endpoint("/upload")
+    Endpoint("upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
         MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: "image/png")
@@ -257,7 +257,7 @@ If you already have a `URL` value, use `buildRequest`:
 ```swift
 let request = try api.buildRequest {
     Method.GET
-    Endpoint("/v1/users/\(userId)")
+    Endpoint("v1/users/\(userId)")
     Header.accept.setValue("application/json")
 }
 ```
@@ -267,7 +267,7 @@ Otherwise declare the URL inside the builder with `BaseURL`:
 ```swift
 let request = try URLRequest {
     Method.POST
-    Endpoint("/login")
+    Endpoint("login")
     RequestBody.json(credentials)
     BaseURL("https://api.example.com")
 }

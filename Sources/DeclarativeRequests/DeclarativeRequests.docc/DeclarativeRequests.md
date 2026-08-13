@@ -16,7 +16,7 @@ the raw HTTP request.
 let request = try URLRequest {
     Method.POST
     BaseURL("https://api.example.com")
-    Endpoint("/v1/login")
+    Endpoint("v1/login")
     Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
@@ -47,13 +47,13 @@ There are several entry points, all equivalent:
 let request = try URLRequest {
     Method.GET
     BaseURL("https://api.example.com")
-    Endpoint("/health")
+    Endpoint("health")
 }
 
 // From an existing URL value:
 let request = try existingURL.buildRequest {
     Method.GET
-    Endpoint("/v1/users/\(userId)")
+    Endpoint("v1/users/\(userId)")
 }
 ```
 
@@ -65,7 +65,7 @@ and `for` — use them directly inside the builder closure:
 ```swift
 let request = try URLRequest {
     Method.GET
-    Endpoint("/v1/users")
+    Endpoint("v1/users")
 
     if isStaging {
         Header.custom("X-Env").setValue("staging")
@@ -117,12 +117,12 @@ extension UserBackend {
             getUser: { id in
                 Method.GET
                 BaseURL(baseURL)
-                Endpoint("/v1/users/\(id)")
+                Endpoint("v1/users/\(id)")
             },
             refreshToken: { token in
                 Method.POST
                 BaseURL(baseURL)
-                Endpoint("/v1/auth/refresh")
+                Endpoint("v1/auth/refresh")
                 RequestBody.json(["token": token])
             }
         )
@@ -140,7 +140,7 @@ Headers go directly in the request — `setValue` replaces, `addValue` accumulat
 let request = try URLRequest {
     Method.GET
     BaseURL("https://api.example.com")
-    Endpoint("/users")
+    Endpoint("users")
 
     MIMEType.json.accept
     Header.userAgent.setValue("MyApp/1.0")
@@ -162,7 +162,7 @@ blocks so the request is fully formed when the closure runs:
 ```swift
 let request = try URLRequest {
     Method.POST
-    Endpoint("/v1/data")
+    Endpoint("v1/data")
     RequestBody.json(payload)
     RequestBlock { state in
         let body = state.request.httpBody ?? Data()

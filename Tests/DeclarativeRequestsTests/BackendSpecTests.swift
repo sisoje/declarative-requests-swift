@@ -55,10 +55,10 @@ enum UserEndpoint {
         switch self {
         case let .getUser(id):
             Method.GET
-            Endpoint("/v1/users/\(id)")
+            Endpoint("v1/users/\(id)")
         case let .refreshToken(token):
             Method.POST
-            Endpoint("/v1/auth/refresh")
+            Endpoint("v1/auth/refresh")
             RequestBody.json(["token": token])
         }
     }
