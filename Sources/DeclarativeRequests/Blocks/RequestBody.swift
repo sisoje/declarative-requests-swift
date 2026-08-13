@@ -41,12 +41,9 @@ public extension RequestBody {
         }
     }
 
-    static func stream(_ stream: @autoclosure @escaping () throws -> InputStream?) -> some RequestBuildable {
+    static func stream(_ stream: @autoclosure @escaping () throws -> InputStream) -> some RequestBuildable {
         RequestBlock { state in
-            guard let inputStream = try stream() else {
-                throw DeclarativeRequestsError.badStream
-            }
-            state.request.httpBodyStream = inputStream
+            state.request.httpBodyStream = try stream()
         }
     }
 }
