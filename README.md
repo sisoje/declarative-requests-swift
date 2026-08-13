@@ -32,8 +32,26 @@ section. The block order roughly mirrors the wire order.
 
 ## Block reference
 
-One type per request property. Pick the factory or initializer that matches
-the data you have.
+One type per request property — you never touch the raw `URLRequest` fields
+directly, each has exactly one typed block over it:
+
+| Raw `URLRequest` field | Block |
+|---|---|
+| `httpMethod` | `Method.GET` … `.custom(_)` |
+| `url` | `BaseURL` / `Endpoint` / `Query` |
+| `allHTTPHeaderFields` | `Header.x.setValue/addValue`, `MIMEType.x.accept/.contentType`, `Cookie`, `Authorization` |
+| `httpBody` / `httpBodyStream` | `RequestBody.*` |
+| `timeoutInterval` | `Timeout(5)` |
+| `cachePolicy` | `CachePolicy(.reloadIgnoringLocalCacheData)` |
+| `networkServiceType` | `NetworkServiceType(.background)` |
+| `httpShouldHandleCookies` | `HTTPShouldHandleCookies(false)` |
+| `allowsCellularAccess` etc. | `AllowAccess.cellular(true)` etc. |
+
+For a field without a block, `RequestMutation[\.keyPath, value]` is the
+one-line escape hatch, and a raw `RequestBlock { state in … }` closure is the
+last resort.
+
+Pick the factory or initializer that matches the data you have.
 
 ### URL & path
 
