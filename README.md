@@ -106,8 +106,8 @@ This split is deliberate — the canonical order is three layers, each varying o
 a different axis:
 
 1. **Definition** — method, path, query, headers, body: the backend's spec, identical everywhere.
-2. **`Authorization`** — who is asking. Varies per session, and only endpoints that need it carry it — public endpoints simply don't have the block.
-3. **`BaseURL`** — where it runs. Varies per environment, always last.
+2. **Authorization** — who is asking. Varies per session, and only endpoints that need it carry the `Authorization` block — public endpoints simply don't have it.
+3. **Base URL** — where it runs. Varies per environment; `BaseURL` comes last.
 
 Endpoints are definition; auth and base are configuration on two different axes.
 
@@ -198,12 +198,12 @@ Describe your backend as an enum: one case per endpoint — a backend is a
 finite set of endpoints, so the spec is a closed type. Materializing a
 request is three composable steps, one per axis:
 
-1. **the case** — definition (what the endpoint is)
-2. **`authorized(token:)`** — session. The spec declares `needsAuth` per
-   endpoint as a static fact; a protected endpoint with a nil token **fails
-   the build** with the spec's own error — a half-authorized request can
-   never reach the wire.
-3. **`baseURL.buildRequest`** — environment, applied at the very end.
+1. **The case** — definition: what the endpoint is.
+2. **The authorized step** — session: `authorized(token:)`. The spec declares
+   `needsAuth` per endpoint as a static fact; a protected endpoint with a nil
+   token **fails the build** with the spec's own error — a half-authorized
+   request can never reach the wire.
+3. **The environment** — `baseURL.buildRequest`, applied at the very end.
 
 ```swift
 enum UserEndpoint {
