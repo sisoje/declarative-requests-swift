@@ -42,8 +42,8 @@ directly, each has exactly one typed block over it:
 | `allHTTPHeaderFields` | `Header.x.setValue/addValue`, `MIMEType.x.accept/.contentType`, `Cookie`, `Authorization` |
 | `httpBody` / `httpBodyStream` | `RequestBody.*` |
 | `timeoutInterval` | `Timeout(5)` |
-| `cachePolicy` | `CachePolicy.reloadIgnoringLocalCacheData` |
-| `networkServiceType` | `NetworkServiceType.background` |
+| `cachePolicy` | `RequestMutation[\.cachePolicy, .returnCacheDataElseLoad]` |
+| `networkServiceType` | `RequestMutation[\.networkServiceType, .background]` |
 | `httpShouldHandleCookies` | `HTTPShouldHandleCookies(false)` |
 | `allowsCellularAccess` etc. | `AllowAccess.cellular(true)` etc. |
 
@@ -132,8 +132,6 @@ let request = try RequestBlock {
 | Block | What it does |
 |---|---|
 | `Timeout(_ seconds:)` | `request.timeoutInterval` |
-| `CachePolicy.reloadIgnoringLocalCacheData` | `request.cachePolicy` |
-| `NetworkServiceType.background` | `request.networkServiceType` |
 | `HTTPShouldHandleCookies(false)` | `request.httpShouldHandleCookies` |
 | `AllowAccess.cellular(true)` etc. | `allowsCellularAccess` / `allowsExpensiveNetworkAccess` / `allowsConstrainedNetworkAccess` / `allowsUltraConstrainedNetworkAccess` (the last is 26.1+, no-op earlier) |
 
@@ -297,8 +295,7 @@ flowchart LR
     %% Networking knobs
     RB --> NetGroup["Networking Knobs"]
     NetGroup --> Timeout["Timeout(_ seconds)"]
-    NetGroup --> CachePolicy["CachePolicy.returnCacheDataElseLoad ..."]
-    NetGroup --> NST["NetworkServiceType.background ..."]
+    NetGroup --> RM["RequestMutation[\.cachePolicy, ...]\nRequestMutation[\.networkServiceType, ...]"]
     NetGroup --> HSHC["HTTPShouldHandleCookies(_ flag)"]
     NetGroup --> AllowAccess
     AllowAccess --> AA1[".cellular(Bool)"]

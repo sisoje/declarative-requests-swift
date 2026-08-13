@@ -666,7 +666,7 @@ import Testing
 
 @Test func networkServiceTypeApplied() throws {
     let request = try URLRequest {
-        NetworkServiceType.background
+        RequestMutation[\.networkServiceType, .background]
     }
     #expect(request.networkServiceType == .background)
 }
@@ -699,7 +699,7 @@ import Testing
 @Test func timeoutAndCachePolicyApplied() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        CachePolicy.reloadIgnoringLocalCacheData
+        RequestMutation[\.cachePolicy, .reloadIgnoringLocalCacheData]
         Timeout(5)
         Method.GET
     }
