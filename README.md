@@ -39,7 +39,7 @@ directly, each has exactly one typed block over it:
 |---|---|
 | `httpMethod` | `Method.GET` … `Method.QUERY` |
 | `url` | `BaseURL` / `Endpoint` / `Query` |
-| `allHTTPHeaderFields` | `Header.x.setValue/addValue`, `MIMEType.x.accept/.contentType`, `Cookie`, `Authorization` |
+| `allHTTPHeaderFields` | `Header.<field>.setValue/addValue`, `MIMEType.<case>.accept/.contentType`, `Cookie`, `Authorization` |
 | `httpBody` / `httpBodyStream` | `RequestBody.*` |
 | `timeoutInterval` | `Timeout(5)` |
 | `cachePolicy` | `RequestMutation[\.cachePolicy, .returnCacheDataElseLoad]` |
@@ -67,15 +67,15 @@ Pick the factory or initializer that matches the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `Method.GET` / `.POST` / `.PUT` / … | Sets the HTTP method. Nonstandard verb: `RequestMutation[\.httpMethod, "LINK"]`. | `Method.POST` |
-| `Header.field.setValue(_:)` | Sets a header field, replacing any previous value. | `Header.accept.setValue("application/json")` |
-| `Header.field.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
+| `Header.<field>.setValue(_:)` | Sets a header field, replacing any previous value. | `Header.accept.setValue("application/json")` |
+| `Header.<field>.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
 | `Cookie(_ encodable:)` | Flatten an `Encodable` model into cookies. | `Cookie(sessionModel)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
-| `MIMEType.x.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
-| `MIMEType.x.accept` | Accumulates `Accept` header values. Arbitrary values: `Header.accept.addValue(...)`. | `MIMEType.json.accept` |
+| `MIMEType.<case>.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
+| `MIMEType.<case>.accept` | Accumulates `Accept` header values. Arbitrary values: `Header.accept.addValue(...)`. | `MIMEType.json.accept` |
 
 They go directly in the request — `setValue` replaces, `addValue` accumulates:
 
@@ -110,7 +110,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ name:, _ value:)` | one form field (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
-| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.x.contentType` if needed |
+| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.<case>.contentType` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
 Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
@@ -258,8 +258,8 @@ flowchart LR
     %% Headers
     RB --> HeaderGroup["Headers"]
     HeaderGroup --> Header["Header (enum)"]
-    Header --> H1["Header.field.setValue(value)"]
-    Header --> H2["Header.field.addValue(value)"]
+    Header --> H1["Header.&lt;field&gt;.setValue(value)"]
+    Header --> H2["Header.&lt;field&gt;.addValue(value)"]
     Header --> H3["Header.custom(name).setValue(value)"]
     Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
     HeaderGroup --> Cookie["Cookie"]
