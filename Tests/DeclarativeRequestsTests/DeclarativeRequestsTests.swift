@@ -956,3 +956,16 @@ import Testing
         #expect(mime.rawValue == raw)
     }
 }
+
+@Test func useEncoderIsScopedToItsGroup() throws {
+    struct Model: Codable { let userName: String }
+    let snake = JSONEncoder()
+    snake.keyEncodingStrategy = .convertToSnakeCase
+    let request = try URLRequest {
+        RequestBuilderGroup {
+            Query(Model(userName: "a"))
+        }.useEncoder(snake)
+        Query(Model(userName: "b"))
+    }
+    #expect(request.url?.query == "user_name=a&userName=b")
+}
