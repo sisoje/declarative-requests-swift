@@ -31,7 +31,7 @@ public extension RequestState {
     }
 
     /// Backed by `request.url`, resolved.
-    var urlComponents: URLComponents {
+    private var urlComponents: URLComponents {
         get { URLComponents(url: request.url ?? .placeholder, resolvingAgainstBaseURL: true) ?? URLComponents() }
         set { request.url = newValue.url }
     }
