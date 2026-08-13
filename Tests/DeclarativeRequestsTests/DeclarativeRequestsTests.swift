@@ -882,22 +882,22 @@ import Testing
 
 @Test func contentTypeBlockSetsHeader() throws {
     let request = try URLRequest {
-        ContentType("application/json")
+        MIMEType.json.contentType
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
 }
 
 @Test func contentTypeWithParameters() throws {
     let request = try URLRequest {
-        ContentType("application/json; charset=utf-8")
+        Header.contentType.setValue("application/json; charset=utf-8")
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json; charset=utf-8")
 }
 
 @Test func contentTypeLastWriteWins() throws {
     let request = try URLRequest {
-        ContentType("application/json")
-        ContentType("application/xml")
+        MIMEType.json.contentType
+        MIMEType.xml.contentType
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/xml")
 }
@@ -906,32 +906,32 @@ import Testing
 
 @Test func acceptSingleType() throws {
     let request = try URLRequest {
-        Accept("application/json")
+        MIMEType.json.accept
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
 }
 
 @Test func acceptMultipleTypesAccumulate() throws {
     let request = try URLRequest {
-        Accept("application/json")
-        Accept("application/xml")
-        Accept("text/html")
+        MIMEType.json.accept
+        MIMEType.xml.accept
+        MIMEType.html.accept
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,application/xml,text/html")
 }
 
 @Test func acceptWithQualityParameters() throws {
     let request = try URLRequest {
-        Accept("application/json")
-        Accept("application/xml; q=0.8")
-        Accept("text/html; q=0.5")
+        MIMEType.json.accept
+        Header.accept.addValue("application/xml; q=0.8")
+        Header.accept.addValue("text/html; q=0.5")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,application/xml; q=0.8,text/html; q=0.5")
 }
 
 @Test func acceptWithCharsetParameter() throws {
     let request = try URLRequest {
-        Accept("text/html; charset=utf-8")
+        Header.accept.addValue("text/html; charset=utf-8")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "text/html; charset=utf-8")
 }

@@ -16,8 +16,8 @@ public extension RequestBody {
 
 public enum MultipartPart {
     case field(name: String, value: String)
-    case data(name: String, filename: String, data: Data, type: String = MIMEType.octetStream)
-    case file(name: String, fileURL: URL, type: String = MIMEType.octetStream, filename: String? = nil)
+    case data(name: String, filename: String, data: Data, type: String = "application/octet-stream")
+    case file(name: String, fileURL: URL, type: String = "application/octet-stream", filename: String? = nil)
 }
 
 @_documentation(visibility: internal)
