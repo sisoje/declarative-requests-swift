@@ -236,13 +236,14 @@ enum UserEndpoint {
         try RequestBlock {
             spec
             if needsAuth {
-                if let token {
-                    Authorization.bearer(token)
-                } else {
-                    throw MissingToken()
-                }
+                try Self.requiredBearer(token)
             }
         }
+    }
+
+    private static func requiredBearer(_ token: String?) throws -> some RequestBuildable {
+        guard let token else { throw MissingToken() }
+        return Authorization.bearer(token)
     }
 }
 
