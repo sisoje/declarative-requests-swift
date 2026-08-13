@@ -35,6 +35,97 @@ let request = try URLRequest {
 `Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
 section. The block order roughly mirrors the wire order.
 
+## Backend spec
+
+Describe your backend as an enum: one case per endpoint — a backend is a
+finite set of endpoints, so the spec is a closed type. Materializing a
+request is three composable steps, one per axis:
+
+1. **The case** — definition: what the endpoint is.
+2. **The authorized step** — session: `authorized(token:)`. The spec declares
+   `needsAuth` per endpoint as a static fact; a protected endpoint with a nil
+   token **fails the build** with the spec's own error — a half-authorized
+   request can never reach the wire.
+3. **The environment** — `.base(_:)`, a layer like any other, applied at the
+   very end. Materializing (`.request`) is the only terminal step.
+
+```swift
+enum UserEndpoint {
+    case getUser(id: String)
+    case refreshToken(token: String)
+
+    var needsAuth: Bool {
+        switch self {
+        case .getUser: true
+        case .refreshToken: false
+        }
+    }
+
+    @RequestBuilder var spec: some RequestBuildable {
+        switch self {
+        case let .getUser(id):
+            Method.GET
+            Endpoint("/v1/users/\(id)")
+        case let .refreshToken(token):
+            Method.POST
+            Endpoint("/v1/auth/refresh")
+            RequestBody.json(["token": token])
+        }
+    }
+
+    struct MissingToken: Error {}
+
+    func authorized(token: String?) -> some RequestBuildable {
+        RequestBlock {
+            spec
+            if needsAuth {
+                if let token {
+                    Authorization.bearer(token)
+                } else {
+                    throw MissingToken()
+                }
+            }
+        }
+    }
+}
+
+extension RequestBuildable {
+    func base(_ url: URL) -> some RequestBuildable {
+        RequestBlock {
+            self
+            BaseURL(url)
+        }
+    }
+}
+```
+
+Every layer has the same shape — `some RequestBuildable` in, `some
+RequestBuildable` out — so the whole pipeline is one chain, and your app
+wraps it once as a demo of the final form:
+
+```swift
+func request(for endpoint: UserEndpoint) throws -> URLRequest {
+    try endpoint
+        .authorized(token: session.token)
+        .base(environment.baseURL)
+        .request
+}
+```
+
+
+```swift
+
+let request = try request(for: .getUser(id: "42"))
+```
+
+Every step returns a block, so layers compose: the spec drops into the
+authorized wrapper, the authorized block drops into the environment builder.
+`MissingToken` is the app's error, not the library's — whether a missing
+token is a failure is the spec's business rule.
+
+This is the "open spec done right" from the top of this README — the spec
+is code, so nothing drifts.
+
 ## Block reference
 
 One type per request property — you never touch the raw `URLRequest` fields
@@ -191,97 +282,6 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
 }
 ```
-
-## Backend spec
-
-Describe your backend as an enum: one case per endpoint — a backend is a
-finite set of endpoints, so the spec is a closed type. Materializing a
-request is three composable steps, one per axis:
-
-1. **The case** — definition: what the endpoint is.
-2. **The authorized step** — session: `authorized(token:)`. The spec declares
-   `needsAuth` per endpoint as a static fact; a protected endpoint with a nil
-   token **fails the build** with the spec's own error — a half-authorized
-   request can never reach the wire.
-3. **The environment** — `.base(_:)`, a layer like any other, applied at the
-   very end. Materializing (`.request`) is the only terminal step.
-
-```swift
-enum UserEndpoint {
-    case getUser(id: String)
-    case refreshToken(token: String)
-
-    var needsAuth: Bool {
-        switch self {
-        case .getUser: true
-        case .refreshToken: false
-        }
-    }
-
-    @RequestBuilder var spec: some RequestBuildable {
-        switch self {
-        case let .getUser(id):
-            Method.GET
-            Endpoint("/v1/users/\(id)")
-        case let .refreshToken(token):
-            Method.POST
-            Endpoint("/v1/auth/refresh")
-            RequestBody.json(["token": token])
-        }
-    }
-
-    struct MissingToken: Error {}
-
-    func authorized(token: String?) -> some RequestBuildable {
-        RequestBlock {
-            spec
-            if needsAuth {
-                if let token {
-                    Authorization.bearer(token)
-                } else {
-                    throw MissingToken()
-                }
-            }
-        }
-    }
-}
-
-extension RequestBuildable {
-    func base(_ url: URL) -> some RequestBuildable {
-        RequestBlock {
-            self
-            BaseURL(url)
-        }
-    }
-}
-```
-
-Every layer has the same shape — `some RequestBuildable` in, `some
-RequestBuildable` out — so the whole pipeline is one chain, and your app
-wraps it once as a demo of the final form:
-
-```swift
-func request(for endpoint: UserEndpoint) throws -> URLRequest {
-    try endpoint
-        .authorized(token: session.token)
-        .base(environment.baseURL)
-        .request
-}
-```
-
-
-```swift
-
-let request = try request(for: .getUser(id: "42"))
-```
-
-Every step returns a block, so layers compose: the spec drops into the
-authorized wrapper, the authorized block drops into the environment builder.
-`MissingToken` is the app's error, not the library's — whether a missing
-token is a failure is the spec's business rule.
-
-This is the "open spec done right" from the top of this README — the spec
-is code, so nothing drifts.
 
 ## Architecture sketch
 
