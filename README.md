@@ -201,10 +201,9 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ name:, _ value:)` | one form field (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
-| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.<case>.contentType` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
-Raw bytes: `RequestMutation[\.httpBody, data]` — pair with `MIMEType.<case>.contentType` if needed.
+Raw bytes: `RequestMutation[\.httpBody, data]`; streams: `RequestMutation[\.httpBodyStream, InputStream(data: data)]` (the subscript's autoclosure re-creates the single-use stream per build). Pair with `MIMEType.<case>.contentType` if needed.
 
 Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
 merges its items into an existing form body, so form fields can accumulate
@@ -337,7 +336,6 @@ flowchart LR
     BodyGroup --> B3[".json(_ encodable)"]
     BodyGroup --> B4[".urlEncoded(_ name, _ value)"]
     BodyGroup --> B5[".urlEncoded(_ encodable)"]
-    BodyGroup --> B6[".stream(_ inputStream)"]
     BodyGroup --> B7[".multipart { parts }"]
     B7 --> MP["MultipartPart"]
     MP --> MP1[".field(name:value:)"]

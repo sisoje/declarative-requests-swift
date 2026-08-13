@@ -11,7 +11,7 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 **Belongs:**
 - The core machinery: the result builder, `RequestBuildable` recursion, `RequestState` (one `URLRequest`, everything else a projection into it), `RequestMutation`.
 - Thin blocks mapping 1:1 onto pieces of a raw HTTP request or `URLRequest` properties — method, URL parts, headers, cookies, body, networking knobs. **One obvious spelling per capability.**
-- Basic body encoders: JSON, url-encoded form, string/data/stream, in-memory multipart.
+- Basic body encoders: JSON, url-encoded form, string, in-memory multipart. Raw bytes and streams ride `RequestMutation` (its value is an autoclosure — single-use streams recreate per build).
 
 **Does not belong** (belongs in a separate package, if anywhere):
 - Sugar that duplicates an existing spelling (the typed-header structs and `Headers {}` DSL were removed for this).
@@ -74,7 +74,6 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 - **`Header` keeps Foundation's vocabulary** — `setValue`/`addValue` are `URLRequest`'s own method names, read in wire order (field → operation → value); an add/set operation enum is the seed `HeaderMode` grew the deleted DSL from — don't replant it.
 - **`MIMEType`** cases are nodes, Header-style: `MIMEType.json.contentType` (set) / `MIMEType.json.accept` (add). Arbitrary values go through `Header.contentType/.accept` directly.
 - **Modifiers**: `.base(_:)` applies the base as a composable layer (`URL.buildRequest` is sugar over it); `.useEncoder(_:)` scopes the encoder to the wrapped blocks.
-- **`RequestBody.stream(_:)`** takes an `@autoclosure` so the `InputStream` is recreated on each build (streams are single-use).
 - **Multipart** is in-memory only (`RequestBody.multipart` assembles a `Data` blob per RFC 7578). See `RequestBody+Multipart.swift`.
 
 ## Tests

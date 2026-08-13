@@ -256,7 +256,7 @@ import Testing
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
     let request = try RequestBlock {
-        RequestBody.stream(InputStream(data: data))
+        RequestMutation[\.httpBodyStream, InputStream(data: data)]
     }.request
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()

@@ -31,10 +31,4 @@ public extension RequestBody {
             state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
-
-    static func stream(_ stream: @autoclosure @escaping () throws -> InputStream) -> some RequestBuildable {
-        RequestBlock { state in
-            state.request.httpBodyStream = try stream()
-        }
-    }
 }
