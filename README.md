@@ -196,7 +196,8 @@ request is three composable steps, one per axis:
 1. **the case** — definition (what the endpoint is)
 2. **`authorized(token:)`** — session. The spec declares `needsAuth` per
    endpoint as a static fact; a protected endpoint with a nil token **fails
-   immediately here**, before any URL exists.
+   the build** with the spec's own error — a half-authorized request can
+   never reach the wire.
 3. **`baseURL.buildRequest`** — environment, applied at the very end.
 
 ```swift
@@ -225,26 +226,31 @@ enum UserBackend {
 
     struct MissingToken: Error {}
 
-    func authorized(token: String?) throws -> some RequestBuildable {
-        if needsAuth, token == nil { throw MissingToken() }
-        return RequestBlock {
+    func authorized(token: String?) -> some RequestBuildable {
+        RequestBlock {
             spec
-            if needsAuth, let token {
-                Authorization.bearer(token)
+            if needsAuth {
+                RequestBlock { state in
+                    guard let token else { throw MissingToken() }
+                    state.request.setValue("Bearer \(token)", forHTTPHeaderField: Header.authorization.rawValue)
+                }
             }
         }
     }
 }
 
-let authorized = try UserBackend.getUser(id: "42").authorized(token: session.token)
-let request = try environment.baseURL.buildRequest { authorized }
+let request = try environment.baseURL.buildRequest {
+    UserBackend.getUser(id: "42").authorized(token: session.token)
+}
 ```
 
 Every step returns a block, so layers compose: the spec drops into the
 authorized wrapper, the authorized block drops into the environment builder.
 `MissingToken` is the app's error, not the library's — whether a missing
-token is a failure is the spec's business rule, and it fires at the session
-boundary, never as a half-authorized request on the wire.
+token is a failure is the spec's business rule.
+
+This is your API spec — an open spec done right: written in Swift, checked
+by the compiler, verified by your builder tests, composable by construction.
 
 ## Architecture sketch
 
