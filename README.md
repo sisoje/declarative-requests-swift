@@ -156,7 +156,6 @@ Pick the factory or initializer that matches the data you have.
 | `Header.<field>.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
-| `Cookie(_ encodable:)` | Flatten an `Encodable` model into cookies. | `Cookie(sessionModel)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
 | `MIMEType.<case>.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
@@ -210,7 +209,7 @@ Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
 merges its items into an existing form body, so form fields can accumulate
 across blocks and loops.
 
-`Encodable`-driven blocks (`json`, `urlEncoded`, `Query`, `Cookie`) use the
+`Encodable`-driven blocks (`json`, `urlEncoded`, `Query`) use the
 builder's `JSONEncoder`. Swap it with `.useEncoder(_:)` on any block group:
 
 ```swift
@@ -320,9 +319,7 @@ flowchart LR
     Header --> H2["Header.&lt;field&gt;.addValue(value)"]
     Header --> H3["Header.custom(name).setValue(value)"]
     Header --> HFields["contentType  accept  authorization<br/>userAgent  origin  cookie  referer<br/>host  acceptLanguage  acceptEncoding"]
-    HeaderGroup --> Cookie["Cookie"]
-    Cookie --> CK1["Cookie(_ name, _ value)"]
-    Cookie --> CK2["Cookie(_ encodable)"]
+    HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
     HeaderGroup --> MIME["MIMEType (enum)"]
     MIME --> MIME1["MIMEType.json.contentType"]
     MIME --> MIME2["MIMEType.json.accept"]
