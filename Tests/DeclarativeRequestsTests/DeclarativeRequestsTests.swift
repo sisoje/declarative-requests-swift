@@ -673,7 +673,7 @@ import Testing
 
 @Test(arguments: [true, false]) func httpShouldHandleCookiesApplied(_ flag: Bool) throws {
     let request = try URLRequest {
-        HTTPShouldHandleCookies(flag)
+        RequestMutation[\.httpShouldHandleCookies, flag]
     }
     #expect(request.httpShouldHandleCookies == flag)
 }
