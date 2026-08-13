@@ -190,9 +190,14 @@ let request = try URLRequest {
 ## Backend spec
 
 Describe your backend as an enum: one case per endpoint — a backend is a
-finite set of endpoints, so the spec is a closed type. The spec declares
-`needsAuth` per endpoint as a static fact; materializing demands a token
-(never a maybe-token) and the base URL comes in at the very end:
+finite set of endpoints, so the spec is a closed type. Materializing a
+request is three composable steps, one per axis:
+
+1. **the case** — definition (what the endpoint is)
+2. **`authorized(token:)`** — session. The spec declares `needsAuth` per
+   endpoint as a static fact; a protected endpoint with a nil token **fails
+   immediately here**, before any URL exists.
+3. **`baseURL.buildRequest`** — environment, applied at the very end.
 
 ```swift
 enum UserBackend {
@@ -218,23 +223,28 @@ enum UserBackend {
         }
     }
 
-    func request(baseURL: URL, token: () -> String) throws -> URLRequest {
-        try baseURL.buildRequest {
+    struct MissingToken: Error {}
+
+    func authorized(token: String?) throws -> some RequestBuildable {
+        if needsAuth, token == nil { throw MissingToken() }
+        return RequestBlock {
             spec
-            if needsAuth {
-                Authorization.bearer(token())
+            if needsAuth, let token {
+                Authorization.bearer(token)
             }
         }
     }
 }
 
-let request = try UserBackend.getUser(id: "42")
-    .request(baseURL: environment.baseURL, token: { session.token })
+let authorized = try UserBackend.getUser(id: "42").authorized(token: session.token)
+let request = try environment.baseURL.buildRequest { authorized }
 ```
 
-The three layers are the three call-site pieces: the case is definition,
-the token is the session axis, the URL is the environment axis. Endpoints
-stay easy to mock in tests — build the request, assert its shape.
+Every step returns a block, so layers compose: the spec drops into the
+authorized wrapper, the authorized block drops into the environment builder.
+`MissingToken` is the app's error, not the library's — whether a missing
+token is a failure is the spec's business rule, and it fires at the session
+boundary, never as a half-authorized request on the wire.
 
 ## Architecture sketch
 
