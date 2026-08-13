@@ -7,7 +7,7 @@ public extension RequestBody {
     ) -> some RequestBuildable {
         let parts = parts()
         let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
-        return RequestStateTransformer { state in
+        return RequestBlock { state in
             state.request.httpBody = try encode(parts: parts, boundary: boundary)
             state.request.setValue(contentType(boundary: boundary), forHTTPHeaderField: Header.contentType.rawValue)
         }

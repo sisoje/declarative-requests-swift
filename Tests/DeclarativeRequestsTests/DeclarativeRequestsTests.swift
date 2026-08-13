@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
-    let req = try RequestBuilderGroup {
+    let req = try RequestBlock {
         AllowAccess.cellular(isAllowed)
         AllowAccess.constrainedNetwork(isAllowed)
         AllowAccess.expensiveNetwork(isAllowed)
@@ -48,7 +48,7 @@ import Testing
 }
 
 @Test func urlRequestTest() throws {
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         Method.POST
         BaseURL("https://google.com")
         Endpoint("/getLanguage")
@@ -76,7 +76,7 @@ import Testing
 }
 
 @Test(arguments: [1, 2]) func countTest(count: Int) throws {
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         BaseURL("https://google.com")
 
         for i in 1 ... count {
@@ -95,7 +95,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithoutElse(isFirst: Bool) throws {
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         BaseURL("https://google.com")
 
         if isFirst {
@@ -114,7 +114,7 @@ import Testing
 }
 
 @Test(arguments: [true, false]) func ifWithElse(isFirst: Bool) throws {
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         BaseURL("https://google.com")
 
         if isFirst {
@@ -135,8 +135,8 @@ import Testing
 }
 
 @Test func urlEncodedBodySingleKeyValue() throws {
-    let builder = RequestBuilderGroup {
-        RequestBody.urlEncoded([URLQueryItem(name: "key", value: "value")])
+    let builder = RequestBlock {
+        RequestBody.urlEncoded("key", "value")
     }
     let source = RequestState()
     try builder.transform(source)
@@ -150,12 +150,10 @@ import Testing
 }
 
 @Test func urlEncodedBodyDuplicateNames() throws {
-    let builder = RequestBuilderGroup {
-        RequestBody.urlEncoded([
-            URLQueryItem(name: "color", value: "red"),
-            URLQueryItem(name: "color", value: "blue"),
-            URLQueryItem(name: "size", value: "large"),
-        ])
+    let builder = RequestBlock {
+        RequestBody.urlEncoded("color", "red")
+        RequestBody.urlEncoded("color", "blue")
+        RequestBody.urlEncoded("size", "large")
     }
     let source = RequestState()
     try builder.transform(source)
@@ -170,7 +168,7 @@ import Testing
 }
 
 @Test func urlEncodedBodyDictionary() throws {
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         RequestBody.urlEncoded(["name": "john", "age": "25"])
     }
     let source = RequestState()
@@ -188,7 +186,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         RequestBody.urlEncoded(User(id: 123, name: "john"))
     }
     let source = RequestState()
@@ -202,9 +200,9 @@ import Testing
 }
 
 @Test func urlEncodedBodiesMerge() throws {
-    let builder = RequestBuilderGroup {
-        RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
-        RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
+    let builder = RequestBlock {
+        RequestBody.urlEncoded("first", "1")
+        RequestBody.urlEncoded("second", "2")
     }
     let source = RequestState()
     try builder.transform(source)
@@ -217,8 +215,8 @@ import Testing
 }
 
 @Test func urlEncodedBodyEscapesPlus() throws {
-    let builder = RequestBuilderGroup {
-        RequestBody.urlEncoded([URLQueryItem(name: "expr", value: "1+2")])
+    let builder = RequestBlock {
+        RequestBody.urlEncoded("expr", "1+2")
     }
     let source = RequestState()
     try builder.transform(source)
@@ -228,9 +226,10 @@ import Testing
 }
 
 @Test func urlEncodedBodyBuiltFromLoop() throws {
-    let items = (1 ... 6).map { URLQueryItem(name: "count", value: "\($0)") }
-    let builder = RequestBuilderGroup {
-        RequestBody.urlEncoded(items)
+    let builder = RequestBlock {
+        for i in 1 ... 6 {
+            RequestBody.urlEncoded("count", "\(i)")
+        }
     }
     let source = RequestState()
     try builder.transform(source)
@@ -249,7 +248,7 @@ import Testing
         let id: Int
         let name: String
     }
-    let builder = RequestBuilderGroup {
+    let builder = RequestBlock {
         Query(User(id: 123, name: "john"))
     }
     let source = RequestState()
@@ -290,7 +289,7 @@ import Testing
 
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         RequestBody.stream(InputStream(data: data))
     }.request
     #expect(request.httpBodyStream != nil)
@@ -317,7 +316,7 @@ import Testing
 }
 
 @Test func queryItems() throws {
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         Query("x", "y")
         Query("1", "2")
     }.request
@@ -343,7 +342,7 @@ import Testing
 }
 
 @Test func cookie() throws {
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         Cookie("x", "y")
         Cookie("1", "2")
     }.request
@@ -352,7 +351,7 @@ import Testing
 }
 
 @Test func authBearer() throws {
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         Authorization.bearer("x")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
@@ -360,7 +359,7 @@ import Testing
 }
 
 @Test func authUserPass() throws {
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         Authorization.basic(username: "x", password: "y")
     }.request
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
@@ -919,7 +918,7 @@ import Testing
     struct Model: Codable { let userName: String }
     let encoder = JSONEncoder()
     encoder.keyEncodingStrategy = .convertToSnakeCase
-    let request = try RequestBuilderGroup {
+    let request = try RequestBlock {
         RequestBody.json(Model(userName: "x"))
     }.useEncoder(encoder).request
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"user_name\":\"x\"}")
@@ -962,7 +961,7 @@ import Testing
     let snake = JSONEncoder()
     snake.keyEncodingStrategy = .convertToSnakeCase
     let request = try URLRequest {
-        RequestBuilderGroup {
+        RequestBlock {
             Query(Model(userName: "a"))
         }.useEncoder(snake)
         Query(Model(userName: "b"))

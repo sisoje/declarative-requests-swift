@@ -91,7 +91,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.data(_ data:type:)` | `Data` + optional content-type string | only if you pass `type:` |
 | `RequestBody.string(_ s:type:)` | `String` (UTF-8) + content-type string | yes (defaults `text/plain`) |
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
-| `RequestBody.urlEncoded(_ items:)` | `[URLQueryItem]` | `application/x-www-form-urlencoded` |
+| `RequestBody.urlEncoded(_ name:, _ value:)` | one form field (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
 | `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.x.contentType` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
@@ -104,7 +104,7 @@ across blocks and loops.
 builder's `JSONEncoder`. Swap it with `.useEncoder(_:)` on any block group:
 
 ```swift
-let request = try RequestBuilderGroup {
+let request = try RequestBlock {
     RequestBody.json(model)   // encoded with snake_case keys
     BaseURL("https://api.example.com")
 }.useEncoder(snakeCaseEncoder).request
@@ -269,7 +269,7 @@ flowchart LR
     BodyGroup --> B1[".data(_ data, type:)"]
     BodyGroup --> B2[".string(_ string, type:)"]
     BodyGroup --> B3[".json(_ encodable)"]
-    BodyGroup --> B4[".urlEncoded(_ items)"]
+    BodyGroup --> B4[".urlEncoded(_ name, _ value)"]
     BodyGroup --> B5[".urlEncoded(_ encodable)"]
     BodyGroup --> B6[".stream(_ inputStream)"]
     BodyGroup --> B7[".multipart { parts }"]
@@ -295,6 +295,6 @@ flowchart LR
 
 - **`RequestBuildable`** — the protocol every block conforms to.
 - **`RequestBuilder`** — the `@resultBuilder` that stitches blocks together.
-- **`RequestStateTransformer`** — the leaf block; holds a closure that mutates `RequestState`.
+- **`RequestBlock`** — the leaf block; holds a closure that mutates `RequestState`.
 - **`RequestState`** — the in-progress `URLRequest` plus the `JSONEncoder` that body / header / query blocks use.
 - **`try URLRequest { … }`** — applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest` (`.request` is the same thing on any `RequestBuildable`).

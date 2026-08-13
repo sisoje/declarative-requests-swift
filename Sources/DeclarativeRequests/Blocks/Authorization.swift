@@ -13,7 +13,7 @@ public extension Authorization {
     }
 
     static func custom(_ authenticator: @escaping (inout URLRequest) throws -> Void) -> some RequestBuildable {
-        RequestStateTransformer { state in
+        RequestBlock { state in
             try authenticator(&state.request)
         }
     }

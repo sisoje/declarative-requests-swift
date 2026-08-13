@@ -14,7 +14,7 @@ public struct Cookie: RequestBuildable {
     let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
-        RequestStateTransformer { state in
+        RequestBlock { state in
             for item in try items(state.encoder) {
                 state.cookies[item.name] = item.value ?? ""
             }

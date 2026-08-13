@@ -32,13 +32,13 @@ public extension Header {
     }
 
     func addValue(_ value: String) -> some RequestBuildable {
-        RequestStateTransformer { state in
+        RequestBlock { state in
             state.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
     func setValue(_ value: String) -> some RequestBuildable {
-        RequestStateTransformer { state in
+        RequestBlock { state in
             state.request.setValue(value, forHTTPHeaderField: rawValue)
         }
     }
