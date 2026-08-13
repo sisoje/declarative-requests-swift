@@ -5,36 +5,6 @@
 Describe your backend in Swift — checked by the compiler, verified by your
 tests, composable by construction — instead of a YAML spec that drifts.
 
-A SwiftUI-style result builder for composing `URLRequest` — fully composable:
-blocks compose into endpoint specs, specs compose with auth, auth composes
-with environment, the same primitive at every level. Each block maps onto one
-piece of a raw HTTP request — read the builder top to bottom and you read the
-request top to bottom.
-
-```http
-POST /v1/login HTTP/1.1
-Host: api.example.com
-Accept: application/json
-Authorization: Bearer eyJhbGci...
-Content-Type: application/json
-
-{"email":"alice@example.com","password":"hunter2"}
-```
-
-```swift
-let request = try URLRequest {
-    Method.POST
-    Endpoint("/v1/login")
-    Header.accept.setValue("application/json")
-    RequestBody.json(LoginRequest(email: email, password: password))
-    Authorization.bearer(token)
-    BaseURL("https://api.example.com")
-}
-```
-
-`Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
-section. The block order roughly mirrors the wire order.
-
 ## Backend spec
 
 Describe your backend as an enum: one case per endpoint — a backend is a
@@ -125,6 +95,38 @@ token is a failure is the spec's business rule.
 
 This is the "open spec done right" from the top of this README — the spec
 is code, so nothing drifts.
+
+## The builder
+
+A SwiftUI-style result builder for composing `URLRequest` — fully composable:
+blocks compose into endpoint specs, specs compose with auth, auth composes
+with environment, the same primitive at every level. Each block maps onto one
+piece of a raw HTTP request — read the builder top to bottom and you read the
+request top to bottom.
+
+```http
+POST /v1/login HTTP/1.1
+Host: api.example.com
+Accept: application/json
+Authorization: Bearer eyJhbGci...
+Content-Type: application/json
+
+{"email":"alice@example.com","password":"hunter2"}
+```
+
+```swift
+let request = try URLRequest {
+    Method.POST
+    Endpoint("/v1/login")
+    Header.accept.setValue("application/json")
+    RequestBody.json(LoginRequest(email: email, password: password))
+    Authorization.bearer(token)
+    BaseURL("https://api.example.com")
+}
+```
+
+`Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
+section. The block order roughly mirrors the wire order.
 
 ## Block reference
 

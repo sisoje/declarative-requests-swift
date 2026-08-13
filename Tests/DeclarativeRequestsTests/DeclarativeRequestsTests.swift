@@ -826,3 +826,14 @@ import Testing
     }
     #expect(request.url?.absoluteString == base)
 }
+
+@Test(arguments: [
+    "/v1/users",
+    "v1/users",
+]) func endpointLeadingSlashIsIrrelevant(_ path: String) throws {
+    let request = try URLRequest {
+        Endpoint(path)
+        BaseURL("https://api.example.com/api")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/api/v1/users")
+}
