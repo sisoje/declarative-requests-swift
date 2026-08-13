@@ -37,7 +37,7 @@ public extension RequestState {
     }
 
     /// Backed by `request.httpBody`, form-url-encoded.
-    var encodedBodyItems: [URLQueryItem] {
+    internal var encodedBodyItems: [URLQueryItem] {
         get {
             let body = request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
             return URLComponents(string: "?" + body)?.queryItems ?? []
