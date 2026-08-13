@@ -11,5 +11,4 @@ public extension Authorization {
         let base64 = Data("\(username):\(password)".utf8).base64EncodedString()
         return Header.authorization.setValue("Basic \(base64)")
     }
-
 }

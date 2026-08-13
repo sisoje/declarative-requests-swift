@@ -1,10 +1,22 @@
 import Foundation
 
-public struct CachePolicy: RequestBuildable {
-    let policy: URLRequest.CachePolicy
+public enum CachePolicy: RequestBuildable {
+    case useProtocolCachePolicy
+    case reloadIgnoringLocalCacheData
+    case reloadIgnoringLocalAndRemoteCacheData
+    case returnCacheDataElseLoad
+    case returnCacheDataDontLoad
+    case reloadRevalidatingCacheData
 
-    public init(_ policy: URLRequest.CachePolicy) {
-        self.policy = policy
+    var policy: URLRequest.CachePolicy {
+        switch self {
+        case .useProtocolCachePolicy: .useProtocolCachePolicy
+        case .reloadIgnoringLocalCacheData: .reloadIgnoringLocalCacheData
+        case .reloadIgnoringLocalAndRemoteCacheData: .reloadIgnoringLocalAndRemoteCacheData
+        case .returnCacheDataElseLoad: .returnCacheDataElseLoad
+        case .returnCacheDataDontLoad: .returnCacheDataDontLoad
+        case .reloadRevalidatingCacheData: .reloadRevalidatingCacheData
+        }
     }
 
     public var body: some RequestBuildable {

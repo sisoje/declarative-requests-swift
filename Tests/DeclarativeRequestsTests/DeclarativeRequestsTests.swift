@@ -699,7 +699,7 @@ import Testing
 @Test func timeoutAndCachePolicyApplied() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        CachePolicy(.reloadIgnoringLocalCacheData)
+        CachePolicy.reloadIgnoringLocalCacheData
         Timeout(5)
         Method.GET
     }
