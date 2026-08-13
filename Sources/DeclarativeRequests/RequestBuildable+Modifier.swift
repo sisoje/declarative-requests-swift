@@ -1,7 +1,7 @@
 import Foundation
 
 public extension RequestBuildable {
-    func useEncoder(_ encoder: JSONEncoder) -> RequestBlock {
+    func useEncoder(_ encoder: JSONEncoder) -> some RequestBuildable {
         RequestBlock { state in
             let original = state.encoder
             defer { state.encoder = original }

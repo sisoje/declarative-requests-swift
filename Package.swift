@@ -16,8 +16,6 @@ let package = Package(
             targets: ["DeclarativeRequests"]
         ),
     ],
-    dependencies: [
-    ],
     targets: [
         .target(
             name: "DeclarativeRequests"

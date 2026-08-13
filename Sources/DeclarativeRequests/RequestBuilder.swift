@@ -1,6 +1,6 @@
 import Foundation
 
-extension Sequence where Element == RequestStateTransformClosure {
+extension Sequence<RequestStateTransformClosure> {
     var reduced: RequestStateTransformClosure {
         reduce({ _ in }) { partialResult, closure in
             {

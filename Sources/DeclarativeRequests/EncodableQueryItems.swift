@@ -7,8 +7,10 @@ private struct AnyQueryItems {
     var stringValue: String {
         if let string = any as? String {
             string
-        } else if let bool = any as? Bool {
-            String(describing: bool)
+        } else if let number = any as? NSNumber {
+            CFGetTypeID(number) == CFBooleanGetTypeID()
+                ? String(describing: number.boolValue)
+                : number.stringValue
         } else {
             String(describing: any)
         }

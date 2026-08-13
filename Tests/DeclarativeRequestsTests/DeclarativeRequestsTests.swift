@@ -829,3 +829,13 @@ import Testing
     }
     #expect(request.url?.query == "user_name=a&userName=b")
 }
+
+@Test func queryEncodableKeepsZeroAndOneNumeric() throws {
+    struct Model: Codable {
+        let zero: Int
+        let one: Int
+        let flag: Bool
+    }
+    let request = try Query(Model(zero: 0, one: 1, flag: true)).request
+    #expect(request.url?.query == "flag=true&one=1&zero=0")
+}
