@@ -230,9 +230,10 @@ enum UserBackend {
         RequestBlock {
             spec
             if needsAuth {
-                RequestBlock { state in
-                    guard let token else { throw MissingToken() }
-                    state.request.setValue("Bearer \(token)", forHTTPHeaderField: Header.authorization.rawValue)
+                if let token {
+                    Authorization.bearer(token)
+                } else {
+                    RequestBlock { _ in throw MissingToken() }
                 }
             }
         }
