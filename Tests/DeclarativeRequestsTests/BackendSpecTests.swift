@@ -39,7 +39,7 @@ import Testing
     }
 }
 
-// The README "Backend spec" example, verbatim — the spec is code, so the docs can't drift.
+// The README "Open Spec" example, verbatim — the spec is code, so the docs can't drift.
 enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)

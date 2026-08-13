@@ -1,4 +1,4 @@
-# Declarative Requests: Backend spec done right
+# Declarative Requests: Open Spec Done Right
 
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
@@ -35,7 +35,7 @@ let request = try URLRequest {
 `Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
 section. The block order roughly mirrors the wire order.
 
-## Backend spec
+## Open Spec
 
 Describe your backend as an enum: one case per endpoint — a backend is a
 finite set of endpoints, so the spec is a closed type. Materializing a
@@ -112,7 +112,7 @@ authorized wrapper, the authorized block drops into the environment builder.
 `MissingToken` is the app's error, not the library's — whether a missing
 token is a failure is the spec's business rule.
 
-This is the "Backend spec done right" from the top of this README — the spec
+This is the "Open Spec Done Right" from the top of this README — the spec
 is code, so nothing drifts.
 
 ## Block reference
