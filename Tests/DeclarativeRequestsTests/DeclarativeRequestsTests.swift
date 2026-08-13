@@ -252,12 +252,12 @@ import Testing
     #expect(queryItems.count == 2)
 }
 
-@Test func repositoryExample() throws {
-    struct Repository {
+@Test func backendSpecExample() throws {
+    struct Backend {
         @RequestBuilder var refreshToken: (_ accessToken: String) -> any RequestBuildable
         @RequestBuilder var getUser: (String) -> any RequestBuildable
     }
-    let repository = Repository(
+    let backend = Backend(
         refreshToken: { accessToken in
             Method.POST
             Endpoint("/refreshToken")
@@ -269,10 +269,10 @@ import Testing
             Query("userId", userId)
         }
     )
-    let request = try repository.getUser("1").request
+    let request = try backend.getUser("1").request
     #expect(request.url?.absoluteString == "/user?userId=1")
     #expect(request.httpMethod == "GET")
-    let request2 = try repository.refreshToken("1").request
+    let request2 = try backend.refreshToken("1").request
     #expect(request2.url?.absoluteString == "/refreshToken")
     #expect(request2.httpMethod == "POST")
     #expect(request2.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"token\":\"1\"}")

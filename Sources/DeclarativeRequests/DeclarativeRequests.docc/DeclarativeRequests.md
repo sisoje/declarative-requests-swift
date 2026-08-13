@@ -96,19 +96,19 @@ struct AuthenticatedJSON: RequestBuildable {
 The recursion terminates automatically at ``RequestBlock`` leaves — no
 additional boilerplate required.
 
-### Repository pattern
+### Backend spec
 
 Declare an endpoint surface as a struct of `@RequestBuilder` closures
 and materialize requests on demand. Keeps URL construction out of
 call sites and makes endpoints easy to mock in tests:
 
 ```swift
-struct UserRepository {
+struct UserBackend {
     @RequestBuilder var getUser: (_ id: String) -> any RequestBuildable
     @RequestBuilder var refreshToken: (_ token: String) -> any RequestBuildable
 }
 
-extension UserRepository {
+extension UserBackend {
     static func live(baseURL: URL) -> Self {
         .init(
             getUser: { id in

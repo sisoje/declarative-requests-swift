@@ -182,19 +182,20 @@ let request = try URLRequest {
 }
 ```
 
-## Repository pattern
+## Backend spec
 
-Declare an endpoint surface as a struct of `@RequestBuilder` closures and
-materialize requests on demand. Keeps URL construction out of call sites
-and makes endpoints easy to mock in tests.
+Describe your backend as a spec: a struct of `@RequestBuilder` closures, one
+per endpoint. The spec is identical in every environment — dev, staging, and
+production materialize the same spec with different base URLs. It also keeps
+URL construction out of call sites and makes endpoints easy to mock in tests.
 
 ```swift
-struct UserRepository {
+struct UserBackend {
     @RequestBuilder var getUser: (_ id: String) -> any RequestBuildable
     @RequestBuilder var refreshToken: (_ token: String) -> any RequestBuildable
 }
 
-extension UserRepository {
+extension UserBackend {
     static func live(baseURL: URL, tokenProvider: @escaping () -> String?) -> Self {
         .init(
             getUser: { id in
@@ -213,7 +214,7 @@ extension UserRepository {
     }
 }
 
-let request = try repo.getUser("42").request
+let request = try backend.getUser("42").request
 ```
 
 
