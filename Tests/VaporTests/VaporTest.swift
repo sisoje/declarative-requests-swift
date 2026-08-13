@@ -110,7 +110,7 @@ struct VaporTests {
         #expect(vaporRequest.headers["X-Trace-Id"].first == "abc123")
     }
 
-    @Test("Multipart binary file round-trips byte-perfect through Vapor (in-memory + streamed)")
+    @Test("Multipart binary file round-trips byte-perfect through Vapor")
     func multipartBinaryFileRoundTrip() async throws {
         let bytes: [UInt8] = (0 ..< (256 * 1024)).map { i in
             UInt8((i &* 31 &+ 7) & 0xFF)
@@ -120,11 +120,11 @@ struct VaporTests {
         try payload.write(to: tmp)
         defer { try? FileManager.default.removeItem(at: tmp) }
 
-        for strategy in [RequestBody.MultipartStrategy.inMemory, .streamed()] {
+        do {
             let request = try server.app.baseUrl.buildRequest {
                 Method.POST
                 Endpoint("/upload")
-                RequestBody.multipart(boundary: "BNDY", strategy: strategy) {
+                RequestBody.multipart(boundary: "BNDY") {
                     MultipartPart.field(name: "title", value: "snapshot")
                     MultipartPart.file(name: "blob", fileURL: tmp, type: .octetStream)
                 }

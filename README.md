@@ -93,8 +93,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.urlEncoded(_ items:)` | `[URLQueryItem]` | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
 | `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `ContentType(…)` if needed |
-| `RequestBody.multipart { parts }` | `MultipartPart`s, in-memory | `multipart/form-data; boundary=…` |
-| `RequestBody.multipart(strategy: .streamed()) { parts }` | `MultipartPart`s, streamed from disk | `multipart/form-data; boundary=…` + `Content-Length` |
+| `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
 The body is *replaced* by each `RequestBody.*` block — last one wins. To
 collect form items across iterations, build the array first and pass it
@@ -127,20 +126,11 @@ let request = try URLRequest {
 }
 ```
 
-For very large uploads, switch to streaming so memory use stays bounded:
-
-```swift
-RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
-    MultipartPart.field(name: "title", value: "Vacation 2026")
-    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .Video.mp4)
-}
-```
-
-Both strategies follow RFC 7578: form-field and filename parameters are quoted, `\` and
+The encoder follows RFC 7578: form-field and filename parameters are quoted, `\` and
 `"` characters are escaped, CR/LF in names is stripped (no header injection), and a
 boundary containing whitespace or special characters is quoted in the `Content-Type`
-header. The streamed strategy additionally sets `Content-Length` up front by stat'ing
-each file, so the server sees the full payload size before bytes start flowing.
+header. For very large uploads, write the assembled body to a temp file and hand it to
+`URLSession.uploadTask(fromFile:)` — the OS streams it and replays it on redirects.
 
 ## Building from a base URL
 

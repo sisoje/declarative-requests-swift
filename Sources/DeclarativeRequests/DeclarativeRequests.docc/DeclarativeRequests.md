@@ -174,33 +174,11 @@ let request = try URLRequest {
 ### Multipart uploads
 
 Build multipart bodies with ``MultipartPart`` values inside a
-``RequestBody/multipart(boundary:strategy:_:)`` block. The encoder follows
+``RequestBody/multipart(boundary:_:)`` block. The encoder follows
 RFC 7578: form-field and filename parameters are quoted, `\` and `"` are
 escaped, CR/LF in names is stripped (no header injection), and a boundary
 containing whitespace or special characters is quoted in the `Content-Type`
-header. For large files, switch to `.streamed()` so memory stays bounded —
-that path also sets `Content-Length` up front by stat'ing each file:
-
-```swift
-let request = try URLRequest {
-    Method.POST
-    BaseURL("https://api.example.com")
-    Endpoint("/upload")
-    RequestBody.multipart {
-        MultipartPart.field(name: "user", value: "alice")
-        MultipartPart.data(name: "avatar", filename: "a.png",
-                           data: pngBytes, type: .png)
-        for url in fileURLs {
-            MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
-        }
-    }
-}
-
-// Streamed — memory-efficient for very large uploads:
-RequestBody.multipart(strategy: .streamed(bufferSize: 64 * 1024)) {
-    MultipartPart.file(name: "video", fileURL: hugeVideoURL, type: .Video.mp4)
-}
-```
+header.
 
 ### Debugging
 
