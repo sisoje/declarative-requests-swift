@@ -38,15 +38,6 @@ import Testing
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
 }
 
-@Test func urlStringBuilderInvalidThrows() throws {
-    #expect(throws: DeclarativeRequestsError.badUrl) {
-        try URLRequest {
-            BaseURL("")
-            Method.GET
-        }
-    }
-}
-
 @Test func urlRequestTest() throws {
     let request = try RequestBlock {
         Method.POST

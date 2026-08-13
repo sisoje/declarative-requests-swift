@@ -203,4 +203,3 @@ header.
 
 ### Error Handling
 
-- ``DeclarativeRequestsError``

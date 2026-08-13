@@ -22,10 +22,7 @@ public struct BaseURL: RequestBuildable {
             case let .url(url):
                 state.baseURL = url
             case let .urlString(string):
-                guard let url = URL(string: string) else {
-                    throw DeclarativeRequestsError.badUrl
-                }
-                state.baseURL = url
+                state.baseURL = URL(string: string)
             }
         }
     }
