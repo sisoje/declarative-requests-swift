@@ -2,6 +2,10 @@
 
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
+**An open spec done right.** Describe your backend in Swift — checked by the
+compiler, verified by your tests, composable by construction — instead of a
+YAML spec that drifts.
+
 A SwiftUI-style result builder for composing `URLRequest`. Each block in the
 builder maps onto one piece of a raw HTTP request — read the builder top to
 bottom and you read the request top to bottom.
@@ -251,8 +255,8 @@ authorized wrapper, the authorized block drops into the environment builder.
 `MissingToken` is the app's error, not the library's — whether a missing
 token is a failure is the spec's business rule.
 
-This is your API spec — an open spec done right: written in Swift, checked
-by the compiler, verified by your builder tests, composable by construction.
+This is the "open spec done right" from the top of this README — the spec
+is code, so nothing drifts.
 
 ## Architecture sketch
 
