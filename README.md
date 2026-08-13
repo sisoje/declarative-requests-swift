@@ -252,7 +252,7 @@ flowchart LR
     Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
     HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
     HeaderGroup --> ContentType["ContentType(_ mimeType)"]
-    ContentType --> CTJSON[".json  .xml  .html  .plainText\n.pdf  .png  .jpeg  .octetStream\nApplication.*  Text.*  Image.*\nAudio.*  Video.*  Multipart.*  Font.*"]
+    ContentType --> CTJSON[".json  .xml  .html  .plainText\n.formURLEncoded  .octetStream\n.png  .jpeg  or any string literal"]
     HeaderGroup --> AcceptBlock["Accept(_ mimeType)"]
 
     %% Auth

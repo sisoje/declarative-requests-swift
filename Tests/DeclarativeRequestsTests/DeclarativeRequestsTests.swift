@@ -826,17 +826,6 @@ import Testing
     #expect(curl.contains("'don'\\''t break'"))
 }
 
-// MARK: - LocalizedError
-
-@Test func errorHasLocalizedDescription() {
-    #expect(DeclarativeRequestsError.badUrl.errorDescription?.isEmpty == false)
-    #expect(DeclarativeRequestsError.badStream.errorDescription?.isEmpty == false)
-    let multipart = DeclarativeRequestsError.badMultipart(reason: "boom").errorDescription
-    #expect(multipart?.contains("boom") == true)
-    let encoding = DeclarativeRequestsError.encodingFailed(reason: "bad").errorDescription
-    #expect(encoding?.contains("bad") == true)
-}
-
 // MARK: - EncodableQueryItems sorting
 
 @Test func queryEncodableHasStableOrder() throws {

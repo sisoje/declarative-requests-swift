@@ -93,7 +93,7 @@ struct AuthenticatedJSON: RequestBuildable {
 }
 ```
 
-The recursion terminates automatically at ``RequestBlock`` leaves — no
+The recursion terminates automatically at ``RequestStateTransformer`` leaves — no
 additional boilerplate required.
 
 ### Repository pattern
@@ -195,7 +195,7 @@ print(request.curlCommand)
 ### Essentials
 
 - ``RequestBuildable``
-- ``RequestBlock``
+- ``RequestStateTransformer``
 - ``RequestState``
 
 ### Builder Blocks
