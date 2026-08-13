@@ -2,24 +2,28 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
-@Test func backendSpecExample() throws {
-    let baseURL = try #require(URL(string: "https://api.example.com"))
+let baseURL = URL(string: "https://api.example.com")!
 
-    let authed = try UserEndpoint.getUser(id: "42")
+@Test func authorizedEndpoint() throws {
+    let request = try UserEndpoint.getUser(id: "42")
         .authorized(token: "T")
         .base(baseURL)
         .request
-    #expect(authed.url?.absoluteString == "https://api.example.com/v1/users/42")
-    #expect(authed.httpMethod == "GET")
-    #expect(authed.value(forHTTPHeaderField: "Authorization") == "Bearer T")
+    #expect(request.url?.absoluteString == "https://api.example.com/v1/users/42")
+    #expect(request.httpMethod == "GET")
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer T")
+}
 
-    let pub = try UserEndpoint.refreshToken(token: "R")
+@Test func publicEndpointCarriesNoAuth() throws {
+    let request = try UserEndpoint.refreshToken(token: "R")
         .authorized(token: nil)
         .base(baseURL)
         .request
-    #expect(pub.url?.absoluteString == "https://api.example.com/v1/auth/refresh")
-    #expect(pub.value(forHTTPHeaderField: "Authorization") == nil)
+    #expect(request.url?.absoluteString == "https://api.example.com/v1/auth/refresh")
+    #expect(request.value(forHTTPHeaderField: "Authorization") == nil)
+}
 
+@Test func missingTokenFailsAtRequest() {
     #expect(throws: UserEndpoint.MissingToken.self) {
         try UserEndpoint.getUser(id: "42")
             .authorized(token: nil)
@@ -29,7 +33,7 @@ import Testing
 }
 
 // The README "Backend spec" example, verbatim — the spec is code, so the docs can't drift.
-private enum UserEndpoint {
+enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
 
@@ -68,7 +72,7 @@ private enum UserEndpoint {
     }
 }
 
-private extension RequestBuildable {
+extension RequestBuildable {
     func base(_ url: URL) -> some RequestBuildable {
         RequestBlock {
             self
