@@ -64,6 +64,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 
 ### Block conventions
 
+- **Canonical block order — three layers, three axes:** definition (method/path/query/headers/body — the backend spec, identical everywhere) → `Authorization` (varies per session; only endpoints that need it carry the block) → `BaseURL` (varies per environment, always last).
 - **`BaseURL` is applied last.** That is the contract — `URL.buildRequest` appends it after the builder blocks automatically. The deeper reason: the builder body describes the backend's API shape, which is identical across environments; the base URL is deployment configuration (dev/staging/prod vary ONLY by base). Blocks first, config last. The relative-URL projections happen to tolerate base-first ordering, but it is not guaranteed and not to be defended with extra code or tests.
 - **Last write wins** for properties (method, URL, body) — with one deliberate exception: `RequestBody.urlEncoded` *merges* its items into an existing form body. Accumulating blocks (cookies, query items, `Header.<field>.addValue`) read-then-write the existing value.
 - **`Endpoint`** just sets `urlComponents.path` (replacing any previous path). Resolution against the base happens via Foundation's relative-URL rules when the URL is rebuilt: leading `/` is from the root, a bare segment is relative to the base directory.

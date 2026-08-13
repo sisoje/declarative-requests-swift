@@ -159,7 +159,6 @@ blocks so the request is fully formed when the closure runs:
 ```swift
 let request = try URLRequest {
     Method.POST
-    BaseURL("https://api.example.com")
     Endpoint("/v1/data")
     RequestBody.json(payload)
     RequestBlock { state in
@@ -168,6 +167,7 @@ let request = try URLRequest {
         state.request.setValue("Signed \(signature)",
                                forHTTPHeaderField: "Authorization")
     }
+    BaseURL("https://api.example.com")
 }
 ```
 

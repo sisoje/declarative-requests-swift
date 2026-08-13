@@ -21,8 +21,8 @@ let request = try URLRequest {
     Method.POST
     Endpoint("/v1/login")
     Header.accept.setValue("application/json")
-    Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
+    Authorization.bearer(token)
     BaseURL("https://api.example.com")
 }
 ```
@@ -86,20 +86,25 @@ let request = try URLRequest {
 
     MIMEType.json.accept
     Header.userAgent.setValue("MyApp/1.0")
-    Authorization.bearer(token)
     Header.custom("X-Trace-Id").setValue("abc123")
     if isStaging {
         Header.custom("X-Env").setValue("staging")
     }
+    Authorization.bearer(token)
     BaseURL("https://api.example.com")
 }
 ```
 
 `BaseURL` goes last — everything before it accumulates the relative part of the
 URL, and the base resolves it (`URL.buildRequest` appends the base for you).
-This split is deliberate: the blocks describe your backend's API shape, which is
-the same in every environment — only the base URL changes between dev, staging,
-and production. Endpoints are definition; the base is configuration.
+This split is deliberate — the canonical order is three layers, each varying on
+a different axis:
+
+1. **Definition** — method, path, query, headers, body: the backend's spec, identical everywhere.
+2. **`Authorization`** — who is asking. Varies per session, and only endpoints that need it carry it — public endpoints simply don't have the block.
+3. **`BaseURL`** — where it runs. Varies per environment, always last.
+
+Endpoints are definition; auth and base are configuration on two different axes.
 
 ### Body — one type, many factories
 
