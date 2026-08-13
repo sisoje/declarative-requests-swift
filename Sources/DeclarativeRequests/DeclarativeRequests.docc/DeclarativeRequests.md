@@ -180,16 +180,6 @@ escaped, CR/LF in names is stripped (no header injection), and a boundary
 containing whitespace or special characters is quoted in the `Content-Type`
 header.
 
-### Debugging
-
-Every `URLRequest` exposes a copy-pasteable `curl` equivalent:
-
-```swift
-print(request.curlCommand)
-// curl -X POST -H 'Content-Type: application/json'
-//   --data-binary '{"x":1}' 'https://api.example.com/foo'
-```
-
 ## Topics
 
 ### Essentials

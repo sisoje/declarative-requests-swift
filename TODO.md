@@ -45,11 +45,11 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 5. Misc cuts
 
-- [ ] `RequestBuildable+Modifier.swift`: `environment(_:_:)` scoping trick — DECIDE keep/kill (`useEncoder` is the only real use; scoped `baseURL` doesn't survive materialization anyway)
-- [ ] `URLRequest+Curl.swift` (34 lines): dev nicety — DECIDE keep/kill
-- [ ] `EncodableQueryItems`: keep the feature (`Query(encodable)`) — DECIDE impl: current JSONEncoder round-trip (handles nesting/enums, needs `encoder` in state) vs stara-verzija's 20-line Mirror helper (simpler, flat structs only)
-- [ ] DECIDE: restore stara-verzija builder sugar — bare `URL(string:)` / `Data` / `InputStream` expressions via `buildExpression`, so `BaseURL(...)` wrapper is optional
-- [ ] Keep thin `RequestMutation` wrappers (Timeout, CachePolicy, AllowAccess, NetworkServiceType, HTTPShouldHandleCookies) — they're one-liners
+- [x] `environment(_:_:)` scoping trick killed; `useEncoder` stays as a plain setter block
+- [x] `URLRequest+Curl.swift` deleted — debugging nicety, separate-package territory
+- [x] `EncodableQueryItems` kept as is (JSONEncoder round-trip — handles enums/nesting, powers urlEncoded(encodable))
+- [x] Bare-expression sugar NOT restored — one obvious spelling per capability
+- [x] Keep thin `RequestMutation` wrappers (Timeout, CachePolicy, AllowAccess, NetworkServiceType, HTTPShouldHandleCookies) — they're one-liners
 
 ## 6. Docs tell the truth (post-refactor drift)
 
@@ -58,12 +58,12 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 7. Tests
 
-- [ ] Vapor test target: KEEP (only thing verifying wire bytes) — but it's the whole Vapor dependency graph; revisit if resolution time hurts
-- [ ] After cuts: delete tests of deleted API, run full suite, one commit per section above
+- [x] Vapor test target: KEEP (only thing verifying wire bytes) — but it's the whole Vapor dependency graph; revisit if resolution time hurts
+- [x] After cuts: deleted tests of deleted API, full suite green, one commit per section
 
 ## Done beyond plan
 
 - [x] MIMEType flattened to 8 constants (json/xml/html/plainText/formURLEncoded/octetStream/png/jpeg) — everything else is a string literal
 - [x] DeclarativeRequestsError: bare enum, no LocalizedError prose, unthrown encodingFailed case deleted
 
-Progress: 1689 → 809 source lines.
+Progress: 1689 → ~760 source lines.

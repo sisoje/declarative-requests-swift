@@ -189,14 +189,6 @@ extension UserRepository {
 let request = try repo.getUser("42").request
 ```
 
-## Debugging
-
-Every `URLRequest` exposes a copy-pasteable `curl` equivalent:
-
-```swift
-print(request.curlCommand)
-// curl -X POST -H 'Content-Type: application/json' --data-binary '{"x":1}' 'https://api.example.com/foo'
-```
 
 ## Architecture sketch
 

@@ -790,42 +790,6 @@ import Testing
     #expect(request.httpShouldHandleCookies == flag)
 }
 
-// MARK: - curlCommand
-
-@Test func curlCommandIncludesMethodHeadersBodyURL() throws {
-    let request = try URLRequest {
-        Method.POST
-        BaseURL("https://api.example.com")
-        Endpoint("/login")
-        Header.accept.setValue("application/json")
-        RequestBody.string("{\"user\":\"alice\"}", type: .json)
-    }
-    let curl = request.curlCommand
-    #expect(curl.contains("curl"))
-    #expect(curl.contains("-X POST"))
-    #expect(curl.contains("'Accept: application/json'"))
-    #expect(curl.contains("'Content-Type: application/json'"))
-    #expect(curl.contains("--data-binary '{\"user\":\"alice\"}'"))
-    #expect(curl.contains("'https://api.example.com/login'"))
-}
-
-@Test func curlCommandOmitsExplicitGet() throws {
-    let request = try URLRequest {
-        Method.GET
-        BaseURL("https://api.example.com")
-    }
-    let curl = request.curlCommand
-    #expect(!curl.contains("-X GET"))
-}
-
-@Test func curlCommandQuotesSingleQuotes() throws {
-    let request = try URLRequest {
-        RequestBody.string("don't break")
-    }
-    let curl = request.curlCommand
-    #expect(curl.contains("'don'\\''t break'"))
-}
-
 // MARK: - EncodableQueryItems sorting
 
 @Test func queryEncodableHasStableOrder() throws {
@@ -982,16 +946,3 @@ import Testing
     }
 }
 
-// MARK: - curlCommand binary body
-
-@Test func curlCommandBinaryBodyOmitted() throws {
-    let binary = Data([0xFF, 0xFE, 0x00, 0x01])
-    let request = try URLRequest {
-        Method.POST
-        BaseURL("https://api.example.com")
-        RequestBody.data(binary, type: .octetStream)
-    }
-    let curl = request.curlCommand
-    #expect(curl.contains("# binary body of 4 bytes omitted"))
-    #expect(!curl.contains("--data-binary"))
-}
