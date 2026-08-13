@@ -50,7 +50,7 @@ The DSL is a SwiftUI-style result builder for `URLRequest`. Five core pieces mak
 - **`RequestBlock`** (`Blocks/RequestBlock.swift`) — the leaf. Wraps a `RequestStateTransformClosure` directly; its `body` is unreachable (traps if called). All other blocks ultimately reduce to this.
 - **`RequestState`** (`RequestState.swift`) — the mutable context threaded through every block during a build. Stores exactly one `URLRequest` (the source of truth) plus the `JSONEncoder` used by `Encodable`-driven blocks. `baseURL`, `urlComponents`, `cookies`, and `encodedBodyItems` are computed projections that read and write through the request — never add stored side-state next to it.
 - **`RequestBuilder`** (`RequestBuilder.swift`) — the `@resultBuilder`. Folds the listed blocks into a single composed transform applied left-to-right (top-to-bottom). Supports `if`/`if-else`/`switch`/`for`/`if #available`. Non-`RequestBuildable` expressions are rejected at compile time via an `@available(*, unavailable)` `buildExpression` overload.
-- **`RequestStateTransformClosure`** = `(RequestState) throws -> Void`. The inner currency.
+- **`RequestStateTransformClosure`** = `(RequestState) throws -> Void`. The currency — and `RequestBuildable.transform` is public, so a `RequestBlock { state in }` closure can apply other blocks imperatively (`try spec.transform(state)`), guard, and throw, all in one place.
 
 The recursion termination trick: `RequestBuildable.transform` checks `if let leaf = self as? RequestBlock` and returns the closure directly; otherwise it recurses into `body.transform`. So custom blocks just return composed sub-blocks from `body` — no boilerplate.
 

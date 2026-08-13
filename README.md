@@ -227,14 +227,11 @@ enum UserBackend {
     struct MissingToken: Error {}
 
     func authorized(token: String?) -> some RequestBuildable {
-        RequestBlock {
-            spec
+        RequestBlock { state in
+            try spec.transform(state)
             if needsAuth {
-                if let token {
-                    Authorization.bearer(token)
-                } else {
-                    RequestBlock { _ in throw MissingToken() }
-                }
+                guard let token else { throw MissingToken() }
+                try Authorization.bearer(token).transform(state)
             }
         }
     }

@@ -15,7 +15,7 @@ public extension RequestBuildable {
     }
 }
 
-extension RequestBuildable {
+public extension RequestBuildable {
     var transform: RequestStateTransformClosure {
         if let leaf = self as? RequestBlock {
             leaf.transform
