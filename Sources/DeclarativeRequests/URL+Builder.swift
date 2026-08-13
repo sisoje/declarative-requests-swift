@@ -1,9 +1,9 @@
 import Foundation
 
 public extension URL {
-    func buildRequest(@RequestBuilder builder: () -> any RequestBuildable) throws -> URLRequest {
+    func buildRequest(@RequestBuilder builder: () throws -> any RequestBuildable) throws -> URLRequest {
         try RequestBlock {
-            builder()
+            try builder()
             BaseURL(self)
         }.request
     }

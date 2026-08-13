@@ -232,12 +232,15 @@ enum UserEndpoint {
 
     struct MissingToken: Error {}
 
-    func authorized(token: String?) -> some RequestBuildable {
-        RequestBlock { state in
-            try spec.transform(state)
+    func authorized(token: String?) throws -> some RequestBuildable {
+        try RequestBlock {
+            spec
             if needsAuth {
-                guard let token else { throw MissingToken() }
-                try Authorization.bearer(token).transform(state)
+                if let token {
+                    Authorization.bearer(token)
+                } else {
+                    throw MissingToken()
+                }
             }
         }
     }
@@ -264,6 +267,13 @@ func request(for endpoint: UserEndpoint) throws -> URLRequest {
         .base(environment.baseURL)
         .request
 }
+```
+
+Builders are throwing closures, so `throw` works right inside a branch —
+failure is declared where it applies, and it fires the moment the
+authorized layer is constructed.
+
+```swift
 
 let request = try request(for: .getUser(id: "42"))
 ```
