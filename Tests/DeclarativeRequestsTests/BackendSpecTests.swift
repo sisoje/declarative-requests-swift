@@ -2,14 +2,14 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
-let baseURL = URL(string: "https://api.example.com")!
+let baseURL = URL(string: "https://api.example.com/api/")!
 
 @Test func authorizedEndpoint() throws {
     let request = try UserEndpoint.getUser(id: "42")
         .authorized(token: "T")
         .base(baseURL)
         .request
-    #expect(request.url?.absoluteString == "https://api.example.com/v1/users/42")
+    #expect(request.url?.absoluteString == "https://api.example.com/api/v1/users/42")
     #expect(request.httpMethod == "GET")
     #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer T")
 }
@@ -19,7 +19,7 @@ let baseURL = URL(string: "https://api.example.com")!
         .authorized(token: nil)
         .base(baseURL)
         .request
-    #expect(request.url?.absoluteString == "https://api.example.com/v1/auth/refresh")
+    #expect(request.url?.absoluteString == "https://api.example.com/api/v1/auth/refresh")
     #expect(request.value(forHTTPHeaderField: "Authorization") == nil)
 }
 
