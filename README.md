@@ -240,9 +240,13 @@ enum UserBackend {
     }
 }
 
-let request = try environment.baseURL.buildRequest {
-    UserBackend.getUser(id: "42").authorized(token: session.token)
+func request(for endpoint: UserBackend) throws -> URLRequest {
+    try environment.baseURL.buildRequest {
+        endpoint.authorized(token: session.token)
+    }
 }
+
+let request = try request(for: .getUser(id: "42"))
 ```
 
 Every step returns a block, so layers compose: the spec drops into the
