@@ -1,19 +1,19 @@
 import Foundation
 
 public struct BaseURL: RequestBuildable {
-    public init(_ url: URL?) {
-        self.url = url
+    public init(_ url: URL) {
+        self.urlString = url.absoluteString
     }
 
     public init(_ string: String) {
-        url = URL(string: string)
+        urlString = string
     }
 
-    let url: URL?
+    let urlString: String
 
     public var body: some RequestBuildable {
         RequestBlock { state in
-            guard let url else {
+            guard let url = URL(string: urlString) else {
                 throw DeclarativeRequestsError.badUrl
             }
             state.baseURL = url

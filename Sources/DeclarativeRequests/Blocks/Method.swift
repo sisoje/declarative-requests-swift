@@ -8,6 +8,7 @@ public enum Method: String, RequestBuildable {
     case OPTIONS
     case TRACE
     case PATCH
+    case QUERY
 
     public var body: some RequestBuildable {
         RequestMutation[\.httpMethod, rawValue]
