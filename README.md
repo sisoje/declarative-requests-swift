@@ -1,6 +1,8 @@
 # Declarative Requests: Open Spec Done Right
 
 [![Build](https://github.com/sisoje/swift-declarative-requests/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/swift-declarative-requests/actions/workflows/swift.yml)
+[![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsisoje%2Fswift-declarative-requests%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/sisoje/swift-declarative-requests)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsisoje%2Fswift-declarative-requests%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/sisoje/swift-declarative-requests)
 
 Describe your backend in Swift — checked by the compiler, verified by your
 tests, composable by construction — instead of a YAML spec that drifts.
