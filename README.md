@@ -1,6 +1,6 @@
 # Declarative Requests: Open Spec Done Right
 
-[![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
+[![Build](https://github.com/sisoje/swift-declarative-requests/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/swift-declarative-requests/actions/workflows/swift.yml)
 
 Describe your backend in Swift — checked by the compiler, verified by your
 tests, composable by construction — instead of a YAML spec that drifts.
