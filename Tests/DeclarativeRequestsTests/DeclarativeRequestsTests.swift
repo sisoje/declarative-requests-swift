@@ -583,8 +583,7 @@ import Testing
             }
         }
     } throws: { error in
-        if case DeclarativeRequestsError.badMultipart = error { return true }
-        return false
+        (error as? CocoaError)?.code == .fileReadNoSuchFile
     }
 }
 

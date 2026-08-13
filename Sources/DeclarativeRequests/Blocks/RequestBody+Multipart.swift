@@ -66,13 +66,7 @@ private func encode(parts: [MultipartPart], boundary: String) throws -> Data {
         case let .data(_, _, payload, _):
             body.append(payload)
         case let .file(_, url, _, _):
-            do {
-                try body.append(Data(contentsOf: url))
-            } catch {
-                throw DeclarativeRequestsError.badMultipart(
-                    reason: "Could not read \(url.lastPathComponent): \(error.localizedDescription)"
-                )
-            }
+            try body.append(Data(contentsOf: url))
         }
         body.append(Data("\r\n".utf8))
     }
