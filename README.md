@@ -203,7 +203,8 @@ request is three composable steps, one per axis:
    `needsAuth` per endpoint as a static fact; a protected endpoint with a nil
    token **fails the build** with the spec's own error — a half-authorized
    request can never reach the wire.
-3. **The environment** — `baseURL.buildRequest`, applied at the very end.
+3. **The environment** — `.base(_:)`, a layer like any other, applied at the
+   very end. Materializing (`.request`) is the only terminal step.
 
 ```swift
 enum UserEndpoint {
@@ -242,10 +243,26 @@ enum UserEndpoint {
     }
 }
 
-func request(for endpoint: UserEndpoint) throws -> URLRequest {
-    try environment.baseURL.buildRequest {
-        endpoint.authorized(token: session.token)
+extension RequestBuildable {
+    func base(_ url: URL) -> some RequestBuildable {
+        RequestBlock {
+            self
+            BaseURL(url)
+        }
     }
+}
+```
+
+Every layer has the same shape — `some RequestBuildable` in, `some
+RequestBuildable` out — so the whole pipeline is one chain, and your app
+wraps it once as a demo of the final form:
+
+```swift
+func request(for endpoint: UserEndpoint) throws -> URLRequest {
+    try endpoint
+        .authorized(token: session.token)
+        .base(environment.baseURL)
+        .request
 }
 
 let request = try request(for: .getUser(id: "42"))
