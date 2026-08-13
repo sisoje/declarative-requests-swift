@@ -125,7 +125,7 @@ directly, each has exactly one typed block over it:
 | `httpMethod` | `Method.GET` … `Method.QUERY` |
 | `url` | `BaseURL` / `Endpoint` / `Query` |
 | `allHTTPHeaderFields` | `Header.<field>.setValue/addValue`, `MIMEType.<case>.accept/.contentType`, `Cookie`, `Authorization` |
-| `httpBody` / `httpBodyStream` | `RequestBody.*` |
+| `httpBody` / `httpBodyStream` | `RequestBody.*` encoders; raw bytes and streams via `RequestMutation` |
 | `timeoutInterval` | `Timeout(5)` |
 | `cachePolicy` | `RequestMutation[\.cachePolicy, .returnCacheDataElseLoad]` |
 | `networkServiceType` | `RequestMutation[\.networkServiceType, .background]` |
