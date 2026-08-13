@@ -1,4 +1,4 @@
-# Declarative Requests: open spec done right
+# Declarative Requests: Backend spec done right
 
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
@@ -112,7 +112,7 @@ authorized wrapper, the authorized block drops into the environment builder.
 `MissingToken` is the app's error, not the library's — whether a missing
 token is a failure is the spec's business rule.
 
-This is the "open spec done right" from the top of this README — the spec
+This is the "Backend spec done right" from the top of this README — the spec
 is code, so nothing drifts.
 
 ## Block reference
