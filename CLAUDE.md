@@ -23,7 +23,7 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 - No checking every stupid error. A composition outside the contract produces a wrong request, not a babysitting throw — users **verify their builders in tests**. A request builder is pure and trivially testable; an untested builder is the user's bug, not this package's.
 - Validation added "for safety" is scope creep with an if-statement. Reject it in review.
 
-**Rules of thumb:** a new block should be a one-liner over `RequestState`/`RequestMutation`. If a feature needs its own thread, run loop, or a second way of building *requests*, it does not go in this package (the multipart part-list builder is fine — it builds parts, not requests). When in doubt, the original version of this library (branch `stara-verzija`) did everything essential in ~540 lines — that is the spirit level.
+**Rules of thumb:** popularity decides what enters the framework — how frequently a feature is used in real-world requests is the bar for adding it; niche needs stay on the escape hatches (`RequestMutation`, raw `RequestBlock`) or in a separate package. A new block should be a one-liner over `RequestState`/`RequestMutation`. If a feature needs its own thread, run loop, or a second way of building *requests*, it does not go in this package (the multipart part-list builder is fine — it builds parts, not requests). When in doubt, the original version of this library (branch `stara-verzija`) did everything essential in ~540 lines — that is the spirit level.
 
 ## Build & test
 
