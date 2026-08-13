@@ -39,7 +39,7 @@ the data you have.
 
 | Block | What it does | Example |
 |---|---|---|
-| `BaseURL(_:)` | Sets host/scheme; preserves any path/query already declared. | `BaseURL("https://api.example.com")` |
+| `BaseURL(_:)` | Sets host/scheme. Apply it **last** — after path/query blocks (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com")` |
 | `Endpoint(_:)` | Resolves the path against the current URL using RFC 3986 reference resolution (like Python's `urljoin`). A leading `/` resets to root, bare segments append. | `Endpoint("/users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
@@ -95,9 +95,9 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `ContentType(…)` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
-The body is *replaced* by each `RequestBody.*` block — last one wins. To
-collect form items across iterations, build the array first and pass it
-once.
+Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
+merges its items into an existing form body, so form fields can accumulate
+across blocks and loops.
 
 ### Networking knobs
 
