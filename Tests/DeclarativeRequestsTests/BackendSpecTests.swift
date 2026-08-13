@@ -43,10 +43,6 @@ import Testing
 enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
-}
-
-extension UserEndpoint {
-    struct MissingToken: Error {}
 
     var needsAuth: Bool {
         switch self {
@@ -54,6 +50,10 @@ extension UserEndpoint {
         case .refreshToken: false
         }
     }
+}
+
+extension UserEndpoint {
+    struct MissingToken: Error {}
 
     @RequestBuilder var spec: some RequestBuildable {
         switch self {
