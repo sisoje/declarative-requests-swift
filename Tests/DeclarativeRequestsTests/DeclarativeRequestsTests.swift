@@ -586,25 +586,6 @@ import Testing
     }
     #expect(request.value(forHTTPHeaderField: "X-Token") == "new")
 }
-
-@Test func headerFromFieldMap() throws {
-    let request = try URLRequest {
-        Header.accept.setValue("application/json")
-        Header.userAgent.setValue("test/1.0")
-    }
-    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
-    #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
-}
-
-@Test func headerFromStringMap() throws {
-    let request = try URLRequest {
-        Header.custom("X-Trace-Id").setValue("abc123")
-        Header.custom("X-Custom").setValue("value")
-    }
-    #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
-    #expect(request.value(forHTTPHeaderField: "X-Custom") == "value")
-}
-
 // MARK: - RequestBody.multipart (in-memory)
 
 @Test func multipartBodyHasFormDataContentType() throws {
@@ -806,40 +787,6 @@ import Testing
     #expect(query == "alpha=a&mango=m&zebra=z")
 }
 
-// MARK: - Header bulk-add modes
-
-@Test func headerStringNameAddMode() throws {
-    let request = try URLRequest {
-        Header.accept.setValue("application/json")
-        Header.accept.addValue("text/html")
-    }
-    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
-}
-
-@Test func headerFieldMapAddMode() throws {
-    let request = try URLRequest {
-        Header.accept.setValue("application/json")
-        Header.accept.addValue("text/html")
-    }
-    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
-}
-
-@Test func headerStringMapAddMode() throws {
-    let request = try URLRequest {
-        Header.accept.setValue("application/json")
-        Header.accept.addValue("text/html")
-    }
-    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
-}
-
-@Test func headerEncodableAddMode() throws {
-    let request = try URLRequest {
-        Header.accept.setValue("application/json")
-        Header.accept.addValue("text/html")
-    }
-    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
-}
-
 // MARK: - URLRequest initializer (cache + timeout)
 
 @Test func urlRequestInitAppliesCustomCacheAndTimeout() throws {
@@ -946,3 +893,32 @@ import Testing
     }
 }
 
+
+// MARK: - Coverage restored after debloat
+
+@Test func relativeEndpointResolvesAgainstBase() throws {
+    let request = try URLRequest {
+        Endpoint("player_api.php")
+        Query("a", "1")
+        BaseURL("https://api.example.com")
+    }
+    #expect(request.url?.absoluteString == "https://api.example.com/player_api.php?a=1")
+}
+
+@Test func basicAuthHandlesColonInPassword() throws {
+    let request = try URLRequest {
+        Authorization.basic(username: "alice", password: "a:b:c")
+    }
+    let expected = "Basic \(Data("alice:a:b:c".utf8).base64EncodedString())"
+    #expect(request.value(forHTTPHeaderField: "Authorization") == expected)
+}
+
+@Test func useEncoderAppliesCustomEncoder() throws {
+    struct Model: Codable { let userName: String }
+    let encoder = JSONEncoder()
+    encoder.keyEncodingStrategy = .convertToSnakeCase
+    let request = try RequestBuilderGroup {
+        RequestBody.json(Model(userName: "x"))
+    }.useEncoder(encoder).request
+    #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"user_name\":\"x\"}")
+}

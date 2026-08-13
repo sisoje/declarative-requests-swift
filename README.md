@@ -40,7 +40,7 @@ the data you have.
 | Block | What it does | Example |
 |---|---|---|
 | `BaseURL(_:)` | Sets host/scheme. Apply it **last** — after path/query blocks (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com")` |
-| `Endpoint(_:)` | Resolves the path against the current URL using RFC 3986 reference resolution (like Python's `urljoin`). A leading `/` resets to root, bare segments append. | `Endpoint("/users/\(id)/posts")` |
+| `Endpoint(_:)` | Sets the path; it resolves against `BaseURL` via Foundation relative-URL rules — leading `/` is from the root, a bare segment is relative to the base. | `Endpoint("/users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
@@ -55,12 +55,9 @@ the data you have.
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
-| `Authorization.token(_:)` | `Authorization: Token …` (e.g. Django REST) | `Authorization.token(apiKey)` |
-| `Authorization.other(_:credentials:)` | `Authorization: <Scheme> <credentials>` | `Authorization.other("HOBA", credentials: "…")` |
-| `Authorization.raw(_:)` | Verbatim value, no scheme prefix | `Authorization.raw("opaque-key")` |
 | `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
-| `ContentType(_:)` | Sets `Content-Type` from a string (constants in `MIMEType`). | `ContentType("application/json")` |
-| `Accept(_:)` | Accumulates `Accept` header values. | `Accept("application/json")` |
+| `MIMEType.x.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
+| `MIMEType.x.accept` | Accumulates `Accept` header values. Arbitrary values: `Header.accept.addValue(...)`. | `MIMEType.json.accept` |
 
 They go directly in the request — `setValue` replaces, `addValue` accumulates:
 
@@ -70,7 +67,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
 
-    Accept("application/json")
+    MIMEType.json.accept
     Header.userAgent.setValue("MyApp/1.0")
     Authorization.bearer(token)
     Header.custom("X-Trace-Id").setValue("abc123")
@@ -87,12 +84,12 @@ bytes are produced and what (if any) `Content-Type` is set:
 
 | Factory | What you supply | Sets `Content-Type` |
 |---|---|---|
-| `RequestBody.data(_ data:type:)` | `Data` + optional `ContentType` | only if you pass `type:` |
-| `RequestBody.string(_ s:type:)` | `String` (UTF-8) + `ContentType` | yes (defaults `text/plain`) |
+| `RequestBody.data(_ data:type:)` | `Data` + optional content-type string | only if you pass `type:` |
+| `RequestBody.string(_ s:type:)` | `String` (UTF-8) + content-type string | yes (defaults `text/plain`) |
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ items:)` | `[URLQueryItem]` | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
-| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `ContentType(…)` if needed |
+| `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.x.contentType` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
 Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
@@ -107,7 +104,7 @@ across blocks and loops.
 | `CachePolicy(.reloadIgnoringLocalCacheData)` | `request.cachePolicy` |
 | `NetworkServiceType(.background)` | `request.networkServiceType` |
 | `HTTPShouldHandleCookies(false)` | `request.httpShouldHandleCookies` |
-| `AllowAccess.cellular(true)` etc. | `allowsCellularAccess` / `allowsExpensiveNetworkAccess` / `allowsConstrainedNetworkAccess` / `allowsUltraConstrainedNetworkAccess` |
+| `AllowAccess.cellular(true)` etc. | `allowsCellularAccess` / `allowsExpensiveNetworkAccess` / `allowsConstrainedNetworkAccess` / `allowsUltraConstrainedNetworkAccess` (the last is 26.1+, no-op earlier) |
 
 ## Multipart upload
 
@@ -197,15 +194,12 @@ flowchart LR
     RequestBuilder --- transforms ---> RequestState
 
     subgraph RequestState
-        baseUrl["base URL"]
-        request
-        path["path components"]
-        baseUrl --> finalUrl["final URL"]
-        path --> finalUrl
+        request["request: URLRequest (single source of truth)"]
+        proj["baseURL / urlComponents / cookies\n(computed projections into request)"]
+        proj --> request
     end
 
     request --> FinalRequest["final request"]
-    finalUrl --> FinalRequest
 
     subgraph RequestBuilder
         function1 --> function2
@@ -243,18 +237,16 @@ flowchart LR
     Header --> H3["Header.custom(name).setValue(value)"]
     Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
     HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
-    HeaderGroup --> ContentType["ContentType(_ mimeType)"]
-    ContentType --> CTJSON[".json  .xml  .html  .plainText\n.formURLEncoded  .octetStream\n.png  .jpeg  or any string literal"]
-    HeaderGroup --> AcceptBlock["Accept(_ mimeType)"]
+    HeaderGroup --> MIME["MIMEType (enum)"]
+    MIME --> MIME1["MIMEType.json.contentType"]
+    MIME --> MIME2["MIMEType.json.accept"]
+    MIME --> MIMEC[".json  .xml  .html  .plainText\n.formURLEncoded  .octetStream  .png  .jpeg"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]
     AuthGroup --> A1["Authorization.bearer(token)"]
     AuthGroup --> A2["Authorization.basic(username:password:)"]
-    AuthGroup --> A3["Authorization.token(apiKey)"]
-    AuthGroup --> A4["Authorization.other(scheme, credentials:)"]
-    AuthGroup --> A5["Authorization.raw(value)"]
-    AuthGroup --> A6["Authorization.custom { inout request in }"]
+    AuthGroup --> A3["Authorization.custom { inout request in }"]
 
     %% Body
     RB --> BodyGroup["RequestBody"]
@@ -269,9 +261,6 @@ flowchart LR
     MP --> MP1[".field(name:value:)"]
     MP --> MP2[".data(name:filename:data:type:)"]
     MP --> MP3[".file(name:fileURL:type:)"]
-    B7 --> MS["strategy:"]
-    MS --> MS1[".inMemory"]
-    MS --> MS2[".streamed(bufferSize:)"]
 
     %% Networking knobs
     RB --> NetGroup["Networking Knobs"]
@@ -290,6 +279,6 @@ flowchart LR
 
 - **`RequestBuildable`** — the protocol every block conforms to.
 - **`RequestBuilder`** — the `@resultBuilder` that stitches blocks together.
-- **`RequestBlock`** — the leaf block; holds a closure that mutates `RequestState`.
+- **`RequestStateTransformer`** — the leaf block; holds a closure that mutates `RequestState`.
 - **`RequestState`** — the in-progress `URLRequest` plus the `JSONEncoder` that body / header / query blocks use.
-- **`URLRequest { … }.request`** — applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest`.
+- **`try URLRequest { … }`** — applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest` (`.request` is the same thing on any `RequestBuildable`).

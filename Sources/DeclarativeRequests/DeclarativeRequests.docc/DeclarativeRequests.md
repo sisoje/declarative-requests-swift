@@ -139,7 +139,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
 
-    Accept("application/json")
+    MIMEType.json.accept
     Header.userAgent.setValue("MyApp/1.0")
     Authorization.bearer(token)
     Header.custom("X-Trace-Id").setValue("abc123")
@@ -190,16 +190,12 @@ header.
 
 ### Builder Blocks
 
-- <doc:BuilderBlocks>
 
 ### Building and Sending Requests
 
-- <doc:EntryPoints>
 
 ### Extensions
 
-- ``Foundation/URLRequest``
-- ``Foundation/URL``
 
 ### MIME Types
 
