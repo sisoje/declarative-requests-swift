@@ -34,16 +34,14 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 3. Multipart: keep in-memory, kill streaming (~170 of 342 lines)
 
-- [ ] Delete `.streamed()` strategy: bound-streams producer thread, buffer management, Content-Length precompute
-- [ ] Keep: `MultipartPart` field/data/file + in-memory assembly + RFC 7578 escaping (that part is correct and small)
-- [ ] DECIDE: or keep streaming if you actually upload big files with this
+- [x] Delete `.streamed()` strategy: bound-streams producer thread, buffer management, Content-Length precompute (also: couldn't replay body on redirect/auth, leaked producer thread on unsent requests)
+- [x] Keep: `MultipartPart` field/data/file + in-memory assembly + RFC 7578 escaping (125 lines now)
 
 ## 4. Docs surface (138 docc pages)
 
-- [ ] Delete the per-symbol docc catalog — 138 hand-written .md pages is a maintenance millstone; doc comments in source are enough
-- [ ] Keep one landing article max (`DeclarativeRequests.md`)
-- [ ] Drop `swift-docc-plugin` from Package.swift if catalog goes
-- [ ] Purge stale pages either way: `RequestState-subscript.md`, `HeaderCap` era leftovers
+- [x] Delete the per-symbol docc catalog — doc comments in source are enough
+- [x] Keep one landing article max (`DeclarativeRequests.md`)
+- [x] Drop `swift-docc-plugin` from Package.swift
 
 ## 5. Misc cuts
 
@@ -55,10 +53,17 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 6. Docs tell the truth (post-refactor drift)
 
-- [ ] CLAUDE.md: "BaseURL order doesn't matter" → base is applied last (contract); "last write wins for body" → urlEncoded bodies merge
-- [ ] README: same two corrections, trim removed API from the blocks table
+- [x] CLAUDE.md: base-last contract, urlEncoded merge, scope rules section added
+- [x] README: same corrections, removed API purged
 
 ## 7. Tests
 
 - [ ] Vapor test target: KEEP (only thing verifying wire bytes) — but it's the whole Vapor dependency graph; revisit if resolution time hurts
 - [ ] After cuts: delete tests of deleted API, run full suite, one commit per section above
+
+## Done beyond plan
+
+- [x] MIMEType flattened to 8 constants (json/xml/html/plainText/formURLEncoded/octetStream/png/jpeg) — everything else is a string literal
+- [x] DeclarativeRequestsError: bare enum, no LocalizedError prose, unthrown encodingFailed case deleted
+
+Progress: 1689 → 809 source lines.
