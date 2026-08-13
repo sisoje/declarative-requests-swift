@@ -4,6 +4,8 @@ public enum MIMEType: String {
     case json = "application/json"
     case xml = "application/xml"
     case formURLEncoded = "application/x-www-form-urlencoded"
+    case jsonPatch = "application/json-patch+json"
+    case mergePatch = "application/merge-patch+json"
     case octetStream = "application/octet-stream"
     case pdf = "application/pdf"
     case zip = "application/zip"

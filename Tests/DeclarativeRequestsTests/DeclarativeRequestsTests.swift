@@ -65,6 +65,7 @@ import Testing
         RequestBody.json([1])
     }
     #expect(request.httpBody == "[1]".data(using: .utf8))
+    #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
 }
 
 @Test func httpMethodTest() throws {
@@ -145,6 +146,7 @@ import Testing
     #expect(items.count == 1)
     #expect(items[0].name == "key")
     #expect(items[0].value == "value")
+    #expect(source.request.value(forHTTPHeaderField: "Content-Type") == "application/x-www-form-urlencoded")
 }
 
 @Test func urlEncodedBodyDuplicateNames() throws {
@@ -936,4 +938,21 @@ import Testing
         Cookie("1", "2")
     }
     #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; num2=2; str2=2; x=y")
+}
+
+@Test func mimeRawValues() {
+    let pairs: [(MIMEType, String)] = [
+        (.svg, "image/svg+xml"),
+        (.ico, "image/vnd.microsoft.icon"),
+        (.mp3, "audio/mpeg"),
+        (.m4a, "audio/mp4"),
+        (.mpeg, "video/mpeg"),
+        (.eventStream, "text/event-stream"),
+        (.formURLEncoded, "application/x-www-form-urlencoded"),
+        (.jsonPatch, "application/json-patch+json"),
+        (.mergePatch, "application/merge-patch+json"),
+    ]
+    for (mime, raw) in pairs {
+        #expect(mime.rawValue == raw)
+    }
 }
