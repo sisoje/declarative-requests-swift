@@ -109,7 +109,7 @@ a different axis:
 2. **Authorization** — who is asking. Varies per session, and only endpoints that need it carry the `Authorization` block — public endpoints simply don't have it.
 3. **Base URL** — where it runs. Varies per environment; `BaseURL` comes last.
 
-Endpoints are definition; auth and base are configuration on two different axes.
+Endpoints are definition; authorization and the base URL are configuration on two different axes.
 
 ### Body — one type, many factories
 
