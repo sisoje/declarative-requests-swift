@@ -17,7 +17,6 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.121.4"),
     ],
     targets: [
         .target(
@@ -26,10 +25,6 @@ let package = Package(
         .testTarget(
             name: "DeclarativeRequestsTests",
             dependencies: ["DeclarativeRequests"]
-        ),
-        .testTarget(
-            name: "VaporTests",
-            dependencies: ["DeclarativeRequests", .product(name: "Vapor", package: "vapor")]
-        ),
+        )
     ]
 )

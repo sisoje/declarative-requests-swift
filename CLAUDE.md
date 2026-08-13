@@ -27,8 +27,6 @@ Swift Package Manager project (Swift 6.2, no Xcode project file). The CI scheme 
 ```sh
 swift build
 swift test                                          # all tests
-swift test --filter DeclarativeRequestsTests        # unit tests only (pure, no network)
-swift test --filter VaporTests                      # integration tests (spins up a local Vapor server)
 swift test --filter <TestName>                      # single test by @Test function name
 ```
 
@@ -72,10 +70,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 
 ## Tests
 
-- **`Tests/DeclarativeRequestsTests/`** — pure unit tests, no network. Verify each block produces the expected `URLRequest` shape.
-- **`Tests/VaporTests/`** — spin up a real Vapor server on `port: .zero`, send requests through `URLSession`, and assert the *wire* shape via `VaporInterceptor` middleware (which captures `(Request, Response, Error?)` keyed by a header ID). Use this when behaviour depends on what actually crosses the socket (multipart, header ordering).
-
-The Vapor dependency exists *only* for the test target; the library itself has zero runtime dependencies beyond `Foundation`.
+`Tests/DeclarativeRequestsTests/` — pure unit tests, no network, asserting each block produces the expected `URLRequest` shape (including exact multipart body bytes). The library has **zero dependencies** beyond `Foundation` — keep it that way, test-target included.
 
 ## House style
 

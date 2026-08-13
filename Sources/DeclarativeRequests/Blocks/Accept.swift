@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Accept: RequestBuildable, Sendable {
+public struct Accept: RequestBuildable {
     let mimeType: MIMEType
 
     public init(_ mimeType: MIMEType) {

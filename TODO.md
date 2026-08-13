@@ -58,7 +58,7 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 7. Tests
 
-- [x] Vapor test target: KEEP (only thing verifying wire bytes) — but it's the whole Vapor dependency graph; revisit if resolution time hurts
+- [x] Vapor test target DELETED — whole dependency graph gone, package resolves/builds instantly; unit tests still assert exact body/header bytes
 - [x] After cuts: deleted tests of deleted API, full suite green, one commit per section
 
 ## Done beyond plan
