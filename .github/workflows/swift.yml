@@ -16,5 +16,10 @@ jobs:
       with:
         xcode-version: 'latest'
     - uses: actions/checkout@v6
+    - uses: actions/cache@v6
+      with:
+        path: .build
+        key: spm-${{ runner.os }}-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}
+        restore-keys: spm-${{ runner.os }}-
     - name: Run tests
       run: swift test
