@@ -18,57 +18,6 @@ extension MIMEType: ExpressibleByStringLiteral {
     }
 }
 
-extension MIMEType: CustomStringConvertible {
-    public var description: String {
-        rawValue
-    }
-}
-
-extension MIMEType: Codable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        rawValue = try container.decode(String.self)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(rawValue)
-    }
-}
-
-public extension MIMEType {
-    var essence: String {
-        rawValue.split(separator: ";", maxSplits: 1).first.map(String.init)?
-            .trimmingCharacters(in: .whitespaces).lowercased() ?? rawValue
-    }
-
-    var type: String? {
-        essence.split(separator: "/", maxSplits: 1).first.map(String.init)
-    }
-
-    var subtype: String? {
-        let parts = essence.split(separator: "/", maxSplits: 1)
-        return parts.count == 2 ? String(parts[1]) : nil
-    }
-
-    var parameters: [String: String] {
-        var result: [String: String] = [:]
-        let segments = rawValue.split(separator: ";").dropFirst()
-        for segment in segments {
-            let pair = segment.split(separator: "=", maxSplits: 1)
-            guard pair.count == 2 else { continue }
-            let key = pair[0].trimmingCharacters(in: .whitespaces).lowercased()
-            let value = pair[1].trimmingCharacters(in: .whitespaces)
-            result[key] = value
-        }
-        return result
-    }
-
-    func matches(_ other: MIMEType) -> Bool {
-        essence == other.essence
-    }
-}
-
 public extension MIMEType {
     static let json: MIMEType = Application.json
     static let xml: MIMEType = Application.xml
@@ -187,10 +136,6 @@ public extension MIMEType {
         public static let byteranges: MIMEType = "multipart/byteranges"
         public static let digest: MIMEType = "multipart/digest"
         public static let parallel: MIMEType = "multipart/parallel"
-
-        public static func formData(boundary: String) -> MIMEType {
-            formData.with(.boundary(boundary))
-        }
     }
 }
 

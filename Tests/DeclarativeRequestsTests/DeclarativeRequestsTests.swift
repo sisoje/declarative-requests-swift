@@ -1074,7 +1074,7 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 
 @Test func contentTypeFromCustomMIMEType() throws {
     let request = try URLRequest {
-        ContentType(.json.with(.charset(.utf8)))
+        ContentType("application/json; charset=utf-8")
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json; charset=utf-8")
 }
@@ -1108,15 +1108,15 @@ private final class StreamConsumer: NSObject, StreamDelegate {
 @Test func acceptWithQualityParameters() throws {
     let request = try URLRequest {
         Accept(.json)
-        Accept(.xml.with(.quality(0.8)))
-        Accept(.html.with(.quality(0.5)))
+        Accept("application/xml; q=0.8")
+        Accept("text/html; q=0.5")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,application/xml; q=0.8,text/html; q=0.5")
 }
 
 @Test func acceptWithCharsetParameter() throws {
     let request = try URLRequest {
-        Accept(.html.with(.charset(.utf8)))
+        Accept("text/html; charset=utf-8")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "text/html; charset=utf-8")
 }

@@ -5,8 +5,7 @@ A type-safe representation of a MIME type (media type) string.
 ## Overview
 
 `MIMEType` wraps a raw string like `"application/json"` or
-`"text/html; charset=utf-8"` and provides structured access to its
-components. Use it anywhere the library expects a content type — with
+`"text/html; charset=utf-8"`. Use it anywhere the library expects a content type — with
 ``ContentType``, ``RequestBody``, ``MultipartPart``, or ``Header``.
 
 ### Using predefined constants
@@ -24,41 +23,6 @@ MIMEType.Multipart.formData         // "multipart/form-data"
 
 Top-level shorthands like ``json``, ``html``, and ``png`` are provided
 for the most frequently used types.
-
-### Parsing components
-
-Inspect the structure of a MIME type without manual string splitting:
-
-```swift
-let mime: MIMEType = "text/html; charset=utf-8"
-mime.essence       // "text/html"
-mime.type          // "text"
-mime.subtype       // "html"
-mime.parameters    // ["charset": "utf-8"]
-```
-
-### Adding parameters
-
-Append parameters with ``with(_:)-(MIMEType.Parameter)`` using the type-safe
-``MIMEType/Parameter`` builders:
-
-```swift
-let json = MIMEType.json
-    .with(.charset(.utf8))
-
-let multipart = MIMEType.Multipart.formData
-    .with(.boundary("----Boundary123"))
-```
-
-### Comparing types
-
-``matches(_:)`` compares two MIME types by their essence only, ignoring
-parameters:
-
-```swift
-let withCharset: MIMEType = "application/json; charset=utf-8"
-withCharset.matches(.json) // true
-```
 
 ### Custom MIME types
 
@@ -84,20 +48,6 @@ let literal: MIMEType = "application/vnd.myapp+json"
 - ``png``
 - ``jpeg``
 
-### Parsing
-
-- ``essence``
-- ``type``
-- ``subtype``
-- ``parameters``
-- ``matches(_:)``
-
-### Composing
-
-- ``with(_:)-(MIMEType.Parameter)``
-- ``with(_:)-(MIMEType.Parameter...)``
-- ``with(_:)-([MIMEType.Parameter])``
-
 ### Namespaces
 
 - ``Application``
@@ -107,12 +57,6 @@ let literal: MIMEType = "application/vnd.myapp+json"
 - ``Video``
 - ``Multipart``
 - ``Font``
-
-### Nested Types
-
-- ``Parameter``
-- ``Charset``
-- ``List``
 
 ### Initializers
 

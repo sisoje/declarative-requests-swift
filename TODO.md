@@ -28,9 +28,9 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## 2. Shrink MIMEType (~340 lines → ~40)
 
-- [ ] Delete `MIMETypeParameter.swift` (133 lines): `.with(.quality(0.8))`, `.charset(.utf8)`, `Parameter.List`, `matches()` — content negotiation machinery nobody asked for; a raw string does it
-- [ ] Reduce `MIMEType` to the stara-verzija `ContentType` model: flat raw-string constants, nothing else
-- [ ] `Accept`/`ContentType` blocks stay, take `MIMEType` or raw `String`
+- [x] Delete `MIMETypeParameter.swift` (133 lines): `.with(.quality(0.8))`, `.charset(.utf8)`, `Parameter.List`, `matches()` — content negotiation machinery nobody asked for; a raw string does it
+- [x] Reduce `MIMEType` to the stara-verzija `ContentType` model: flat raw-string constants, nothing else (also dropped Codable/essence/type/subtype/parameters)
+- [x] `Accept`/`ContentType` blocks stay, take `MIMEType` or string literal (`Accept("application/xml; q=0.8")`)
 
 ## 3. Multipart: keep in-memory, kill streaming (~170 of 342 lines)
 

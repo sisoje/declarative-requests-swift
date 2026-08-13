@@ -12,7 +12,7 @@ as a parameter to body blocks like ``RequestBody`` and ``MultipartPart``:
 ContentType(.json)  // sets Content-Type: application/json
 
 // With parameters:
-ContentType(.json.with(.charset(.utf8)))
+ContentType("application/json; charset=utf-8")
 // sets Content-Type: application/json; charset=utf-8
 ```
 

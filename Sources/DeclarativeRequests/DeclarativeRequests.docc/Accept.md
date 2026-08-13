@@ -11,8 +11,8 @@ clients negotiate content types:
 ```swift
 let request = try URLRequest {
     Accept(.json)
-    Accept(.xml.with(.quality(0.8)))
-    Accept(.html.with(.quality(0.5)))
+    Accept("application/xml; q=0.8")
+    Accept("text/html; q=0.5")
 }
 // Accept: application/json, application/xml; q=0.8, text/html; q=0.5
 ```
