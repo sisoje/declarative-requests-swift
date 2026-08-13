@@ -152,8 +152,8 @@ let request = try URLRequest {
 ### Custom authentication
 
 For signing schemes that derive credentials from the request itself —
-like HMAC signatures computed over headers or the body — use the
-``Authorization/custom(_:)`` authenticator closure. Place it after all other
+like HMAC signatures computed over headers or the body — use a raw
+``RequestBlock`` closure. Place it after all other
 blocks so the request is fully formed when the closure runs:
 
 ```swift
@@ -162,11 +162,11 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/v1/data")
     RequestBody.json(payload)
-    Authorization.custom { request in
-        let body = request.httpBody ?? Data()
+    RequestBlock { state in
+        let body = state.request.httpBody ?? Data()
         let signature = hmac(body, secret: key)
-        request.setValue("Signed \(signature)",
-                        forHTTPHeaderField: "Authorization")
+        state.request.setValue("Signed \(signature)",
+                               forHTTPHeaderField: "Authorization")
     }
 }
 ```

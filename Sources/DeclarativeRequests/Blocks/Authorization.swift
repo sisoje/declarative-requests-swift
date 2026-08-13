@@ -12,9 +12,4 @@ public extension Authorization {
         return Header.authorization.setValue("Basic \(base64)")
     }
 
-    static func custom(_ authenticator: @escaping (inout URLRequest) throws -> Void) -> some RequestBuildable {
-        RequestBlock { state in
-            try authenticator(&state.request)
-        }
-    }
 }

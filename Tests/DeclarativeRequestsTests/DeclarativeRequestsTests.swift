@@ -373,9 +373,9 @@ import Testing
         Endpoint("/v1/data")
         Header.accept.setValue("application/json")
         RequestBody.json(["key": "value"])
-        Authorization.custom { request in
-            let bodyHash = (request.httpBody ?? Data()).count
-            request.setValue("Signed \(bodyHash)", forHTTPHeaderField: "Authorization")
+        RequestBlock { state in
+            let bodyHash = (state.request.httpBody ?? Data()).count
+            state.request.setValue("Signed \(bodyHash)", forHTTPHeaderField: "Authorization")
         }
     }
     #expect(request.value(forHTTPHeaderField: "Authorization") == "Signed 15")

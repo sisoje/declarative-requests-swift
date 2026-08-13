@@ -74,7 +74,6 @@ Pick the factory or initializer that matches the data you have.
 | `Cookie(_ encodable:)` | Flatten an `Encodable` model into cookies. | `Cookie(sessionModel)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
-| `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
 | `MIMEType.x.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
 | `MIMEType.x.accept` | Accumulates `Accept` header values. Arbitrary values: `Header.accept.addValue(...)`. | `MIMEType.json.accept` |
 
@@ -280,7 +279,6 @@ flowchart LR
     RB --> AuthGroup["Authorization"]
     AuthGroup --> A1["Authorization.bearer(token)"]
     AuthGroup --> A2["Authorization.basic(username:password:)"]
-    AuthGroup --> A3["Authorization.custom { inout request in }"]
 
     %% Body
     RB --> BodyGroup["RequestBody"]
