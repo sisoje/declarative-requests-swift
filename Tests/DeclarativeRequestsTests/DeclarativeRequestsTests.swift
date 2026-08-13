@@ -666,7 +666,7 @@ import Testing
 
 @Test func networkServiceTypeApplied() throws {
     let request = try URLRequest {
-        NetworkServiceType(.background)
+        NetworkServiceType.background
     }
     #expect(request.networkServiceType == .background)
 }

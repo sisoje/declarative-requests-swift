@@ -43,7 +43,7 @@ directly, each has exactly one typed block over it:
 | `httpBody` / `httpBodyStream` | `RequestBody.*` |
 | `timeoutInterval` | `Timeout(5)` |
 | `cachePolicy` | `CachePolicy.reloadIgnoringLocalCacheData` |
-| `networkServiceType` | `NetworkServiceType(.background)` |
+| `networkServiceType` | `NetworkServiceType.background` |
 | `httpShouldHandleCookies` | `HTTPShouldHandleCookies(false)` |
 | `allowsCellularAccess` etc. | `AllowAccess.cellular(true)` etc. |
 
@@ -133,7 +133,7 @@ let request = try RequestBlock {
 |---|---|
 | `Timeout(_ seconds:)` | `request.timeoutInterval` |
 | `CachePolicy.reloadIgnoringLocalCacheData` | `request.cachePolicy` |
-| `NetworkServiceType(.background)` | `request.networkServiceType` |
+| `NetworkServiceType.background` | `request.networkServiceType` |
 | `HTTPShouldHandleCookies(false)` | `request.httpShouldHandleCookies` |
 | `AllowAccess.cellular(true)` etc. | `allowsCellularAccess` / `allowsExpensiveNetworkAccess` / `allowsConstrainedNetworkAccess` / `allowsUltraConstrainedNetworkAccess` (the last is 26.1+, no-op earlier) |
 
@@ -298,7 +298,7 @@ flowchart LR
     RB --> NetGroup["Networking Knobs"]
     NetGroup --> Timeout["Timeout(_ seconds)"]
     NetGroup --> CachePolicy["CachePolicy.returnCacheDataElseLoad ..."]
-    NetGroup --> NST["NetworkServiceType(_ type)"]
+    NetGroup --> NST["NetworkServiceType.background ..."]
     NetGroup --> HSHC["HTTPShouldHandleCookies(_ flag)"]
     NetGroup --> AllowAccess
     AllowAccess --> AA1[".cellular(Bool)"]
