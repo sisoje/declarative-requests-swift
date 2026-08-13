@@ -201,15 +201,15 @@ struct UserBackend {
 }
 
 extension UserBackend {
-    static func live(baseURL: URL, tokenProvider: @escaping () -> String?) -> Self {
+    static func live(baseURL: URL, token: @escaping () -> String) -> Self {
         .init(
             getUser: { id in
                 Method.GET
                 Endpoint("/v1/users/\(id)")
-                if let t = tokenProvider() { Authorization.bearer(t) }
+                Authorization.bearer(token())    // this endpoint requires auth — statically
                 BaseURL(baseURL)
             },
-            refreshToken: { token in
+            refreshToken: { token in    // public endpoint — no Authorization block
                 Method.POST
                 Endpoint("/v1/auth/refresh")
                 RequestBody.json(["token": token])

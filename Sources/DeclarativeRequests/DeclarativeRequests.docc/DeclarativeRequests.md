@@ -64,15 +64,18 @@ and `for` — use them directly inside the builder closure:
 
 ```swift
 let request = try URLRequest {
-    BaseURL("https://api.example.com")
+    Method.GET
+    Endpoint("/v1/users")
 
-    if let token = tokenProvider() {
-        Authorization.bearer(token)
+    if isStaging {
+        Header.custom("X-Env").setValue("staging")
     }
 
     for (key, value) in extraHeaders {
         Header.custom(key).setValue(value)
     }
+
+    BaseURL("https://api.example.com")
 }
 ```
 
