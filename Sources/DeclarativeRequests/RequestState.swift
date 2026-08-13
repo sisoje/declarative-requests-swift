@@ -76,7 +76,7 @@ public extension RequestState {
 }
 
 public extension RequestState {
-    var pathString: String {
+    var path: String {
         get { urlComponents.path }
         set { urlComponents.path = newValue }
     }
