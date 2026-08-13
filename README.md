@@ -19,11 +19,11 @@ Content-Type: application/json
 ```swift
 let request = try URLRequest {
     Method.POST
-    BaseURL("https://api.example.com")
     Endpoint("/v1/login")
     Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
+    BaseURL("https://api.example.com")
 }
 ```
 
@@ -53,6 +53,7 @@ the data you have.
 | `Header.field.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
+| `Cookie(_ encodable:)` | Flatten an `Encodable` model into cookies. | `Cookie(sessionModel)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
 | `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
@@ -64,7 +65,6 @@ They go directly in the request — `setValue` replaces, `addValue` accumulates:
 ```swift
 let request = try URLRequest {
     Method.GET
-    BaseURL("https://api.example.com")
     Endpoint("/users")
 
     MIMEType.json.accept
@@ -74,8 +74,12 @@ let request = try URLRequest {
     if isStaging {
         Header.custom("X-Env").setValue("staging")
     }
+    BaseURL("https://api.example.com")
 }
 ```
+
+`BaseURL` goes last — everything before it accumulates the relative part of the
+URL, and the base resolves it (`URL.buildRequest` appends the base for you).
 
 ### Body — one type, many factories
 
@@ -96,6 +100,16 @@ Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
 merges its items into an existing form body, so form fields can accumulate
 across blocks and loops.
 
+`Encodable`-driven blocks (`json`, `urlEncoded`, `Query`, `Cookie`) use the
+builder's `JSONEncoder`. Swap it with `.useEncoder(_:)` on any block group:
+
+```swift
+let request = try RequestBuilderGroup {
+    RequestBody.json(model)   // encoded with snake_case keys
+    BaseURL("https://api.example.com")
+}.useEncoder(snakeCaseEncoder).request
+```
+
 ### Networking knobs
 
 | Block | What it does |
@@ -111,7 +125,6 @@ across blocks and loops.
 ```swift
 let request = try URLRequest {
     Method.POST
-    BaseURL("https://api.example.com")
     Endpoint("/upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
@@ -120,6 +133,7 @@ let request = try URLRequest {
             MultipartPart.file(name: "files", fileURL: url, type: "application/octet-stream")
         }
     }
+    BaseURL("https://api.example.com")
 }
 ```
 
@@ -146,9 +160,9 @@ Otherwise declare the URL inside the builder with `BaseURL`:
 ```swift
 let request = try URLRequest {
     Method.POST
-    BaseURL("https://api.example.com")
     Endpoint("/login")
     RequestBody.json(credentials)
+    BaseURL("https://api.example.com")
 }
 ```
 
@@ -169,15 +183,15 @@ extension UserRepository {
         .init(
             getUser: { id in
                 Method.GET
-                BaseURL(baseURL)
                 Endpoint("/v1/users/\(id)")
                 if let t = tokenProvider() { Authorization.bearer(t) }
+                BaseURL(baseURL)
             },
             refreshToken: { token in
                 Method.POST
-                BaseURL(baseURL)
                 Endpoint("/v1/auth/refresh")
                 RequestBody.json(["token": token])
+                BaseURL(baseURL)
             }
         )
     }
@@ -236,11 +250,13 @@ flowchart LR
     Header --> H2["Header.field.addValue(value)"]
     Header --> H3["Header.custom(name).setValue(value)"]
     Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
-    HeaderGroup --> Cookie["Cookie(_ name, _ value)"]
+    HeaderGroup --> Cookie["Cookie"]
+    Cookie --> CK1["Cookie(_ name, _ value)"]
+    Cookie --> CK2["Cookie(_ encodable)"]
     HeaderGroup --> MIME["MIMEType (enum)"]
     MIME --> MIME1["MIMEType.json.contentType"]
     MIME --> MIME2["MIMEType.json.accept"]
-    MIME --> MIMEC[".json  .xml  .html  .plainText\n.formURLEncoded  .octetStream  .png  .jpeg"]
+    MIME --> MIMEC["36 common types:\n.json  .xml  .png  .mp4  .pdf ...\nanything else: Header + string"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]

@@ -1,17 +1,23 @@
 import Foundation
 
 public struct Cookie: RequestBuildable {
-    public init(_ key: String, _ value: String) {
-        self.key = key
-        self.value = value
+    public init(_ name: String, _ value: String) {
+        items = { _ in [URLQueryItem(name: name, value: value)] }
     }
 
-    let key: String
-    let value: String
+    public init(_ encodable: any Encodable) {
+        items = {
+            try EncodableQueryItems(encodable: encodable, encoder: $0).items
+        }
+    }
+
+    let items: (JSONEncoder) throws -> [URLQueryItem]
 
     public var body: some RequestBuildable {
         RequestStateTransformer { state in
-            state.cookies[key] = value
+            for item in try items(state.encoder) {
+                state.cookies[item.name] = item.value ?? ""
+            }
         }
     }
 }

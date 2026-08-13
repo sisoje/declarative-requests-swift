@@ -60,7 +60,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 - **Last write wins** for properties (method, URL, body) — with one deliberate exception: `RequestBody.urlEncoded` *merges* its items into an existing form body. Accumulating blocks (cookies, query items, `Header.x.addValue`) read-then-write the existing value.
 - **`Endpoint`** just sets `urlComponents.path` (replacing any previous path). Resolution against the base happens via Foundation's relative-URL rules when the URL is rebuilt: leading `/` is from the root, a bare segment is relative to the base directory.
 - **`RequestMutation[\.keyPath, value]` subscript** is the canonical way to write a one-line block (used by `Method`, `Timeout`, `AllowAccess`, etc.). New blocks should use it instead of writing closures by hand.
-- **Encodable-driven blocks** (`Query(_:)`, `RequestBody.json/.urlEncoded`) route through `state.encoder` so the user's encoder configuration (date strategy, key strategy) is respected.
+- **Encodable-driven blocks** (`Query(_:)`, `Cookie(_:)`, `RequestBody.json/.urlEncoded`) route through `state.encoder` so the user's encoder configuration (date strategy, key strategy) is respected.
 - **`MIMEType`** cases are nodes, Header-style: `MIMEType.json.contentType` (set) / `MIMEType.json.accept` (add). Arbitrary values go through `Header.contentType/.accept` directly.
 - **`RequestBody.stream(_:)`** takes an `@autoclosure` so the `InputStream` is recreated on each build (streams are single-use).
 - **Multipart** is in-memory only (`RequestBody.multipart` assembles a `Data` blob per RFC 7578). See `RequestBody+Multipart.swift`.

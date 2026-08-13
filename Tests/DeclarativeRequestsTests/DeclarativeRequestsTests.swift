@@ -922,3 +922,18 @@ import Testing
     }.useEncoder(encoder).request
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"user_name\":\"x\"}")
 }
+
+@Test func cookieFromEncodable() throws {
+    struct Model: Codable {
+        var str1: String?
+        var str2 = "2"
+        var num1: Int?
+        var num2 = 2
+    }
+    let request = try URLRequest {
+        Cookie("x", "y")
+        Cookie(Model())
+        Cookie("1", "2")
+    }
+    #expect(request.value(forHTTPHeaderField: Header.cookie.rawValue) == "1=2; num2=2; str2=2; x=y")
+}
