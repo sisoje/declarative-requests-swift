@@ -28,7 +28,6 @@ Blocks follow two conventions:
 
 - ``Method``
 - ``Header``
-- ``Headers``
 - ``Cookie``
 - ``Authorization``
 - ``ContentType``

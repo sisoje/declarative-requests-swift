@@ -129,13 +129,9 @@ extension UserRepository {
 let request = try repo.getUser("42").request
 ```
 
-### Grouped headers
+### Headers
 
-Top-level ``Header`` and ``Authorization`` blocks work directly inside a request.
-When you'd rather keep header declarations visually together — or vary an entire
-group conditionally — wrap them in ``Headers`` and use the typed header nodes.
-The grouping builder only accepts header values; passing anything else is a
-compile-time error:
+Headers go directly in the request — `setValue` replaces, `addValue` accumulates:
 
 ```swift
 let request = try URLRequest {
@@ -143,20 +139,15 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
 
-    Headers {
-        AcceptHeader(.json)
-        UserAgentHeader("MyApp/1.0")
-        AuthorizationHeader.bearer(token)
-        CustomHeader("X-Trace-Id", "abc123")
-        if isStaging {
-            CustomHeader("X-Env", "staging")
-        }
+    Accept(.json)
+    Header.userAgent.setValue("MyApp/1.0")
+    Authorization.bearer(token)
+    Header.custom("X-Trace-Id").setValue("abc123")
+    if isStaging {
+        Header.custom("X-Env").setValue("staging")
     }
 }
 ```
-
-Each typed node has a default mode (most are set, ``CustomHeader`` is add). Flip
-it explicitly with `.replacing()` or `.appending()` when you need the other one.
 
 ### Custom authentication
 
@@ -232,10 +223,6 @@ print(request.curlCommand)
 ### Builder Blocks
 
 - <doc:BuilderBlocks>
-
-### Headers
-
-- ``Headers``
 
 ### Building and Sending Requests
 
