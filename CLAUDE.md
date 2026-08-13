@@ -18,6 +18,11 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 - `import SwiftUI`/Combine, `@Observable`, or speculative `Sendable` annotations.
 - Code defending against idiotic usage. Contracts are documented, not enforced with extra machinery.
 
+**We do not write code for idiots:**
+- No defensive re-mutation or re-assignment — state is written once, honestly; no getter that recomputes what a setter already wrote, no setter that resets what someone else assigned (both existed once; both were bugs).
+- No checking every stupid error. A malformed base/path composition produces a wrong request, not a babysitting throw — users are expected to **verify their builders in tests**. A request builder is pure and trivially testable; a builder without a test is the user's bug, not this package's.
+- Validation added "for safety" is scope creep with an if-statement. Reject it in review.
+
 **Rules of thumb:** a new block should be a one-liner over `RequestState`/`RequestMutation`. If a feature needs its own thread, run loop, or a second way of building *requests*, it does not go in this package (the multipart part-list builder is fine — it builds parts, not requests). When in doubt, the original version of this library (branch `stara-verzija`) did everything essential in ~540 lines — that is the spirit level.
 
 ## Build & test
