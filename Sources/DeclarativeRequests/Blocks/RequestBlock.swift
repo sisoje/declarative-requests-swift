@@ -3,8 +3,8 @@ public struct RequestBlock: RequestBuildable {
         self.transform = transform
     }
 
-    public init(@RequestBuilder builder: () throws -> any RequestBuildable) rethrows {
-        transform = try builder().transform
+    public init(@RequestBuilder builder: @escaping () throws -> any RequestBuildable) {
+        transform = { try builder().transform($0) }
     }
 
     let transform: RequestStateTransformClosure

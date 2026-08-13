@@ -232,8 +232,8 @@ enum UserEndpoint {
 
     struct MissingToken: Error {}
 
-    func authorized(token: String?) throws -> some RequestBuildable {
-        try RequestBlock {
+    func authorized(token: String?) -> some RequestBuildable {
+        RequestBlock {
             spec
             if needsAuth {
                 if let token {
