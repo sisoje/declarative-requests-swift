@@ -43,6 +43,10 @@ import Testing
 enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
+}
+
+extension UserEndpoint {
+    struct MissingToken: Error {}
 
     var needsAuth: Bool {
         switch self {
@@ -62,8 +66,6 @@ enum UserEndpoint {
             RequestBody.json(["token": token])
         }
     }
-
-    struct MissingToken: Error {}
 
     func authorized(token: String?) -> some RequestBuildable {
         RequestBlock {

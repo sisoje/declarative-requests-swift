@@ -53,6 +53,10 @@ request is three composable steps, one per axis:
 enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
+}
+
+extension UserEndpoint {
+    struct MissingToken: Error {}
 
     var needsAuth: Bool {
         switch self {
@@ -73,8 +77,6 @@ enum UserEndpoint {
         }
     }
 
-    struct MissingToken: Error {}
-
     func authorized(token: String?) -> some RequestBuildable {
         RequestBlock {
             spec
@@ -82,7 +84,7 @@ enum UserEndpoint {
                 if let token {
                     Authorization.bearer(token)
                 } else {
-                    throw MissingToken()
+                    RequestBlock { _ in throw MissingToken() }
                 }
             }
         }
