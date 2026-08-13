@@ -201,7 +201,7 @@ request is three composable steps, one per axis:
 3. **`baseURL.buildRequest`** — environment, applied at the very end.
 
 ```swift
-enum UserBackend {
+enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
 
@@ -237,7 +237,7 @@ enum UserBackend {
     }
 }
 
-func request(for endpoint: UserBackend) throws -> URLRequest {
+func request(for endpoint: UserEndpoint) throws -> URLRequest {
     try environment.baseURL.buildRequest {
         endpoint.authorized(token: session.token)
     }
