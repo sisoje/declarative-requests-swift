@@ -20,9 +20,11 @@ public struct BaseURL: RequestBuildable {
         RequestBlock { state in
             switch source {
             case let .url(url):
-                state.baseURL = url
+                state.setBaseURL(url)
             case let .urlString(string):
-                state.baseURL = URL(string: string)
+                if let url = URL(string: string) {
+                    state.setBaseURL(url)
+                }
             }
         }
     }

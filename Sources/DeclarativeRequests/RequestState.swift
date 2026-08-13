@@ -15,23 +15,19 @@ public final class RequestState {
 }
 
 public extension RequestState {
-    /// Backed by the relative-URL structure of `request.url`.
-    ///
-    /// Limitation: the base URL is meant to be applied after path and query.
-    /// Setting `request.url` to an absolute URL directly discards the base.
-    var baseURL: URL? {
-        get { request.url?.baseURL }
-        set {
-            guard var url = newValue else { return }
-            let combinedComponents = urlComponents
-            if !combinedComponents.path.isEmpty {
-                url.append(path: combinedComponents.path)
-            }
-            if let queryItems = combinedComponents.queryItems {
-                url.append(queryItems: queryItems)
-            }
-            request.url = url
+    /// Combines the base into `request.url`: accumulated path and query are
+    /// appended onto it. Apply after path and query; there is no readback —
+    /// combination consumes the base/path boundary.
+    func setBaseURL(_ url: URL) {
+        var url = url
+        let combinedComponents = urlComponents
+        if !combinedComponents.path.isEmpty {
+            url.append(path: combinedComponents.path)
         }
+        if let queryItems = combinedComponents.queryItems {
+            url.append(queryItems: queryItems)
+        }
+        request.url = url
     }
 
     /// Backed by `request.url`, resolved.

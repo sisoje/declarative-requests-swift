@@ -291,7 +291,7 @@ flowchart LR
 
     subgraph RequestState
         request["request: URLRequest (single source of truth)"]
-        proj["baseURL / urlComponents / cookies<br/>(computed projections into request)"]
+        proj["urlComponents / cookies<br/>(computed projections into request)<br/>setBaseURL combines, no readback"]
         proj --> request
     end
 
