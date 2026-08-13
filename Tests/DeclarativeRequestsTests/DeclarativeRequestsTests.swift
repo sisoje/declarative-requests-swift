@@ -70,7 +70,7 @@ import Testing
 
 @Test func httpMethodTest() throws {
     let request = try URLRequest {
-        Method.custom("sisoje")
+        RequestMutation[\.httpMethod, "sisoje"]
     }
     #expect(request.httpMethod == "sisoje")
 }

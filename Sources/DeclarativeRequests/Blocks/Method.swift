@@ -13,8 +13,4 @@ public enum Method: String, RequestBuildable {
     public var body: some RequestBuildable {
         RequestMutation[\.httpMethod, rawValue]
     }
-
-    public static func custom(_ method: String) -> some RequestBuildable {
-        RequestMutation[\.httpMethod, method]
-    }
 }

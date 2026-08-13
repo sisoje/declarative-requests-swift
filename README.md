@@ -37,7 +37,7 @@ directly, each has exactly one typed block over it:
 
 | Raw `URLRequest` field | Block |
 |---|---|
-| `httpMethod` | `Method.GET` … `.custom(_)` |
+| `httpMethod` | `Method.GET` … `Method.QUERY` |
 | `url` | `BaseURL` / `Endpoint` / `Query` |
 | `allHTTPHeaderFields` | `Header.x.setValue/addValue`, `MIMEType.x.accept/.contentType`, `Cookie`, `Authorization` |
 | `httpBody` / `httpBodyStream` | `RequestBody.*` |
@@ -66,7 +66,7 @@ Pick the factory or initializer that matches the data you have.
 
 | Block | What it does | Example |
 |---|---|---|
-| `Method.GET` / `.POST` / `.PUT` / … / `.custom("LINK")` | Sets the HTTP method. | `Method.POST` |
+| `Method.GET` / `.POST` / `.PUT` / … | Sets the HTTP method. Nonstandard verb: `RequestMutation[\.httpMethod, "LINK"]`. | `Method.POST` |
 | `Header.field.setValue(_:)` | Sets a header field, replacing any previous value. | `Header.accept.setValue("application/json")` |
 | `Header.field.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
@@ -254,7 +254,6 @@ flowchart LR
     %% Method
     RB --> MethodGroup["Method"]
     MethodGroup --> MSTD[".GET  .POST  .PUT\n.DELETE  .PATCH  .HEAD\n.OPTIONS  .TRACE  .CONNECT  .QUERY"]
-    MethodGroup --> MCUSTOM[".custom(_ string)"]
 
     %% Headers
     RB --> HeaderGroup["Headers"]
