@@ -189,39 +189,52 @@ let request = try URLRequest {
 
 ## Backend spec
 
-Describe your backend as a spec: a struct of `@RequestBuilder` closures, one
-per endpoint. The spec is identical in every environment — dev, staging, and
-production materialize the same spec with different base URLs. It also keeps
-URL construction out of call sites and makes endpoints easy to mock in tests.
+Describe your backend as an enum: one case per endpoint — a backend is a
+finite set of endpoints, so the spec is a closed type. The spec declares
+`needsAuth` per endpoint as a static fact; materializing demands a token
+(never a maybe-token) and the base URL comes in at the very end:
 
 ```swift
-struct UserBackend {
-    @RequestBuilder var getUser: (_ id: String) -> any RequestBuildable
-    @RequestBuilder var refreshToken: (_ token: String) -> any RequestBuildable
-}
+enum UserBackend {
+    case getUser(id: String)
+    case refreshToken(token: String)
 
-extension UserBackend {
-    static func live(baseURL: URL, token: @escaping () -> String) -> Self {
-        .init(
-            getUser: { id in
-                Method.GET
-                Endpoint("/v1/users/\(id)")
-                Authorization.bearer(token())    // this endpoint requires auth — statically
-                BaseURL(baseURL)
-            },
-            refreshToken: { token in    // public endpoint — no Authorization block
-                Method.POST
-                Endpoint("/v1/auth/refresh")
-                RequestBody.json(["token": token])
-                BaseURL(baseURL)
+    var needsAuth: Bool {
+        switch self {
+        case .getUser: true
+        case .refreshToken: false
+        }
+    }
+
+    @RequestBuilder var spec: some RequestBuildable {
+        switch self {
+        case let .getUser(id):
+            Method.GET
+            Endpoint("/v1/users/\(id)")
+        case let .refreshToken(token):
+            Method.POST
+            Endpoint("/v1/auth/refresh")
+            RequestBody.json(["token": token])
+        }
+    }
+
+    func request(baseURL: URL, token: () -> String) throws -> URLRequest {
+        try baseURL.buildRequest {
+            spec
+            if needsAuth {
+                Authorization.bearer(token())
             }
-        )
+        }
     }
 }
 
-let request = try backend.getUser("42").request
+let request = try UserBackend.getUser(id: "42")
+    .request(baseURL: environment.baseURL, token: { session.token })
 ```
 
+The three layers are the three call-site pieces: the case is definition,
+the token is the session axis, the URL is the environment axis. Endpoints
+stay easy to mock in tests — build the request, assert its shape.
 
 ## Architecture sketch
 
