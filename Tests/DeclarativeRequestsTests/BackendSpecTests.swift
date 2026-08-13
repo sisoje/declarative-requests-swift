@@ -2,9 +2,10 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
-let baseURL = URL(string: "https://api.example.com/api")!
-
-@Test func authorizedEndpoint() throws {
+@Test(arguments: [
+    URL(string: "https://api.example.com/api")!,
+    URL(string: "https://api.example.com/api/")!,
+]) func authorizedEndpoint(_ baseURL: URL) throws {
     let request = try UserEndpoint.getUser(id: "42")
         .authorized(token: "T")
         .base(baseURL)
@@ -14,7 +15,10 @@ let baseURL = URL(string: "https://api.example.com/api")!
     #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer T")
 }
 
-@Test func publicEndpointCarriesNoAuth() throws {
+@Test(arguments: [
+    URL(string: "https://api.example.com/api")!,
+    URL(string: "https://api.example.com/api/")!,
+]) func publicEndpointCarriesNoAuth(_ baseURL: URL) throws {
     let request = try UserEndpoint.refreshToken(token: "R")
         .authorized(token: nil)
         .base(baseURL)
@@ -23,7 +27,10 @@ let baseURL = URL(string: "https://api.example.com/api")!
     #expect(request.value(forHTTPHeaderField: "Authorization") == nil)
 }
 
-@Test func missingTokenFailsAtRequest() {
+@Test(arguments: [
+    URL(string: "https://api.example.com/api")!,
+    URL(string: "https://api.example.com/api/")!,
+]) func missingTokenFailsAtRequest(_ baseURL: URL) {
     #expect(throws: UserEndpoint.MissingToken.self) {
         try UserEndpoint.getUser(id: "42")
             .authorized(token: nil)

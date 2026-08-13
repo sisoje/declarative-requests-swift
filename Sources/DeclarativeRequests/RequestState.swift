@@ -22,21 +22,22 @@ public extension RequestState {
     var baseURL: URL? {
         get { request.url?.baseURL }
         set {
-            guard let base = newValue.flatMap({ URLComponents(url: $0, resolvingAgainstBaseURL: true) }) else { return }
-            var components = urlComponents
-            components.scheme = base.scheme
-            components.host = base.host
-            components.port = base.port
-            let path = components.path
-            components.path = base.path + (path.isEmpty || path.hasPrefix("/") ? path : "/" + path)
-            request.url = components.url
+            guard var url = newValue else { return }
+            let combinedComponents = urlComponents
+            if !combinedComponents.path.isEmpty {
+                url.append(path: combinedComponents.path)
+            }
+            if let queryItems = combinedComponents.queryItems {
+                url.append(queryItems: queryItems)
+            }
+            request.url = url
         }
     }
 
-    /// Backed by the relative part of `request.url`.
+    /// Backed by `request.url`, resolved.
     var urlComponents: URLComponents {
         get { URLComponents(url: request.url ?? .placeholder, resolvingAgainstBaseURL: true) ?? URLComponents() }
-        set { request.url = newValue.url(relativeTo: baseURL) }
+        set { request.url = newValue.url }
     }
 
     /// Backed by `request.httpBody`, form-url-encoded.

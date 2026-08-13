@@ -813,3 +813,16 @@ import Testing
     let request = try Query(Model(zero: 0, one: 1, flag: true)).request
     #expect(request.url?.query == "flag=true&one=1&zero=0")
 }
+
+
+@Test(arguments: [
+    "https://api.example.com",
+    "https://api.example.com/",
+    "https://api.example.com/api",
+    "https://api.example.com/api/",
+]) func baseURLAlone(_ base: String) throws {
+    let request = try URLRequest {
+        BaseURL(base)
+    }
+    #expect(request.url?.absoluteString == base)
+}
