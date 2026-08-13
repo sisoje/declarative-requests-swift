@@ -90,15 +90,6 @@ extension UserEndpoint {
         }
     }
 }
-
-extension RequestBuildable {
-    func base(_ url: URL) -> some RequestBuildable {
-        RequestBlock {
-            self
-            BaseURL(url)
-        }
-    }
-}
 ```
 
 Every layer has the same shape — `some RequestBuildable` in, `some
@@ -112,10 +103,6 @@ func request(for endpoint: UserEndpoint) throws -> URLRequest {
         .base(environment.baseURL)
         .request
 }
-```
-
-
-```swift
 
 let request = try request(for: .getUser(id: "42"))
 ```

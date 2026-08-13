@@ -73,6 +73,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 - **Encodable-driven blocks** (`Query(_:)`, `Cookie(_:)`, `RequestBody.json/.urlEncoded`) route through `state.encoder` so the user's encoder configuration (date strategy, key strategy) is respected.
 - **`Header` keeps Foundation's vocabulary** — `setValue`/`addValue` are `URLRequest`'s own method names, read in wire order (field → operation → value); an add/set operation enum is the seed `HeaderMode` grew the deleted DSL from — don't replant it.
 - **`MIMEType`** cases are nodes, Header-style: `MIMEType.json.contentType` (set) / `MIMEType.json.accept` (add). Arbitrary values go through `Header.contentType/.accept` directly.
+- **Modifiers**: `.base(_:)` applies the base as a composable layer (`URL.buildRequest` is sugar over it); `.useEncoder(_:)` scopes the encoder to the wrapped blocks.
 - **`RequestBody.stream(_:)`** takes an `@autoclosure` so the `InputStream` is recreated on each build (streams are single-use).
 - **Multipart** is in-memory only (`RequestBody.multipart` assembles a `Data` blob per RFC 7578). See `RequestBody+Multipart.swift`.
 

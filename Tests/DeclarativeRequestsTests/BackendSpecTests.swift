@@ -80,12 +80,3 @@ extension UserEndpoint {
         }
     }
 }
-
-extension RequestBuildable {
-    func base(_ url: URL) -> some RequestBuildable {
-        RequestBlock {
-            self
-            BaseURL(url)
-        }
-    }
-}
