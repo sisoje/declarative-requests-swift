@@ -221,11 +221,11 @@ let request = try repo.getUser("42").request
 
 ```mermaid
 flowchart LR
-    RequestBuilder --- transforms ---> RequestState
+    RequestBuilder -- transforms --> RequestState
 
     subgraph RequestState
         request["request: URLRequest (single source of truth)"]
-        proj["baseURL / urlComponents / cookies\n(computed projections into request)"]
+        proj["baseURL / urlComponents / cookies<br/>(computed projections into request)"]
         proj --> request
     end
 
@@ -248,7 +248,7 @@ flowchart LR
 
     %% URL & Endpoint
     RB --> URL_GROUP["URL & Endpoint"]
-    URL_GROUP --> BaseURL["BaseURL(_ string)"]
+    URL_GROUP --> BaseURL["BaseURL(_ url / _ string)"]
     URL_GROUP --> Endpoint["Endpoint(_ path)"]
     URL_GROUP --> Query
     Query --> Q1["Query(_ name, _ value)"]
@@ -256,7 +256,7 @@ flowchart LR
 
     %% Method
     RB --> MethodGroup["Method"]
-    MethodGroup --> MSTD[".GET  .POST  .PUT\n.DELETE  .PATCH  .HEAD\n.OPTIONS  .TRACE  .CONNECT  .QUERY"]
+    MethodGroup --> MSTD[".GET  .POST  .PUT<br/>.DELETE  .PATCH  .HEAD<br/>.OPTIONS  .TRACE  .CONNECT  .QUERY"]
 
     %% Headers
     RB --> HeaderGroup["Headers"]
@@ -264,14 +264,14 @@ flowchart LR
     Header --> H1["Header.&lt;field&gt;.setValue(value)"]
     Header --> H2["Header.&lt;field&gt;.addValue(value)"]
     Header --> H3["Header.custom(name).setValue(value)"]
-    Header --> HFields["contentType  accept  authorization\nuserAgent  origin  cookie  referer\nhost  acceptLanguage  acceptEncoding"]
+    Header --> HFields["contentType  accept  authorization<br/>userAgent  origin  cookie  referer<br/>host  acceptLanguage  acceptEncoding"]
     HeaderGroup --> Cookie["Cookie"]
     Cookie --> CK1["Cookie(_ name, _ value)"]
     Cookie --> CK2["Cookie(_ encodable)"]
     HeaderGroup --> MIME["MIMEType (enum)"]
     MIME --> MIME1["MIMEType.json.contentType"]
     MIME --> MIME2["MIMEType.json.accept"]
-    MIME --> MIMEC["36 common types:\n.json  .xml  .png  .mp4  .pdf ...\nanything else: Header + string"]
+    MIME --> MIMEC["common types:<br/>.json  .xml  .png  .mp4  .pdf ...<br/>anything else: Header + string"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]
@@ -295,7 +295,7 @@ flowchart LR
     %% Networking knobs
     RB --> NetGroup["Networking Knobs"]
     NetGroup --> Timeout["Timeout(_ seconds)"]
-    NetGroup --> RM["RequestMutation[\.cachePolicy, ...]\nRequestMutation[\.networkServiceType, ...]\nRequestMutation[\.httpShouldHandleCookies, ...]"]
+    NetGroup --> RM["RequestMutation[\.cachePolicy, ...]<br/>RequestMutation[\.networkServiceType, ...]<br/>RequestMutation[\.httpShouldHandleCookies, ...]"]
 ```
 
 ## Key concepts
