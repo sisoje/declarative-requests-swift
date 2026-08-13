@@ -366,7 +366,7 @@ import Testing
     #expect(tok == "Basic eDp5")
 }
 
-@Test func authCustomAuthenticator() throws {
+@Test func computedAuthOverBuiltRequest() throws {
     let request = try URLRequest {
         Method.POST
         BaseURL("https://api.example.com")
@@ -374,8 +374,8 @@ import Testing
         Header.accept.setValue("application/json")
         RequestBody.json(["key": "value"])
         RequestBlock { state in
-            let bodyHash = (state.request.httpBody ?? Data()).count
-            state.request.setValue("Signed \(bodyHash)", forHTTPHeaderField: "Authorization")
+            let bodyLength = (state.request.httpBody ?? Data()).count
+            state.request.setValue("Signed \(bodyLength)", forHTTPHeaderField: "Authorization")
         }
     }
     #expect(request.value(forHTTPHeaderField: "Authorization") == "Signed 15")
