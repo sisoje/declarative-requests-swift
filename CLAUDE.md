@@ -20,7 +20,7 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 - `import SwiftUI`/Combine, `@Observable`, or speculative `Sendable` annotations.
 - Code defending against idiotic usage. Contracts are documented, not enforced with extra machinery.
 
-**We do not write code for idiots.** Documented limitations are part of the API contract, and users are expected to accept them — `BaseURL` comes last (or at least after the path), and that's ok. We don't add code so that every ordering or misuse works anyway:
+**We do not write code for irresponsible people — those who do not test their code and use the package wrong.** Documented limitations are part of the API contract, and users are expected to accept them — `BaseURL` comes last (or at least after the path), and that's ok. We don't add code so that every ordering or misuse works anyway:
 - No defensive re-mutation or re-assignment — state is written once, honestly; no getter that recomputes what a setter already wrote, no setter that resets what someone else assigned (both existed once; both were bugs).
 - No checking every stupid error. A composition outside the contract produces a wrong request, not a babysitting throw — users **verify their builders in tests**. A request builder is pure and trivially testable; an untested builder is the user's bug, not this package's.
 - Validation added "for safety" is scope creep with an if-statement. Reject it in review.
