@@ -62,8 +62,8 @@ Pick the factory or initializer that matches the data you have.
 
 | Block | What it does | Example |
 |---|---|---|
-| `BaseURL(_:)` | Sets scheme/host. A base path ending in `/` is a directory **prefix** for the accumulated path. Apply it **last** (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com/api/")` |
-| `Endpoint(_:)` | Sets the path, always relative to the base (leading `/` optional, bare `/` is root). | `Endpoint("/users/\(id)/posts")` |
+| `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com/api")` |
+| `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("/users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 

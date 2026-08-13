@@ -21,12 +21,21 @@ public extension RequestState {
     /// Setting `request.url` to an absolute URL directly discards the base.
     var baseURL: URL? {
         get { request.url?.baseURL }
-        set { request.url = urlComponents.url(relativeTo: newValue) }
+        set {
+            guard let base = newValue.flatMap({ URLComponents(url: $0, resolvingAgainstBaseURL: true) }) else { return }
+            var components = urlComponents
+            components.scheme = base.scheme
+            components.host = base.host
+            components.port = base.port
+            let path = components.path
+            components.path = base.path + (path.isEmpty || path.hasPrefix("/") ? path : "/" + path)
+            request.url = components.url
+        }
     }
 
     /// Backed by the relative part of `request.url`.
     var urlComponents: URLComponents {
-        get { URLComponents(string: request.url?.relativeString ?? "") ?? URLComponents() }
+        get { URLComponents(url: request.url ?? .placeholder, resolvingAgainstBaseURL: true) ?? URLComponents() }
         set { request.url = newValue.url(relativeTo: baseURL) }
     }
 
