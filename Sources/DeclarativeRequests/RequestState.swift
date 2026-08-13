@@ -1,100 +1,82 @@
 import Foundation
-import SwiftUI
 
-@Observable public final class RequestState: @unchecked Sendable {
-    init(
-        baseURL: URL = .placeholder,
-        urlComponents: URLComponents = URLComponents(),
-        request: URLRequest = URLRequest(url: .placeholder),
-        encoder: JSONEncoder = JSONEncoder(),
-    ) {
-        self.baseURL = baseURL
-        self.urlComponents = urlComponents
-        _request = request
+/// Mutable context a request is built in.
+///
+/// Holds a single `URLRequest` as the only source of truth — every other
+/// property is a projection that reads and writes through it.
+public final class RequestState {
+    public var request: URLRequest
+    public var encoder: JSONEncoder
+
+    init(request: URLRequest = URLRequest(url: .placeholder), encoder: JSONEncoder = JSONEncoder()) {
+        self.request = request
         self.encoder = encoder
     }
+}
 
-    public var baseURL: URL = .placeholder
-    public var urlComponents: URLComponents = .init()
+public extension RequestState {
+    /// Backed by the relative-URL structure of `request.url`.
+    ///
+    /// Limitation: the base URL is meant to be applied after path and query.
+    /// Setting `request.url` to an absolute URL directly discards the base.
+    var baseURL: URL? {
+        get { request.url?.baseURL }
+        set { request.url = urlComponents.url(relativeTo: newValue) }
+    }
 
-    private var _request: URLRequest = .init(url: .placeholder)
-    public var request: URLRequest {
+    /// Backed by the relative part of `request.url`.
+    var urlComponents: URLComponents {
+        get { URLComponents(string: request.url?.relativeString ?? "") ?? URLComponents() }
+        set { request.url = newValue.url(relativeTo: baseURL) }
+    }
+
+    /// Backed by `request.httpBody`, form-url-encoded.
+    var encodedBodyItems: [URLQueryItem] {
         get {
-            var res = _request
-            res.url = urlComponents.url(relativeTo: baseURL)
-            return res
+            let body = request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
+            return URLComponents(string: "?" + body)?.queryItems ?? []
         }
         set {
-            var res = newValue
-            res.url = .placeholder
-            _request = res
+            var components = URLComponents()
+            components.queryItems = newValue
+            request.httpBody = components.percentEncodedQuery?
+                .replacingOccurrences(of: "+", with: "%2B") // form parsers read "+" as space
+                .data(using: .utf8)
         }
     }
 
-    public var encoder: JSONEncoder = .init()
-
-    public var cookies: [String: String] {
+    /// Backed by the `Cookie` header of `request`.
+    var cookies: [String: String] {
         get {
-            _request.value(forHTTPHeaderField: Header.cookie.rawValue)?
-                .split(separator: ";")
-                .reduce(into: [:]) { result, component in
-                    let parts = component.split(separator: "=", maxSplits: 1)
-                    if parts.count == 2 {
-                        let key = parts[0].trimmingCharacters(in: .whitespaces)
-                        let value = parts[1].trimmingCharacters(in: .whitespaces)
-                        result[key] = value
-                    }
-                } ?? [:]
+            let header = request.value(forHTTPHeaderField: Header.cookie.rawValue) ?? ""
+            let pairs = header.split(separator: ";").compactMap { component -> (String, String)? in
+                let parts = component.split(separator: "=", maxSplits: 1)
+                guard parts.count == 2 else { return nil }
+                return (
+                    parts[0].trimmingCharacters(in: .whitespaces),
+                    parts[1].trimmingCharacters(in: .whitespaces)
+                )
+            }
+            return Dictionary(pairs) { _, last in last }
         }
         set {
-            let cookieString = newValue
+            let header = newValue
                 .map { "\($0.key)=\($0.value)" }
+                .sorted()
                 .joined(separator: "; ")
-            let value = cookieString.isEmpty ? nil : cookieString
-            _request.setValue(value, forHTTPHeaderField: Header.cookie.rawValue)
+            request.setValue(header.isEmpty ? nil : header, forHTTPHeaderField: Header.cookie.rawValue)
         }
     }
+}
 
+extension RequestState {
     var pathString: String {
-        get {
-            urlComponents.path
-        }
-        set {
-            urlComponents.path = newValue
-        }
+        get { urlComponents.path }
+        set { urlComponents.path = newValue }
     }
 
     var queryItems: [URLQueryItem] {
-        get {
-            urlComponents.queryItems ?? []
-        }
-        set {
-            urlComponents.queryItems = newValue
-        }
-    }
-
-    var encodedBodyItems: [URLQueryItem] {
-        get {
-            _request.httpBody.flatMap { bodyData in
-                var comp = URLComponents()
-                comp.percentEncodedQuery = String(decoding: bodyData, as: UTF8.self)
-                return comp.queryItems
-            } ?? []
-        }
-        set {
-            var comp = URLComponents()
-            comp.queryItems = newValue
-            _request.httpBody = comp.percentEncodedQuery?.data(using: .utf8)
-        }
-    }
-
-    func header(_ name: String) -> HeaderCap {
-        HeaderCap(
-            value: Binding(
-                get: { self._request.value(forHTTPHeaderField: name) },
-                set: { self._request.setValue($0, forHTTPHeaderField: name) }
-            ),
-            addValue: { self._request.addValue($0, forHTTPHeaderField: name) }
-        )
+        get { urlComponents.queryItems ?? [] }
+        set { urlComponents.queryItems = newValue }
     }
 }

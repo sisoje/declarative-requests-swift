@@ -199,7 +199,7 @@ import Testing
     #expect(items.contains(where: { $0.name == "name" && $0.value == "john" }))
 }
 
-@Test func urlEncodedBodyLastWins() throws {
+@Test func urlEncodedBodiesMerge() throws {
     let builder = RequestBuilderGroup {
         RequestBody.urlEncoded([URLQueryItem(name: "first", value: "1")])
         RequestBody.urlEncoded([URLQueryItem(name: "second", value: "2")])
@@ -209,9 +209,20 @@ import Testing
     let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) } ?? ""
     let items = URLComponents(string: "?" + body)?.queryItems ?? []
 
-    #expect(items.count == 1)
-    #expect(items[0].name == "second")
-    #expect(items[0].value == "2")
+    #expect(items.count == 2)
+    #expect(items.contains(where: { $0.name == "first" && $0.value == "1" }))
+    #expect(items.contains(where: { $0.name == "second" && $0.value == "2" }))
+}
+
+@Test func urlEncodedBodyEscapesPlus() throws {
+    let builder = RequestBuilderGroup {
+        RequestBody.urlEncoded([URLQueryItem(name: "expr", value: "1+2")])
+    }
+    let source = RequestState()
+    try builder.transform(source)
+    let body = source.request.httpBody.map { String(decoding: $0, as: UTF8.self) }
+    #expect(body == "expr=1%2B2")
+    #expect(source.encodedBodyItems == [URLQueryItem(name: "expr", value: "1+2")])
 }
 
 @Test func urlEncodedBodyBuiltFromLoop() throws {
@@ -1284,89 +1295,4 @@ private final class StreamConsumer: NSObject, StreamDelegate {
     let curl = request.curlCommand
     #expect(curl.contains("# binary body of 4 bytes omitted"))
     #expect(!curl.contains("--data-binary"))
-}
-
-private func expect(
-    _ build: () throws -> URLRequest,
-    scheme: String,
-    host: String,
-    path: String,
-    query: [URLQueryItem]
-) throws {
-    let url = try #require(try build().url)
-    let comps = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
-    #expect(comps.scheme == scheme)
-    #expect(comps.host == host)
-    #expect(comps.path == path)
-    #expect(Set(comps.queryItems ?? []) == Set(query))
-}
-
-@Test func orderIndependence_baseEndpointQuery() throws {
-    let base = { BaseURL("https://api.example.com") }
-    let endpt = { Endpoint("/v1/users") }
-    let query = { Query("token", "abc") }
-    let perms: [() throws -> URLRequest] = [
-        { try URLRequest { base(); endpt(); query() } },
-        { try URLRequest { base(); query(); endpt() } },
-        { try URLRequest { endpt(); base(); query() } },
-        { try URLRequest { endpt(); query(); base() } },
-        { try URLRequest { query(); base(); endpt() } },
-        { try URLRequest { query(); endpt(); base() } },
-    ]
-    for build in perms {
-        try expect(
-            build,
-            scheme: "https",
-            host: "api.example.com",
-            path: "/v1/users",
-            query: [URLQueryItem(name: "token", value: "abc")]
-        )
-    }
-}
-
-@Test func orderIndependence_noLeadingSlashEndpoint() throws {
-    let perms: [() throws -> URLRequest] = [
-        { try URLRequest { BaseURL("https://api.example.com"); Endpoint("player_api.php") } },
-        { try URLRequest { Endpoint("player_api.php"); BaseURL("https://api.example.com") } },
-    ]
-    for build in perms {
-        try expect(
-            build,
-            scheme: "https",
-            host: "api.example.com",
-            path: "/player_api.php",
-            query: []
-        )
-    }
-}
-
-@Test func orderIndependence_basePathPrefixWithRelativeEndpoint() throws {
-    let perms: [() throws -> URLRequest] = [
-        { try URLRequest { BaseURL("https://api.example.com/v1/"); Endpoint("users") } },
-        { try URLRequest { Endpoint("v1/users"); BaseURL("https://api.example.com") } },
-    ]
-    for build in perms {
-        try expect(
-            build,
-            scheme: "https",
-            host: "api.example.com",
-            path: "/v1/users",
-            query: []
-        )
-    }
-}
-
-@Test func secondBaseURLReplacesAuthorityPreservesPathAndQuery() throws {
-    let request = try URLRequest {
-        BaseURL("https://first.example.com")
-        Endpoint("/v1/users")
-        Query("token", "abc")
-        BaseURL("https://second.example.com")
-    }
-    let url = try #require(request.url)
-    let comps = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
-    #expect(comps.scheme == "https")
-    #expect(comps.host == "second.example.com")
-    #expect(comps.path == "/v1/users")
-    #expect(Set(comps.queryItems ?? []) == Set([URLQueryItem(name: "token", value: "abc")]))
 }

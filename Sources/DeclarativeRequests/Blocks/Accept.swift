@@ -9,7 +9,7 @@ public struct Accept: RequestBuildable, Sendable {
 
     public var body: some RequestBuildable {
         RequestStateTransformer { state in
-            state.header(Header.accept.rawValue).addValue(mimeType.rawValue)
+            state.request.addValue(mimeType.rawValue, forHTTPHeaderField: Header.accept.rawValue)
         }
     }
 }

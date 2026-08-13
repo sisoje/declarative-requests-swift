@@ -7,7 +7,7 @@ public extension RequestBody {
         RequestStateTransformer { state in
             state.request.httpBody = data
             if let type {
-                state.header(Header.contentType.rawValue).value = type.rawValue
+                state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
             }
         }
     }
@@ -15,7 +15,7 @@ public extension RequestBody {
     static func string(_ string: String, type: MIMEType = .plainText) -> some RequestBuildable {
         RequestStateTransformer { state in
             state.request.httpBody = Data(string.utf8)
-            state.header(Header.contentType.rawValue).value = type.rawValue
+            state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
@@ -23,26 +23,21 @@ public extension RequestBody {
         RequestStateTransformer { state in
             let body = try state.encoder.encode(value)
             state.request.httpBody = body
-            state.header(Header.contentType.rawValue).value = MIMEType.json.rawValue
+            state.request.setValue(MIMEType.json.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
     static func urlEncoded(_ items: [URLQueryItem]) -> some RequestBuildable {
         RequestStateTransformer { state in
-            var components = URLComponents()
-            components.queryItems = items
-            state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.header(Header.contentType.rawValue).value = MIMEType.formURLEncoded.rawValue
+            state.encodedBodyItems += items
+            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
     static func urlEncoded(_ encodable: any Encodable) -> some RequestBuildable {
         RequestStateTransformer { state in
-            let items = try EncodableQueryItems(encodable: encodable, encoder: state.encoder).items
-            var components = URLComponents()
-            components.queryItems = items
-            state.request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
-            state.header(Header.contentType.rawValue).value = MIMEType.formURLEncoded.rawValue
+            state.encodedBodyItems += try EncodableQueryItems(encodable: encodable, encoder: state.encoder).items
+            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
