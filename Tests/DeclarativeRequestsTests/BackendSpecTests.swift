@@ -2,7 +2,7 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
-let baseURL = URL(string: "https://api.example.com/api/")!
+let baseURL = URL(string: "https://api.example.com/api")!
 
 @Test func authorizedEndpoint() throws {
     let request = try UserEndpoint.getUser(id: "42")
