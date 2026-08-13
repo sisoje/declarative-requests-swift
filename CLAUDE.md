@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is deliberately a **lightweight** package: declarative machinery to compose a `URLRequest`, nothing else.
 
+**Principle #1 — never lose information.** Everything else follows from it: errors propagate untouched (no catch-and-rewrap into strings), state is written once and never defensively reset (the old url-resetting setter destroyed what users assigned), blocks store exactly what the user gave them (`Source` enums remember URL vs String, pair vs Encodable), and duplicate form fields survive merging ("da ne bude dictionary"). When a change would flatten a type into a string, swallow an error, or collapse duplicates — that is the bug.
+
 **Belongs:**
 - The core machinery: the result builder, `RequestBuildable` recursion, `RequestState` (one `URLRequest`, everything else a projection into it), `RequestMutation`.
 - Thin blocks mapping 1:1 onto pieces of a raw HTTP request or `URLRequest` properties — method, URL parts, headers, cookies, body, networking knobs. **One obvious spelling per capability.**
