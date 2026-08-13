@@ -403,9 +403,9 @@ import Testing
 
 // MARK: - RequestBody (raw / string)
 
-@Test func bodyDataNoContentType() throws {
+@Test func rawBodyViaMutation() throws {
     let request = try URLRequest {
-        RequestBody.data(Data("hello".utf8))
+        RequestMutation[\.httpBody, Data("hello".utf8)]
     }
     #expect(request.httpBody == Data("hello".utf8))
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == nil)
@@ -417,13 +417,6 @@ import Testing
     }
     #expect(request.httpBody == Data("hello".utf8))
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/plain")
-}
-
-@Test func bodyExplicitContentType() throws {
-    let request = try URLRequest {
-        RequestBody.data(Data("<x/>".utf8), type: "application/xml")
-    }
-    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
 }
 
 // MARK: - Header

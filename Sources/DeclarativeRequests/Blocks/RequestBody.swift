@@ -3,15 +3,6 @@ import Foundation
 public enum RequestBody {}
 
 public extension RequestBody {
-    static func data(_ data: Data, type: String? = nil) -> some RequestBuildable {
-        RequestBlock { state in
-            state.request.httpBody = data
-            if let type {
-                state.request.setValue(type, forHTTPHeaderField: Header.contentType.rawValue)
-            }
-        }
-    }
-
     static func string(_ string: String, type: String = MIMEType.plainText.rawValue) -> some RequestBuildable {
         RequestBlock { state in
             state.request.httpBody = Data(string.utf8)

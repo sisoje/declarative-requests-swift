@@ -197,13 +197,14 @@ bytes are produced and what (if any) `Content-Type` is set:
 
 | Factory | What you supply | Sets `Content-Type` |
 |---|---|---|
-| `RequestBody.data(_ data:type:)` | `Data` + optional content-type string | only if you pass `type:` |
 | `RequestBody.string(_ s:type:)` | `String` (UTF-8) + content-type string | yes (defaults `text/plain`) |
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ name:, _ value:)` | one form field (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
 | `RequestBody.stream(_ stream:)` | `InputStream` (autoclosure) | no — pair with `MIMEType.<case>.contentType` if needed |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
+
+Raw bytes: `RequestMutation[\.httpBody, data]` — pair with `MIMEType.<case>.contentType` if needed.
 
 Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
 merges its items into an existing form body, so form fields can accumulate
@@ -332,7 +333,6 @@ flowchart LR
 
     %% Body
     RB --> BodyGroup["RequestBody"]
-    BodyGroup --> B1[".data(_ data, type:)"]
     BodyGroup --> B2[".string(_ string, type:)"]
     BodyGroup --> B3[".json(_ encodable)"]
     BodyGroup --> B4[".urlEncoded(_ name, _ value)"]
