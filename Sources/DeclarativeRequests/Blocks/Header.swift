@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Header: Equatable, Hashable {
+public enum Header {
     case contentType
     case accept
     case authorization
@@ -27,7 +27,7 @@ public extension Header {
         case .host: "Host"
         case .acceptLanguage: "Accept-Language"
         case .acceptEncoding: "Accept-Encoding"
-        case let .custom(value): value
+        case let .custom(name): name
         }
     }
 
