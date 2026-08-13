@@ -1,10 +1,9 @@
-# Declarative Requests
+# Declarative Requests: open spec done right
 
 [![Build](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/sisoje/declarative-requests-swift/actions/workflows/swift.yml)
 
-**An open spec done right.** Describe your backend in Swift — checked by the
-compiler, verified by your tests, composable by construction — instead of a
-YAML spec that drifts.
+Describe your backend in Swift — checked by the compiler, verified by your
+tests, composable by construction — instead of a YAML spec that drifts.
 
 A SwiftUI-style result builder for composing `URLRequest`. Each block in the
 builder maps onto one piece of a raw HTTP request — read the builder top to
