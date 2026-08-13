@@ -755,7 +755,6 @@ import Testing
     }
 }
 
-
 // MARK: - Coverage restored after debloat
 
 @Test func relativeEndpointResolvesAgainstBase() throws {

@@ -116,4 +116,3 @@ private func needsQuoting(_ token: String) -> Bool {
     let tokenChars = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'+_-")
     return !token.allSatisfy { tokenChars.contains($0) }
 }
-
