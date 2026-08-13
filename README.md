@@ -269,9 +269,6 @@ func request(for endpoint: UserEndpoint) throws -> URLRequest {
 }
 ```
 
-Builders are throwing closures, so `throw` works right inside a branch —
-failure is declared where it applies, and it fires the moment the
-authorized layer is constructed.
 
 ```swift
 
