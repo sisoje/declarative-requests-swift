@@ -5,9 +5,11 @@
 Describe your backend in Swift — checked by the compiler, verified by your
 tests, composable by construction — instead of a YAML spec that drifts.
 
-A SwiftUI-style result builder for composing `URLRequest`. Each block in the
-builder maps onto one piece of a raw HTTP request — read the builder top to
-bottom and you read the request top to bottom.
+A SwiftUI-style result builder for composing `URLRequest` — fully composable:
+blocks compose into endpoint specs, specs compose with auth, auth composes
+with environment, the same primitive at every level. Each block maps onto one
+piece of a raw HTTP request — read the builder top to bottom and you read the
+request top to bottom.
 
 ```http
 POST /v1/login HTTP/1.1
