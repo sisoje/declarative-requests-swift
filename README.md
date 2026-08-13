@@ -97,6 +97,9 @@ let request = try URLRequest {
 
 `BaseURL` goes last — everything before it accumulates the relative part of the
 URL, and the base resolves it (`URL.buildRequest` appends the base for you).
+This split is deliberate: the blocks describe your backend's API shape, which is
+the same in every environment — only the base URL changes between dev, staging,
+and production. Endpoints are definition; the base is configuration.
 
 ### Body — one type, many factories
 
