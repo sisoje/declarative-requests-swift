@@ -50,10 +50,6 @@ enum UserEndpoint {
         case .refreshToken: false
         }
     }
-}
-
-extension UserEndpoint {
-    struct MissingToken: Error {}
 
     @RequestBuilder var spec: some RequestBuildable {
         switch self {
@@ -66,6 +62,10 @@ extension UserEndpoint {
             RequestBody.json(["token": token])
         }
     }
+}
+
+extension UserEndpoint {
+    struct MissingToken: Error {}
 
     func authorized(token: String?) -> some RequestBuildable {
         RequestBlock {
