@@ -1,15 +1,15 @@
 import Foundation
 
 public struct Accept: RequestBuildable {
-    let mimeType: MIMEType
+    let value: String
 
-    public init(_ mimeType: MIMEType) {
-        self.mimeType = mimeType
+    public init(_ value: String) {
+        self.value = value
     }
 
     public var body: some RequestBuildable {
         RequestStateTransformer { state in
-            state.request.addValue(mimeType.rawValue, forHTTPHeaderField: Header.accept.rawValue)
+            state.request.addValue(value, forHTTPHeaderField: Header.accept.rawValue)
         }
     }
 }

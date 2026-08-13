@@ -514,7 +514,7 @@ import Testing
 
 @Test func bodyExplicitContentType() throws {
     let request = try URLRequest {
-        RequestBody.data(Data("<x/>".utf8), type: .xml)
+        RequestBody.data(Data("<x/>".utf8), type: "application/xml")
     }
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
 }
@@ -633,7 +633,7 @@ import Testing
     let payload = Data([0x89, 0x50, 0x4E, 0x47])
     let request = try URLRequest {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: .png)
+            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: "image/png")
         }
     }
     let body = request.httpBody ?? Data()
@@ -670,7 +670,7 @@ import Testing
 
     let request = try URLRequest {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.file(name: "doc", fileURL: tmp, type: .octetStream)
+            MultipartPart.file(name: "doc", fileURL: tmp, type: "application/octet-stream")
         }
     }
     let body = request.httpBody ?? Data()
@@ -882,12 +882,12 @@ import Testing
 
 @Test func contentTypeBlockSetsHeader() throws {
     let request = try URLRequest {
-        ContentType(.json)
+        ContentType("application/json")
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
 }
 
-@Test func contentTypeFromCustomMIMEType() throws {
+@Test func contentTypeWithParameters() throws {
     let request = try URLRequest {
         ContentType("application/json; charset=utf-8")
     }
@@ -896,8 +896,8 @@ import Testing
 
 @Test func contentTypeLastWriteWins() throws {
     let request = try URLRequest {
-        ContentType(.json)
-        ContentType(.xml)
+        ContentType("application/json")
+        ContentType("application/xml")
     }
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/xml")
 }
@@ -906,23 +906,23 @@ import Testing
 
 @Test func acceptSingleType() throws {
     let request = try URLRequest {
-        Accept(.json)
+        Accept("application/json")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
 }
 
 @Test func acceptMultipleTypesAccumulate() throws {
     let request = try URLRequest {
-        Accept(.json)
-        Accept(.xml)
-        Accept(.html)
+        Accept("application/json")
+        Accept("application/xml")
+        Accept("text/html")
     }
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,application/xml,text/html")
 }
 
 @Test func acceptWithQualityParameters() throws {
     let request = try URLRequest {
-        Accept(.json)
+        Accept("application/json")
         Accept("application/xml; q=0.8")
         Accept("text/html; q=0.5")
     }

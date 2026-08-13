@@ -16,8 +16,8 @@ public extension RequestBody {
 
 public enum MultipartPart {
     case field(name: String, value: String)
-    case data(name: String, filename: String, data: Data, type: MIMEType = .octetStream)
-    case file(name: String, fileURL: URL, type: MIMEType = .octetStream, filename: String? = nil)
+    case data(name: String, filename: String, data: Data, type: String = MIMEType.octetStream)
+    case file(name: String, fileURL: URL, type: String = MIMEType.octetStream, filename: String? = nil)
 }
 
 @_documentation(visibility: internal)
@@ -91,10 +91,10 @@ private func partHeader(_ part: MultipartPart, boundary: String) -> String {
     }
 }
 
-private func fileHeader(name: String, filename: String, type: MIMEType, boundary: String) -> String {
+private func fileHeader(name: String, filename: String, type: String, boundary: String) -> String {
     "--\(boundary)\r\n" +
         "Content-Disposition: form-data; name=\"\(quoteParam(name))\"; filename=\"\(quoteParam(filename))\"\r\n" +
-        "Content-Type: \(type.rawValue)\r\n\r\n"
+        "Content-Type: \(type)\r\n\r\n"
 }
 
 private func quoteParam(_ s: String) -> String {

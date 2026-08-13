@@ -3,19 +3,19 @@ import Foundation
 public enum RequestBody {}
 
 public extension RequestBody {
-    static func data(_ data: Data, type: MIMEType? = nil) -> some RequestBuildable {
+    static func data(_ data: Data, type: String? = nil) -> some RequestBuildable {
         RequestStateTransformer { state in
             state.request.httpBody = data
             if let type {
-                state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+                state.request.setValue(type, forHTTPHeaderField: Header.contentType.rawValue)
             }
         }
     }
 
-    static func string(_ string: String, type: MIMEType = .plainText) -> some RequestBuildable {
+    static func string(_ string: String, type: String = MIMEType.plainText) -> some RequestBuildable {
         RequestStateTransformer { state in
             state.request.httpBody = Data(string.utf8)
-            state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(type, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
@@ -23,21 +23,21 @@ public extension RequestBody {
         RequestStateTransformer { state in
             let body = try state.encoder.encode(value)
             state.request.httpBody = body
-            state.request.setValue(MIMEType.json.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.json, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
     static func urlEncoded(_ items: [URLQueryItem]) -> some RequestBuildable {
         RequestStateTransformer { state in
             state.encodedBodyItems += items
-            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.formURLEncoded, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 
     static func urlEncoded(_ encodable: any Encodable) -> some RequestBuildable {
         RequestStateTransformer { state in
             state.encodedBodyItems += try EncodableQueryItems(encodable: encodable, encoder: state.encoder).items
-            state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(MIMEType.formURLEncoded, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 

@@ -59,8 +59,8 @@ the data you have.
 | `Authorization.other(_:credentials:)` | `Authorization: <Scheme> <credentials>` | `Authorization.other("HOBA", credentials: "…")` |
 | `Authorization.raw(_:)` | Verbatim value, no scheme prefix | `Authorization.raw("opaque-key")` |
 | `Authorization.custom { … }` | Closure receives `inout URLRequest` for computed auth | `Authorization.custom { req in … }` |
-| `ContentType(_:)` | Sets `Content-Type` from a `MIMEType`. | `ContentType(.json)` |
-| `Accept(_:)` | Accumulates `Accept` header values. | `Accept(.json)` |
+| `ContentType(_:)` | Sets `Content-Type` from a string (constants in `MIMEType`). | `ContentType("application/json")` |
+| `Accept(_:)` | Accumulates `Accept` header values. | `Accept("application/json")` |
 
 They go directly in the request — `setValue` replaces, `addValue` accumulates:
 
@@ -70,7 +70,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
 
-    Accept(.json)
+    Accept("application/json")
     Header.userAgent.setValue("MyApp/1.0")
     Authorization.bearer(token)
     Header.custom("X-Trace-Id").setValue("abc123")
@@ -118,9 +118,9 @@ let request = try URLRequest {
     Endpoint("/upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
-        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .png)
+        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: "image/png")
         for url in fileURLs {
-            MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
+            MultipartPart.file(name: "files", fileURL: url, type: "application/octet-stream")
         }
     }
 }

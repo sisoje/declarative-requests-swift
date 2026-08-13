@@ -139,7 +139,7 @@ let request = try URLRequest {
     BaseURL("https://api.example.com")
     Endpoint("/users")
 
-    Accept(.json)
+    Accept("application/json")
     Header.userAgent.setValue("MyApp/1.0")
     Authorization.bearer(token)
     Header.custom("X-Trace-Id").setValue("abc123")
