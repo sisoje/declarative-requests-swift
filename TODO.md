@@ -63,7 +63,11 @@ Everything below cuts *duplicates and machinery*, not capability.
 
 ## Done beyond plan
 
-- [x] MIMEType flattened to 8 constants (json/xml/html/plainText/formURLEncoded/octetStream/png/jpeg) — everything else is a string literal
+- [x] MIMEType is a node-producing enum, Header-style: `MIMEType.json.contentType` / `MIMEType.json.accept` (8 cases; arbitrary values via `Header.contentType/.accept`); Accept and ContentType block types deleted
 - [x] DeclarativeRequestsError: bare enum, no LocalizedError prose, unthrown encodingFailed case deleted
+- [x] Vapor deleted entirely — zero dependencies, test target included
+- [x] Authorization.raw/.other/.token cut — duplicates of `Header.authorization.setValue`
+- [x] RequestMutation subscript made public; RequestState projections uniformly public
+- [x] 30-agent audit: all confirmed findings fixed (README/CLAUDE.md truth, dead docc links, duplicate tests out, useEncoder/relative-endpoint/colon-password coverage in)
 
-Progress: 1689 → ~760 source lines.
+Progress: **1689 → 721 source lines**, 0 dependencies, 81 tests green.
