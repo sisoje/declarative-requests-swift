@@ -38,7 +38,7 @@ swift test                                          # all tests
 swift test --filter <TestName>                      # single test by @Test function name
 ```
 
-CI runs plain `swift test` on macos-latest; `.build` is cached keyed on Package.swift + sources, so doc-only pushes rebuild nothing (see `.github/workflows/swift.yml`).
+CI runs plain `swift test` on macos-latest, no caching (see `.github/workflows/swift.yml`).
 
 Tests use **swift-testing** (`import Testing`, `@Test`), not XCTest.
 
