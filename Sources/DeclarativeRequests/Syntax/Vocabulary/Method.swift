@@ -4,9 +4,7 @@ public enum Method: RequestBuildable {
     case POST
     case PUT
     case DELETE
-    case CONNECT
     case OPTIONS
-    case TRACE
     case PATCH
     case QUERY
     case custom(String)
@@ -18,9 +16,7 @@ public enum Method: RequestBuildable {
         case .POST: "POST"
         case .PUT: "PUT"
         case .DELETE: "DELETE"
-        case .CONNECT: "CONNECT"
         case .OPTIONS: "OPTIONS"
-        case .TRACE: "TRACE"
         case .PATCH: "PATCH"
         case .QUERY: "QUERY"
         case let .custom(method): method

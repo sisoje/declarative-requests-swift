@@ -317,7 +317,7 @@ flowchart LR
 
     %% Method
     RB --> MethodGroup["Method"]
-    MethodGroup --> MSTD[".GET  .POST  .PUT<br/>.DELETE  .PATCH  .HEAD<br/>.OPTIONS  .TRACE  .CONNECT  .QUERY"]
+    MethodGroup --> MSTD[".GET  .POST  .PUT<br/>.DELETE  .PATCH  .HEAD<br/>.OPTIONS  .QUERY"]
     MethodGroup --> MCUSTOM[".custom(_ string)"]
 
     %% Headers

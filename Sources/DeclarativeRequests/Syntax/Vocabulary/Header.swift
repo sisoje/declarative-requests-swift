@@ -8,9 +8,11 @@ public enum Header {
     case origin
     case cookie
     case referer
-    case host
     case acceptLanguage
     case acceptEncoding
+    case cacheControl
+    case ifNoneMatch
+    case range
     case custom(String)
 
     public var rawValue: String {
@@ -22,9 +24,11 @@ public enum Header {
         case .origin: "Origin"
         case .cookie: "Cookie"
         case .referer: "Referer"
-        case .host: "Host"
         case .acceptLanguage: "Accept-Language"
         case .acceptEncoding: "Accept-Encoding"
+        case .cacheControl: "Cache-Control"
+        case .ifNoneMatch: "If-None-Match"
+        case .range: "Range"
         case let .custom(name): name
         }
     }

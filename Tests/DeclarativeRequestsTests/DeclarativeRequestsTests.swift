@@ -716,7 +716,7 @@ import Testing
 // MARK: - Method (every standard case)
 
 @Test func methodAppliesRawValueForAllStandardCases() throws {
-    let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .CONNECT, .OPTIONS, .TRACE, .PATCH, .QUERY, .custom("LINK")]
+    let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .OPTIONS, .PATCH, .QUERY, .custom("LINK")]
     for method in cases {
         let request = try RequestBlock { method }.request
         #expect(request.httpMethod == method.rawValue)
