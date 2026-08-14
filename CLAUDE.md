@@ -20,7 +20,7 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 - Content-negotiation machinery (the MIME parameter algebra was removed; parameters are string literals: `Header.accept.addValue("application/xml; q=0.8")`).
 - Transport machinery (streamed multipart with its producer thread was removed; for huge uploads write the assembled body to a temp file and use `URLSession.uploadTask(fromFile:)`).
 - `import SwiftUI`/Combine, `@Observable`, or speculative `Sendable` annotations.
-- Public extensions on Foundation types — they pollute every importer's namespace. The package exports its own vocabulary only; the sole terminal is `.request` on `RequestBuildable`.
+- Public extensions on Foundation types — they pollute every importer's namespace. The package exports its own vocabulary only; the sole terminal is `.request()` on `RequestBuildable`.
 - Code defending against idiotic usage. Contracts are documented, not enforced with extra machinery.
 
 **We do not write code for irresponsible people — those who do not test their code and use the package wrong.** Documented limitations are part of the API contract, and users are expected to accept them — `BaseURL` comes last (or at least after the path), and that's ok. We don't add code so that every ordering or misuse works anyway:
@@ -59,7 +59,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 
 ### How a build flows
 
-`RequestBuildable.request` materializes:
+`RequestBuildable.request()` materializes:
 
 1. Create a `RequestState` (placeholder URL: `URLComponents().url!`).
 2. Call `transform(state)` — which recurses through every block's `body` and applies each leaf closure in declaration order.
@@ -67,8 +67,8 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 
 ### Block conventions
 
-- **Canonical block order — three layers, three axes:** definition (method/path/query/headers/body — the backend spec, identical everywhere) → `Authorization` (varies per session; only endpoints that need it carry the block) → `BaseURL` (varies per environment, always last).
-- **`BaseURL` is applied last.** That is the contract — declare `BaseURL` last, or chain `.base(_:)` after the block. The deeper reason: the builder body describes the backend's API shape, which is identical across environments; the base URL is deployment configuration (dev/staging/prod vary ONLY by base). Blocks first, config last. The relative-URL projections happen to tolerate base-first ordering, but it is not guaranteed and not to be defended with extra code or tests.
+- **Canonical block order — three layers, three axes:** definition (method/path/query/headers/body — the backend spec, identical everywhere) → `BaseURL` (varies per environment) → session layers like `Authorization` (vary per session; header/body-only, so they ride on either side of the base).
+- **`BaseURL` comes after the path and query writes.** That is the contract — path and query are the only axes the base combines with, and those live exactly in the endpoint definition, so `.base(_:)` chains right after the definition. Layers that touch only headers or body (auth, api keys, tracing) are orthogonal and may come after the base freely. The deeper reason: the definition describes the backend's API shape, identical across environments; the base is deployment configuration (dev/staging/prod vary ONLY by base). Path/query writes after the base are not guaranteed and not to be defended with extra code or tests.
 - **Last write wins** for properties (method, URL, body) — with one deliberate exception: `RequestBody.urlEncoded` *merges* its items into an existing form body. Accumulating blocks (cookies, query items, `Header.<field>.addValue`) read-then-write the existing value.
 - **`Endpoint`** just sets `urlComponents.path`, replacing any previous path. Applying `BaseURL` combines: scheme/host/port from the base, base path + accumulated path (trailing slash irrelevant) — `https://host/api` + `/v1/users` is `/api/v1/users`. The base's path is never dropped.
 - **`RequestMutation(\.keyPath, value)` subscript** is the canonical way to write a one-line block (used by `Method` and `Timeout`). New blocks should use it instead of writing closures by hand.

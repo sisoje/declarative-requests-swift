@@ -31,7 +31,7 @@ let request = try RequestBlock {
     RequestBody.json(LoginRequest(email: email, password: password))
     Authorization.bearer(token)
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 `Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
@@ -43,79 +43,91 @@ Describe your backend as an enum: one case per endpoint — a backend is a
 finite set of endpoints, so the spec is a closed type. Materializing a
 request is three composable steps, one per axis:
 
-1. **The case** — definition: what the endpoint is.
-2. **The authorized step** — session: `authorized(token:)`. The spec declares
-   `needsAuth` per endpoint as a static fact; a protected endpoint with a nil
-   token **fails the build** with the spec's own error — a half-authorized
-   request can never reach the wire.
-3. **The environment** — `.base(_:)`, a layer like any other, applied at the
-   very end. Materializing (`.request`) is the only terminal step.
+1. **The operation** — definition: what the endpoint is.
+2. **The environment** — `.base(_:)`. The base combines with path and
+   query, and those live exactly in the endpoint definition — so it
+   chains right after the endpoint. Header-only layers may follow it.
+3. **The authorized step** — the spec's `Security` enum declares HOW:
+   `authorization(token:)`, token non-optional (the scheme is a spec
+   fact, absence is not its business) and `needsAuthorization(_:)` per
+   endpoint. The client decides WHEN: it gates on the spec's facts and
+   its own session state, and a protected endpoint with no token
+   **fails the build** with the client's error — a half-authorized
+   request can never reach the wire. Materializing (`.request()`) is
+   the only terminal step.
 
 ```swift
-// the spec: endpoints, auth requirements, request shapes
-enum UserEndpoint {
-    case getUser(id: String)
-    case refreshToken(token: String)
+// the whole backend in one closed type: endpoints + security, like the
+// sections of an OpenAPI document
+enum BackendSpec {
+    // each operation IS a block
+    enum Operation: RequestBuildable {
+        case getUser(id: String)
+        case refreshToken(token: String)
 
-    var needsAuth: Bool {
-        switch self {
-        case .getUser: true
-        case .refreshToken: false
-        }
-    }
-
-    @RequestBuilder var spec: some RequestBuildable {
-        switch self {
-        case let .getUser(id):
-            Method.GET
-            Endpoint("v1/users/\(id)")
-        case let .refreshToken(token):
-            Method.POST
-            Endpoint("v1/auth/refresh")
-            RequestBody.json(["token": token])
-        }
-    }
-}
-
-// the session layer: spec + token -> authorized block
-extension UserEndpoint {
-    struct MissingToken: Error {}
-
-    func authorized(token: String?) -> some RequestBuildable {
-        RequestBlock {
-            spec
-            if needsAuth {
-                if let token {
-                    Authorization.bearer(token)
-                } else {
-                    RequestBlock { _ in throw MissingToken() }
-                }
+        var body: some RequestBuildable {
+            switch self {
+            case let .getUser(id):
+                Method.GET
+                Endpoint("v1/users/\(id)")
+            case let .refreshToken(token):
+                Method.POST
+                Endpoint("v1/auth/refresh")
+                RequestBody.json(["token": token])
             }
         }
     }
+
+    // the security section: one scheme = one factory
+    enum Security {
+        static func needsAuthorization(_ operation: Operation) -> Bool {
+            switch operation {
+            case .getUser: true
+            case .refreshToken: false
+            }
+        }
+
+        static func authorization(token: String) -> some RequestBuildable {
+            Authorization.bearer(token)
+        }
+    }
 }
 ```
 
-Every layer has the same shape — `some RequestBuildable` in, `some
-RequestBuildable` out — so the whole pipeline is one chain, and your app
-wires session and environment exactly once:
+Every layer is a block, so the client composes them in one builder —
+definition, environment, session, in canonical order — and wires it
+exactly once:
 
 ```swift
-// wire session and environment once
-func request(_ endpoint: UserEndpoint) throws -> URLRequest {
-    try endpoint
-        .authorized(token: session.token)
-        .base(environment.baseURL)
-        .request
+// the client: session + environment in one place; gating is its rule
+struct MissingToken: Error {}
+
+struct APIClient {
+    var baseURL: URL
+    var token: String?
+
+    func request(_ operation: BackendSpec.Operation) throws -> URLRequest {
+        try RequestBlock {
+            operation
+            BaseURL(baseURL)
+            if BackendSpec.Security.needsAuthorization(operation) {
+                if let token {
+                    BackendSpec.Security.authorization(token: token)
+                } else {
+                    RequestFailure(MissingToken())
+                }
+            }
+        }.request()
+    }
 }
 
-let request = try request(.getUser(id: "42"))
+let client = APIClient(baseURL: URL(string: "https://api.example.com/api")!)
+let user = try client.request(.getUser(id: "42"))
 ```
 
-Every step returns a block, so layers compose: the spec drops into the
-authorized wrapper, the authorized block drops into the environment builder.
-`MissingToken` is the app's error, not the library's — whether a missing
-token is a failure is the spec's business rule.
+`MissingToken` is the client's error, not the library's and not the
+spec's — the spec says how to authorize, the client says whether a
+missing token is a failure.
 
 This is the "Open Spec Done Right" from the top of this README — the spec
 is code, so nothing drifts.
@@ -181,7 +193,7 @@ let request = try RequestBlock {
     }
     Authorization.bearer(token)
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 `BaseURL` goes last — everything before it accumulates the relative part of the
@@ -221,7 +233,7 @@ builder's `JSONEncoder`. Swap it with `.useEncoder(_:)` on any block group:
 let request = try RequestBlock {
     RequestBody.json(model)   // encoded with snake_case keys
     BaseURL("https://api.example.com")
-}.useEncoder(snakeCaseEncoder).request
+}.useEncoder(snakeCaseEncoder).request()
 ```
 
 ### Networking knobs
@@ -244,7 +256,7 @@ let request = try RequestBlock {
         }
     }
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 The encoder follows RFC 7578: form-field and filename parameters are quoted, `\` and
@@ -264,7 +276,7 @@ let request = try RequestBlock {
     Header.accept.setValue("application/json")
 }
 .base(api)
-.request
+.request()
 ```
 
 Otherwise declare the URL inside the builder with `BaseURL`:
@@ -275,7 +287,7 @@ let request = try RequestBlock {
     Endpoint("login")
     RequestBody.json(credentials)
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 ## Architecture sketch
@@ -362,4 +374,4 @@ flowchart LR
 - **`RequestBuilder`** — the `@resultBuilder` that stitches blocks together.
 - **`RequestBlock`** — the leaf block; holds a closure that mutates `RequestState`.
 - **`RequestState`** — the in-progress `URLRequest` plus the `JSONEncoder` that body / header / query blocks use.
-- **`.request`** — the only terminal: applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest`.
+- **`.request()`** — the only terminal: applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest`.

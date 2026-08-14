@@ -7,7 +7,7 @@ import Testing
         RequestMutation(\.allowsCellularAccess, isAllowed)
         RequestMutation(\.allowsConstrainedNetworkAccess, isAllowed)
         RequestMutation(\.allowsExpensiveNetworkAccess, isAllowed)
-    }.request
+    }.request()
     #expect(req.allowsCellularAccess == isAllowed)
     #expect(req.allowsExpensiveNetworkAccess == isAllowed)
     #expect(req.allowsConstrainedNetworkAccess == isAllowed)
@@ -19,7 +19,7 @@ import Testing
         BaseURL(baseUrl)
         Method.POST
         RequestBody.json([1])
-    }.request
+    }.request()
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.httpMethod == "POST")
     #expect(request.url?.absoluteString == "https://google.com")
@@ -32,7 +32,7 @@ import Testing
         Endpoint("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
-    }.request
+    }.request()
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
@@ -45,7 +45,7 @@ import Testing
         Endpoint("/getLanguage")
         RequestBody.json([1])
         Query("languageId", "1")
-    }.request
+    }.request()
     #expect(request.httpMethod == "POST")
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "[1]")
     #expect(request.url?.absoluteString == "https://google.com/getLanguage?languageId=1")
@@ -54,7 +54,7 @@ import Testing
 @Test func jsonBodyTest() throws {
     let request = try RequestBlock {
         RequestBody.json([1])
-    }.request
+    }.request()
     #expect(request.httpBody == "[1]".data(using: .utf8))
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
 }
@@ -62,7 +62,7 @@ import Testing
 @Test func httpMethodTest() throws {
     let request = try RequestBlock {
         Method.custom("sisoje")
-    }.request
+    }.request()
     #expect(request.httpMethod == "sisoje")
 }
 
@@ -257,7 +257,7 @@ import Testing
     let data = Data("sisoje".utf8)
     let request = try RequestBlock {
         RequestMutation(\.httpBodyStream, InputStream(data: data))
-    }.request
+    }.request()
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()
     var buffer: [UInt8] = .init(repeating: 0, count: data.count)
@@ -272,7 +272,7 @@ import Testing
         var num2 = 2
         var b = true
     }
-    let request = try Query(Model()).request
+    let request = try Query(Model()).request()
     let url = try #require(request.url)
     let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
     let q1 = try Set(#require(rs.queryItems))
@@ -285,7 +285,7 @@ import Testing
     let request = try RequestBlock {
         Query("x", "y")
         Query("1", "2")
-    }.request
+    }.request()
     let url = try #require(request.url)
     let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
     let q1 = try Set(#require(rs.queryItems))
@@ -298,7 +298,7 @@ import Testing
     enum Model: Codable {
         case some(x: Int = 5, y: String = "a")
     }
-    let request = try Query(Model.some()).request
+    let request = try Query(Model.some()).request()
     let url = try #require(request.url)
     let rs = try #require(URLComponents(url: url, resolvingAgainstBaseURL: true))
     let q1 = try Set(#require(rs.queryItems))
@@ -311,7 +311,7 @@ import Testing
     let request = try RequestBlock {
         Cookie("x", "y")
         Cookie("1", "2")
-    }.request
+    }.request()
     let rs = RequestState(request: request)
     #expect(rs.cookies == ["x": "y", "1": "2"])
 }
@@ -319,7 +319,7 @@ import Testing
 @Test func authBearer() throws {
     let request = try RequestBlock {
         Authorization.bearer("x")
-    }.request
+    }.request()
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
     #expect(tok == "Bearer x")
 }
@@ -327,7 +327,7 @@ import Testing
 @Test func authUserPass() throws {
     let request = try RequestBlock {
         Authorization.basic(username: "x", password: "y")
-    }.request
+    }.request()
     let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
     #expect(tok == "Basic eDp5")
 }
@@ -343,7 +343,7 @@ import Testing
             let bodyLength = (state.request.httpBody ?? Data()).count
             state.request.setValue("Signed \(bodyLength)", forHTTPHeaderField: "Authorization")
         }
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Authorization") == "Signed 15")
     #expect(request.httpMethod == "POST")
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
@@ -355,7 +355,7 @@ import Testing
     let request = try RequestBlock {
         BaseURL("https://api.example.com")
         Endpoint("/users/123/posts")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/users/123/posts")
 }
 
@@ -363,7 +363,7 @@ import Testing
     let request = try RequestBlock {
         BaseURL("https://api.example.com/v1")
         Endpoint("/v1/users")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users")
 }
 
@@ -371,7 +371,7 @@ import Testing
     let request = try RequestBlock {
         BaseURL("https://api.example.com/blabla")
         Endpoint("/test")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/test")
 }
 
@@ -380,7 +380,7 @@ import Testing
         BaseURL("https://api.example.com")
         Endpoint("/v1/users")
         Endpoint("/health")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/health")
 }
 
@@ -388,7 +388,7 @@ import Testing
     let request = try RequestBlock {
         BaseURL("https://api.example.com/v1/users")
         Endpoint("/")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/")
 }
 
@@ -397,7 +397,7 @@ import Testing
         BaseURL("https://api.example.com/v1")
         Query("token", "abc")
         Endpoint("/v1/users")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/v1/users?token=abc")
 }
 
@@ -406,7 +406,7 @@ import Testing
 @Test func rawBodyViaMutation() throws {
     let request = try RequestBlock {
         RequestMutation(\.httpBody, Data("hello".utf8))
-    }.request
+    }.request()
     #expect(request.httpBody == Data("hello".utf8))
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == nil)
 }
@@ -414,7 +414,7 @@ import Testing
 @Test func bodyStringSetsPlainTextContentType() throws {
     let request = try RequestBlock {
         RequestBody.string("hello")
-    }.request
+    }.request()
     #expect(request.httpBody == Data("hello".utf8))
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/plain")
 }
@@ -424,14 +424,14 @@ import Testing
 @Test func headerSingleStringPair() throws {
     let request = try RequestBlock {
         Header.custom("X-Trace-Id").setValue("abc123")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc123")
 }
 
 @Test func headerSingleFieldPair() throws {
     let request = try RequestBlock {
         Header.referer.setValue("https://example.com")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Referer") == "https://example.com")
 }
 
@@ -439,7 +439,7 @@ import Testing
     let request = try RequestBlock {
         Header.userAgent.setValue("first/1.0")
         Header.userAgent.setValue("second/2.0")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "second/2.0")
 }
 
@@ -447,7 +447,7 @@ import Testing
     let request = try RequestBlock {
         Header.accept.setValue("application/json")
         Header.accept.addValue("text/html")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,text/html")
 }
 
@@ -455,7 +455,7 @@ import Testing
     let request = try RequestBlock {
         Header.userAgent.setValue("test/1.0")
         Header.acceptLanguage.setValue("en")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "User-Agent") == "test/1.0")
     #expect(request.value(forHTTPHeaderField: "Accept-Language") == "en")
 }
@@ -465,7 +465,7 @@ import Testing
         Header.custom("count").setValue("42")
         Header.custom("enabled").setValue("true")
         Header.custom("label").setValue("hello")
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "count") == "42")
     #expect(request.value(forHTTPHeaderField: "enabled") == "true")
     #expect(request.value(forHTTPHeaderField: "label") == "hello")
@@ -476,7 +476,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "name", value: "alice")
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     #expect(body.contains("--TEST\r\n"))
     #expect(body.contains("Content-Disposition: form-data; name=\"name\"\r\n\r\nalice\r\n"))
@@ -489,7 +489,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: "image/png")
         }
-    }.request
+    }.request()
     let body = request.httpBody ?? Data()
     let head = String(decoding: body, as: UTF8.self)
     #expect(head.contains("Content-Disposition: form-data; name=\"avatar\"; filename=\"a.png\""))
@@ -508,7 +508,7 @@ import Testing
                 MultipartPart.field(name: "tag", value: tag)
             }
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     #expect(body.contains("name=\"always\"\r\n\r\nyes"))
     #expect(body.contains("name=\"conditional\"\r\n\r\nmaybe"))
@@ -526,7 +526,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.file(name: "doc", fileURL: tmp, type: "application/octet-stream")
         }
-    }.request
+    }.request()
     let body = request.httpBody ?? Data()
     let text = String(decoding: body, as: UTF8.self)
     #expect(text.contains("filename=\"\(tmp.lastPathComponent)\""))
@@ -540,7 +540,7 @@ import Testing
             RequestBody.multipart {
                 MultipartPart.file(name: "doc", fileURL: missing)
             }
-        }.request
+        }.request()
     } throws: { error in
         (error as? CocoaError)?.code == .fileReadNoSuchFile
     }
@@ -553,7 +553,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "weird\"name", value: "v")
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     #expect(body.contains("name=\"weird\\\"name\""))
 }
@@ -563,7 +563,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.data(name: "f", filename: "a\\b.bin", data: Data("x".utf8))
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     #expect(body.contains("filename=\"a\\\\b.bin\""))
 }
@@ -573,7 +573,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "a\r\nX-Injected: y", value: "v")
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     #expect(body.contains("name=\"aX-Injected: y\""))
     #expect(!body.contains("\r\nX-Injected"))
@@ -584,7 +584,7 @@ import Testing
         RequestBody.multipart(boundary: "with space") {
             MultipartPart.field(name: "k", value: "v")
         }
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "multipart/form-data; boundary=\"with space\"")
 }
 
@@ -593,7 +593,7 @@ import Testing
         RequestBody.multipart(boundary: "TEST") {
             MultipartPart.field(name: "k", value: "v")
         }
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "multipart/form-data; boundary=TEST")
 }
 
@@ -612,7 +612,7 @@ import Testing
             MultipartPart.file(name: "attachment", fileURL: a)
             MultipartPart.file(name: "attachment", fileURL: b)
         }
-    }.request
+    }.request()
     let body = String(decoding: request.httpBody ?? Data(), as: UTF8.self)
     let occurrences = body.components(separatedBy: "name=\"attachment\"").count - 1
     #expect(occurrences == 2)
@@ -625,14 +625,14 @@ import Testing
 @Test func networkServiceTypeApplied() throws {
     let request = try RequestBlock {
         RequestMutation(\.networkServiceType, .background)
-    }.request
+    }.request()
     #expect(request.networkServiceType == .background)
 }
 
 @Test(arguments: [true, false]) func httpShouldHandleCookiesApplied(_ flag: Bool) throws {
     let request = try RequestBlock {
         RequestMutation(\.httpShouldHandleCookies, flag)
-    }.request
+    }.request()
     #expect(request.httpShouldHandleCookies == flag)
 }
 
@@ -647,7 +647,7 @@ import Testing
     let request = try RequestBlock {
         BaseURL("https://example.com")
         Query(Model(zebra: "z", alpha: "a", mango: "m"))
-    }.request
+    }.request()
     let query = request.url?.query
     #expect(query == "alpha=a&mango=m&zebra=z")
 }
@@ -660,7 +660,7 @@ import Testing
         RequestMutation(\.cachePolicy, .reloadIgnoringLocalCacheData)
         Timeout(5)
         Method.GET
-    }.request
+    }.request()
     #expect(request.cachePolicy == .reloadIgnoringLocalCacheData)
     #expect(request.timeoutInterval == 5)
     #expect(request.url?.absoluteString == "https://api.example.com")
@@ -673,7 +673,7 @@ import Testing
     let request = try RequestBlock {
         Method.PUT
         Endpoint("/widgets/1")
-    }.base(url).request
+    }.base(url).request()
     #expect(request.httpMethod == "PUT")
     #expect(request.url?.absoluteString == "https://api.example.com/widgets/1")
 }
@@ -683,7 +683,7 @@ import Testing
 @Test func contentTypeBlockSetsHeader() throws {
     let request = try RequestBlock {
         MIMEType.json.contentType
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
 }
 
@@ -691,7 +691,7 @@ import Testing
     let request = try RequestBlock {
         MIMEType.json.contentType
         MIMEType.xml.contentType
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/xml")
 }
 
@@ -700,7 +700,7 @@ import Testing
 @Test func acceptSingleType() throws {
     let request = try RequestBlock {
         MIMEType.json.accept
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
 }
 
@@ -709,7 +709,7 @@ import Testing
         MIMEType.json.accept
         MIMEType.xml.accept
         MIMEType.html.accept
-    }.request
+    }.request()
     #expect(request.value(forHTTPHeaderField: "Accept") == "application/json,application/xml,text/html")
 }
 
@@ -718,7 +718,7 @@ import Testing
 @Test func methodAppliesRawValueForAllStandardCases() throws {
     let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .OPTIONS, .PATCH, .QUERY, .custom("LINK")]
     for method in cases {
-        let request = try RequestBlock { method }.request
+        let request = try RequestBlock { method }.request()
         #expect(request.httpMethod == method.rawValue)
     }
 }
@@ -730,14 +730,14 @@ import Testing
         Endpoint("player_api.php")
         Query("a", "1")
         BaseURL("https://api.example.com")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/player_api.php?a=1")
 }
 
 @Test func basicAuthHandlesColonInPassword() throws {
     let request = try RequestBlock {
         Authorization.basic(username: "alice", password: "a:b:c")
-    }.request
+    }.request()
     let expected = "Basic \(Data("alice:a:b:c".utf8).base64EncodedString())"
     #expect(request.value(forHTTPHeaderField: "Authorization") == expected)
 }
@@ -748,7 +748,7 @@ import Testing
     encoder.keyEncodingStrategy = .convertToSnakeCase
     let request = try RequestBlock {
         RequestBody.json(Model(userName: "x"))
-    }.useEncoder(encoder).request
+    }.useEncoder(encoder).request()
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "{\"user_name\":\"x\"}")
 }
 
@@ -779,7 +779,7 @@ import Testing
             Query(Model(userName: "a"))
         }.useEncoder(snake)
         Query(Model(userName: "b"))
-    }.request
+    }.request()
     #expect(request.url?.query == "user_name=a&userName=b")
 }
 
@@ -789,7 +789,7 @@ import Testing
         let one: Int
         let flag: Bool
     }
-    let request = try Query(Model(zero: 0, one: 1, flag: true)).request
+    let request = try Query(Model(zero: 0, one: 1, flag: true)).request()
     #expect(request.url?.query == "flag=true&one=1&zero=0")
 }
 
@@ -802,7 +802,7 @@ import Testing
 ]) func baseURLAlone(_ base: String) throws {
     let request = try RequestBlock {
         BaseURL(base)
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == base)
 }
 
@@ -813,7 +813,7 @@ import Testing
     let request = try RequestBlock {
         Endpoint(path)
         BaseURL("https://api.example.com/api")
-    }.request
+    }.request()
     #expect(request.url?.absoluteString == "https://api.example.com/api/v1/users")
 }
 
@@ -825,14 +825,14 @@ import Testing
         Query("limit", 50)
         Query("ratio", 0.5)
         Query("flag", true)
-    }.request
+    }.request()
     #expect(request.url?.query == "limit=50&ratio=0.5&flag=true")
 }
 
 @Test func urlEncodedLosslessValue() throws {
     let request = try RequestBlock {
         RequestBody.urlEncoded("count", 3)
-    }.request
+    }.request()
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "count=3")
 }
 
@@ -843,7 +843,7 @@ import Testing
     let request = try RequestBlock {
         Query("q", "swift")
         Query("flag", flag)
-    }.request
+    }.request()
     #expect(request.url?.query == "q=swift&flag")
 }
 
@@ -852,6 +852,22 @@ import Testing
     let request = try RequestBlock {
         RequestBody.urlEncoded("a", "1")
         RequestBody.urlEncoded("flag", flag)
-    }.request
+    }.request()
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "a=1&flag")
+}
+
+// MARK: - Premade request
+
+@Test func requestFromPremadeTransforms() throws {
+    var premade = URLRequest(url: URL(string: "https://api.example.com/v1/users")!)
+    premade.httpMethod = "PUT"
+    premade.setValue("abc", forHTTPHeaderField: "X-Trace-Id")
+    let request = try RequestBlock {
+        Header.accept.setValue("application/json")
+        Query("page", 2)
+    }.request(initialRequest: premade)
+    #expect(request.httpMethod == "PUT")
+    #expect(request.value(forHTTPHeaderField: "X-Trace-Id") == "abc")
+    #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+    #expect(request.url?.absoluteString == "https://api.example.com/v1/users?page=2")
 }

@@ -20,7 +20,7 @@ let request = try RequestBlock {
     Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
-}.request
+}.request()
 ```
 
 Read the builder top to bottom and you read the request top to bottom:
@@ -48,13 +48,13 @@ let request = try RequestBlock {
     Method.GET
     BaseURL("https://api.example.com")
     Endpoint("health")
-}.request
+}.request()
 
 // From an existing URL value:
 let request = try RequestBlock {
     Method.GET
     Endpoint("v1/users/\(userId)")
-}.base(existingURL).request
+}.base(existingURL).request()
 ```
 
 ### Control flow
@@ -76,7 +76,7 @@ let request = try RequestBlock {
     }
 
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 ### Custom blocks
@@ -129,7 +129,7 @@ extension UserBackend {
     }
 }
 
-let request = try repo.getUser("42").request
+let request = try repo.getUser("42").request()
 ```
 
 ### Headers
@@ -149,7 +149,7 @@ let request = try RequestBlock {
     if isStaging {
         Header.custom("X-Env").setValue("staging")
     }
-}.request
+}.request()
 ```
 
 ### Custom authentication
@@ -171,7 +171,7 @@ let request = try RequestBlock {
                                forHTTPHeaderField: "Authorization")
     }
     BaseURL("https://api.example.com")
-}.request
+}.request()
 ```
 
 ### Multipart uploads

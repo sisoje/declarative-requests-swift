@@ -1,5 +1,6 @@
 import Foundation
 
+/// Applies only after the path and query are finished — the base combines with exactly those two axes. Header/body blocks may follow freely.
 public struct BaseURL: RequestBuildable {
     enum Source {
         case url(URL)

@@ -8,9 +8,9 @@ public final class RequestState {
     public var request: URLRequest
     public var encoder: JSONEncoder
 
-    init(request: URLRequest = URLRequest(url: .placeholder), encoder: JSONEncoder = JSONEncoder()) {
-        self.request = request
-        self.encoder = encoder
+    init(request: URLRequest? = nil, encoder: JSONEncoder? = nil) {
+        self.request = request ?? URLRequest(url: .placeholder)
+        self.encoder = encoder ?? JSONEncoder()
     }
 }
 
