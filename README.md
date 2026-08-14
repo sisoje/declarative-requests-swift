@@ -149,7 +149,7 @@ Pick the factory or initializer that matches the data you have.
 |---|---|---|
 | `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (or chain `.base(_:)` after the block). | `BaseURL("https://api.example.com/api")` |
 | `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("users/\(id)/posts")` |
-| `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
+| `Query(_ name:, _ value:)` | Append a single query item (accumulates). Value is any `LosslessStringConvertible?` (`String`, `Int`, `Double`, `Bool`…). | `Query("page", 2)` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
 ### Method, headers, cookies, auth
@@ -204,7 +204,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 |---|---|---|
 | `RequestBody.string(_ s:type:)` | `String` (UTF-8) + content-type string | yes (defaults `text/plain`) |
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
-| `RequestBody.urlEncoded(_ name:, _ value:)` | one form field (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
+| `RequestBody.urlEncoded(_ name:, _ value:)` | one form field, value contract same as `Query` (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 

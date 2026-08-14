@@ -18,9 +18,9 @@ public extension RequestBody {
         }
     }
 
-    static func urlEncoded(_ name: String, _ value: String?) -> some RequestBuildable {
+    static func urlEncoded(_ name: String, _ value: (some LosslessStringConvertible)?) -> some RequestBuildable {
         RequestBlock { state in
-            state.encodedBodyItems += [URLQueryItem(name: name, value: value)]
+            state.encodedBodyItems += [URLQueryItem(name: name, value: value?.description)]
             state.request.setValue(MIMEType.formURLEncoded.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }

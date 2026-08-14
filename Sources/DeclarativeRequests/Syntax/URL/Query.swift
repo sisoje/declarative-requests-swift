@@ -1,13 +1,15 @@
 import Foundation
 
+/// Adds query items. Values follow `URLComponents` encoding — a literal `+` stays `+`; percent-encode it yourself if your server decodes `+` as space.
 public struct Query: RequestBuildable {
     enum Source {
         case pair(name: String, value: String?)
         case encodable(any Encodable)
     }
 
-    public init(_ name: String, _ value: String?) {
-        source = .pair(name: name, value: value)
+    /// A bare `nil` literal can't infer the value type — pass a typed optional (`nil as String?`). Non-lossless values convert explicitly (`uuid.uuidString`).
+    public init(_ name: String, _ value: (some LosslessStringConvertible)?) {
+        source = .pair(name: name, value: value?.description)
     }
 
     public init(_ encodable: any Encodable) {

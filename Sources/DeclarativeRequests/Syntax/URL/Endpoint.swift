@@ -1,3 +1,4 @@
+/// Sets the path, replacing any previous one. Interpolated values are not escaped — percent-encode dynamic segments yourself.
 public struct Endpoint: RequestBuildable {
     public init(_ path: String) {
         self.path = path

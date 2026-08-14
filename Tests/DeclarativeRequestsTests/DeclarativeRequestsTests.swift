@@ -816,3 +816,22 @@ import Testing
     }.request
     #expect(request.url?.absoluteString == "https://api.example.com/api/v1/users")
 }
+
+
+// MARK: - Lossless values
+
+@Test func queryLosslessValues() throws {
+    let request = try RequestBlock {
+        Query("limit", 50)
+        Query("ratio", 0.5)
+        Query("flag", true)
+    }.request
+    #expect(request.url?.query == "limit=50&ratio=0.5&flag=true")
+}
+
+@Test func urlEncodedLosslessValue() throws {
+    let request = try RequestBlock {
+        RequestBody.urlEncoded("count", 3)
+    }.request
+    #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "count=3")
+}

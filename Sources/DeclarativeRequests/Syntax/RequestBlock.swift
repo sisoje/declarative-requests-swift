@@ -10,6 +10,9 @@ public struct RequestBlock: RequestBuildable {
     let transform: RequestStateTransformClosure
 
     public var body: some RequestBuildable {
-        let _ = fatalError("dont call body of RequestBlock")
+        // Not fatalError: a never-returning body puts a "will never be executed" warning in every
+        // consumer's build. `transform` short-circuits the leaf, so this never runs.
+        assertionFailure("dont call body of RequestBlock")
+        return self
     }
 }
