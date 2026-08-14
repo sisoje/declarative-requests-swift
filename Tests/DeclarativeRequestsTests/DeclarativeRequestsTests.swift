@@ -756,7 +756,6 @@ import Testing
 @Test func mimeRawValues() {
     let pairs: [(MIMEType, String)] = [
         (.svg, "image/svg+xml"),
-        (.ico, "image/vnd.microsoft.icon"),
         (.mp3, "audio/mpeg"),
         (.m4a, "audio/mp4"),
         (.mpeg, "video/mpeg"),

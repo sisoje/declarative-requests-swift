@@ -12,19 +12,17 @@ public enum MIMEType {
     case gzip
     case plainText
     case html
-    case css
     case csv
-    case javascript
     case markdown
     case eventStream
     case calendar
     case png
     case jpeg
+    case heic
     case gif
     case webp
     case svg
     case tiff
-    case ico
     case mp3
     case wav
     case aac
@@ -33,11 +31,6 @@ public enum MIMEType {
     case mpeg
     case webm
     case quicktime
-    case formData
-    case woff
-    case woff2
-    case ttf
-    case otf
     case custom(String)
 
     public var rawValue: String {
@@ -53,19 +46,17 @@ public enum MIMEType {
         case .gzip: "application/gzip"
         case .plainText: "text/plain"
         case .html: "text/html"
-        case .css: "text/css"
         case .csv: "text/csv"
-        case .javascript: "text/javascript"
         case .markdown: "text/markdown"
         case .eventStream: "text/event-stream"
         case .calendar: "text/calendar"
         case .png: "image/png"
         case .jpeg: "image/jpeg"
+        case .heic: "image/heic"
         case .gif: "image/gif"
         case .webp: "image/webp"
         case .svg: "image/svg+xml"
         case .tiff: "image/tiff"
-        case .ico: "image/vnd.microsoft.icon"
         case .mp3: "audio/mpeg"
         case .wav: "audio/wav"
         case .aac: "audio/aac"
@@ -74,11 +65,6 @@ public enum MIMEType {
         case .mpeg: "video/mpeg"
         case .webm: "video/webm"
         case .quicktime: "video/quicktime"
-        case .formData: "multipart/form-data"
-        case .woff: "font/woff"
-        case .woff2: "font/woff2"
-        case .ttf: "font/ttf"
-        case .otf: "font/otf"
         case let .custom(value): value
         }
     }
