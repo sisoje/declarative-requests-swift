@@ -2,6 +2,26 @@ import DeclarativeRequests
 import Foundation
 import Testing
 
+// hardcoded stand-ins for the README's app fictions
+struct Session { let token: String? }
+struct Environment { let baseURL: URL }
+let session = Session(token: "T")
+let environment = Environment(baseURL: URL(string: "https://api.example.com/api")!)
+
+// the README wiring, verbatim
+func request(_ endpoint: UserEndpoint) throws -> URLRequest {
+    try endpoint
+        .authorized(token: session.token)
+        .base(environment.baseURL)
+        .request
+}
+
+@Test func wiredRequest() throws {
+    let request = try request(.getUser(id: "42"))
+    #expect(request.url?.absoluteString == "https://api.example.com/api/v1/users/42")
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer T")
+}
+
 @Test(arguments: [
     URL(string: "https://api.example.com/api")!,
     URL(string: "https://api.example.com/api/")!,

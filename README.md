@@ -24,14 +24,14 @@ Content-Type: application/json
 ```
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.POST
     Endpoint("v1/login")
     Header.accept.setValue("application/json")
     RequestBody.json(LoginRequest(email: email, password: password))
     Authorization.bearer(token)
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 `Header.accept.setValue(...)` is one HTTP header line. `RequestBody.json(...)` is the body
@@ -52,6 +52,7 @@ request is three composable steps, one per axis:
    very end. Materializing (`.request`) is the only terminal step.
 
 ```swift
+// the spec: endpoints, auth requirements, request shapes
 enum UserEndpoint {
     case getUser(id: String)
     case refreshToken(token: String)
@@ -76,6 +77,7 @@ enum UserEndpoint {
     }
 }
 
+// the session layer: spec + token -> authorized block
 extension UserEndpoint {
     struct MissingToken: Error {}
 
@@ -96,17 +98,18 @@ extension UserEndpoint {
 
 Every layer has the same shape — `some RequestBuildable` in, `some
 RequestBuildable` out — so the whole pipeline is one chain, and your app
-wraps it once as a demo of the final form:
+wires session and environment exactly once:
 
 ```swift
-func request(for endpoint: UserEndpoint) throws -> URLRequest {
+// wire session and environment once
+func request(_ endpoint: UserEndpoint) throws -> URLRequest {
     try endpoint
         .authorized(token: session.token)
         .base(environment.baseURL)
         .request
 }
 
-let request = try request(for: .getUser(id: "42"))
+let request = try request(.getUser(id: "42"))
 ```
 
 Every step returns a block, so layers compose: the spec drops into the
@@ -144,7 +147,7 @@ Pick the factory or initializer that matches the data you have.
 
 | Block | What it does | Example |
 |---|---|---|
-| `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (`URL.buildRequest` does this for you). | `BaseURL("https://api.example.com/api")` |
+| `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (or chain `.base(_:)` after the block). | `BaseURL("https://api.example.com/api")` |
 | `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("users/\(id)/posts")` |
 | `Query(_ name:, _ value:)` | Append a single query item (accumulates). | `Query("page", "2")` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
@@ -166,7 +169,7 @@ Pick the factory or initializer that matches the data you have.
 They go directly in the request — `setValue` replaces, `addValue` accumulates:
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.GET
     Endpoint("users")
 
@@ -178,11 +181,11 @@ let request = try URLRequest {
     }
     Authorization.bearer(token)
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 `BaseURL` goes last — everything before it accumulates the relative part of the
-URL, and the base resolves it (`URL.buildRequest` appends the base for you).
+URL, and the base resolves it — declare `BaseURL` last or chain `.base(_:)`.
 This split is deliberate — the canonical order is three layers, each varying on
 a different axis:
 
@@ -230,7 +233,7 @@ let request = try RequestBlock {
 ## Multipart upload
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.POST
     Endpoint("upload")
     RequestBody.multipart {
@@ -241,7 +244,7 @@ let request = try URLRequest {
         }
     }
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 The encoder follows RFC 7578: form-field and filename parameters are quoted, `\` and
@@ -252,25 +255,27 @@ header. For very large uploads, write the assembled body to a temp file and hand
 
 ## Building from a base URL
 
-If you already have a `URL` value, use `buildRequest`:
+If you already have a `URL` value, chain it as the base:
 
 ```swift
-let request = try api.buildRequest {
+let request = try RequestBlock {
     Method.GET
     Endpoint("v1/users/\(userId)")
     Header.accept.setValue("application/json")
 }
+.base(api)
+.request
 ```
 
 Otherwise declare the URL inside the builder with `BaseURL`:
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.POST
     Endpoint("login")
     RequestBody.json(credentials)
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 ## Architecture sketch
@@ -357,4 +362,4 @@ flowchart LR
 - **`RequestBuilder`** — the `@resultBuilder` that stitches blocks together.
 - **`RequestBlock`** — the leaf block; holds a closure that mutates `RequestState`.
 - **`RequestState`** — the in-progress `URLRequest` plus the `JSONEncoder` that body / header / query blocks use.
-- **`try URLRequest { … }`** — applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest` (`.request` is the same thing on any `RequestBuildable`).
+- **`.request`** — the only terminal: applies the composed transform to a fresh `RequestState` and returns the finished `URLRequest`.

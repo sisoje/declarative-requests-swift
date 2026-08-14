@@ -13,14 +13,14 @@ views — declare blocks top to bottom, and each block maps onto one piece of
 the raw HTTP request.
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.POST
     BaseURL("https://api.example.com")
     Endpoint("v1/login")
     Header.accept.setValue("application/json")
     Authorization.bearer(token)
     RequestBody.json(LoginRequest(email: email, password: password))
-}
+}.request
 ```
 
 Read the builder top to bottom and you read the request top to bottom:
@@ -44,17 +44,17 @@ There are several entry points, all equivalent:
 
 ```swift
 // From scratch — BaseURL inside the builder sets the URL:
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.GET
     BaseURL("https://api.example.com")
     Endpoint("health")
-}
+}.request
 
 // From an existing URL value:
-let request = try existingURL.buildRequest {
+let request = try RequestBlock {
     Method.GET
     Endpoint("v1/users/\(userId)")
-}
+}.base(existingURL).request
 ```
 
 ### Control flow
@@ -63,7 +63,7 @@ The `@RequestBuilder` result builder supports `if`, `if-else`, `switch`,
 and `for` — use them directly inside the builder closure:
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.GET
     Endpoint("v1/users")
 
@@ -76,7 +76,7 @@ let request = try URLRequest {
     }
 
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 ### Custom blocks
@@ -137,7 +137,7 @@ let request = try repo.getUser("42").request
 Headers go directly in the request — `setValue` replaces, `addValue` accumulates:
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.GET
     BaseURL("https://api.example.com")
     Endpoint("users")
@@ -149,7 +149,7 @@ let request = try URLRequest {
     if isStaging {
         Header.custom("X-Env").setValue("staging")
     }
-}
+}.request
 ```
 
 ### Custom authentication
@@ -160,7 +160,7 @@ like HMAC signatures computed over headers or the body — use a raw
 blocks so the request is fully formed when the closure runs:
 
 ```swift
-let request = try URLRequest {
+let request = try RequestBlock {
     Method.POST
     Endpoint("v1/data")
     RequestBody.json(payload)
@@ -171,7 +171,7 @@ let request = try URLRequest {
                                forHTTPHeaderField: "Authorization")
     }
     BaseURL("https://api.example.com")
-}
+}.request
 ```
 
 ### Multipart uploads

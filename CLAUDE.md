@@ -20,6 +20,7 @@ This is deliberately a **lightweight** package: declarative machinery to compose
 - Content-negotiation machinery (the MIME parameter algebra was removed; parameters are string literals: `Header.accept.addValue("application/xml; q=0.8")`).
 - Transport machinery (streamed multipart with its producer thread was removed; for huge uploads write the assembled body to a temp file and use `URLSession.uploadTask(fromFile:)`).
 - `import SwiftUI`/Combine, `@Observable`, or speculative `Sendable` annotations.
+- Public extensions on Foundation types — they pollute every importer's namespace. The package exports its own vocabulary only; the sole terminal is `.request` on `RequestBuildable`.
 - Code defending against idiotic usage. Contracts are documented, not enforced with extra machinery.
 
 **We do not write code for irresponsible people — those who do not test their code and use the package wrong.** Documented limitations are part of the API contract, and users are expected to accept them — `BaseURL` comes last (or at least after the path), and that's ok. We don't add code so that every ordering or misuse works anyway:
@@ -58,7 +59,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 
 ### How a build flows
 
-`URLRequest(builder:)`, `URL.buildRequest`, and `RequestBuildable.request` all do the same thing:
+`RequestBuildable.request` materializes:
 
 1. Create a `RequestState` (placeholder URL: `URLComponents().url!`).
 2. Call `transform(state)` — which recurses through every block's `body` and applies each leaf closure in declaration order.
@@ -67,7 +68,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 ### Block conventions
 
 - **Canonical block order — three layers, three axes:** definition (method/path/query/headers/body — the backend spec, identical everywhere) → `Authorization` (varies per session; only endpoints that need it carry the block) → `BaseURL` (varies per environment, always last).
-- **`BaseURL` is applied last.** That is the contract — `URL.buildRequest` appends it after the builder blocks automatically. The deeper reason: the builder body describes the backend's API shape, which is identical across environments; the base URL is deployment configuration (dev/staging/prod vary ONLY by base). Blocks first, config last. The relative-URL projections happen to tolerate base-first ordering, but it is not guaranteed and not to be defended with extra code or tests.
+- **`BaseURL` is applied last.** That is the contract — declare `BaseURL` last, or chain `.base(_:)` after the block. The deeper reason: the builder body describes the backend's API shape, which is identical across environments; the base URL is deployment configuration (dev/staging/prod vary ONLY by base). Blocks first, config last. The relative-URL projections happen to tolerate base-first ordering, but it is not guaranteed and not to be defended with extra code or tests.
 - **Last write wins** for properties (method, URL, body) — with one deliberate exception: `RequestBody.urlEncoded` *merges* its items into an existing form body. Accumulating blocks (cookies, query items, `Header.<field>.addValue`) read-then-write the existing value.
 - **`Endpoint`** just sets `urlComponents.path`, replacing any previous path. Applying `BaseURL` combines: scheme/host/port from the base, base path + accumulated path (trailing slash irrelevant) — `https://host/api` + `/v1/users` is `/api/v1/users`. The base's path is never dropped.
 - **`RequestMutation(\.keyPath, value)` subscript** is the canonical way to write a one-line block (used by `Method` and `Timeout`). New blocks should use it instead of writing closures by hand.
@@ -75,7 +76,7 @@ The recursion termination trick: `RequestBuildable.transform` checks `if let lea
 - **Encodable-driven blocks** (`Query(_:)`, `RequestBody.json/.urlEncoded`) route through `state.encoder` so the user's encoder configuration (date strategy, key strategy) is respected.
 - **`Header` keeps Foundation's vocabulary** — `setValue`/`addValue` are `URLRequest`'s own method names, read in wire order (field → operation → value); an add/set operation enum is the seed `HeaderMode` grew the deleted DSL from — don't replant it.
 - **Vocabulary enums share one shape, Header's**: plain enum, named cases + `case custom(String)`, computed `rawValue` switch. `Header`, `Method`, and `MIMEType` all follow it — `MIMEType.json.contentType` (set) / `.accept` (add), `Method.custom("LINK")`, `MIMEType.custom("application/vnd.x+json")`.
-- **Modifiers**: `.base(_:)` applies the base as a composable layer (`URL.buildRequest` is sugar over it); `.useEncoder(_:)` scopes the encoder to the wrapped blocks.
+- **Modifiers**: `.base(_:)` applies the base as a composable layer; `.useEncoder(_:)` scopes the encoder to the wrapped blocks.
 - **Multipart** is in-memory only (`RequestBody.multipart` assembles a `Data` blob per RFC 7578). Its parts closure is `@RequestBuilder` — the builder returns `[MultipartPart]` when the context asks for parts. See `RequestBody+Multipart.swift`.
 
 ## Tests
