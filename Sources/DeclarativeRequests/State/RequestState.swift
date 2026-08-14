@@ -20,11 +20,11 @@ public extension RequestState {
     /// combination consumes the base/path boundary.
     func setBaseURL(_ url: URL) {
         var url = url
-        let combinedComponents = urlComponents
-        if !combinedComponents.path.isEmpty {
-            url.append(path: combinedComponents.path)
+        let urlComponents = urlComponents
+        if !urlComponents.path.isEmpty {
+            url.append(path: urlComponents.path)
         }
-        if let queryItems = combinedComponents.queryItems {
+        if let queryItems = urlComponents.queryItems, !queryItems.isEmpty {
             url.append(queryItems: queryItems)
         }
         request.url = url
@@ -32,7 +32,7 @@ public extension RequestState {
 
     /// Backed by `request.url`, resolved.
     private var urlComponents: URLComponents {
-        get { URLComponents(url: request.url ?? .placeholder, resolvingAgainstBaseURL: true) ?? URLComponents() }
+        get { URLComponents(url: request.url ?? .placeholder, resolvingAgainstBaseURL: false) ?? URLComponents() }
         set { request.url = newValue.url }
     }
 
