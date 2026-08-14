@@ -835,3 +835,23 @@ import Testing
     }.request
     #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "count=3")
 }
+
+// MARK: - Nil renders a bare key
+
+@Test func queryNilRendersBareKey() throws {
+    let flag: Int? = nil
+    let request = try RequestBlock {
+        Query("q", "swift")
+        Query("flag", flag)
+    }.request
+    #expect(request.url?.query == "q=swift&flag")
+}
+
+@Test func urlEncodedNilRendersBareKey() throws {
+    let flag: String? = nil
+    let request = try RequestBlock {
+        RequestBody.urlEncoded("a", "1")
+        RequestBody.urlEncoded("flag", flag)
+    }.request
+    #expect(request.httpBody.map { String(decoding: $0, as: UTF8.self) } == "a=1&flag")
+}

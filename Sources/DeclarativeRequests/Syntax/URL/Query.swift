@@ -7,7 +7,7 @@ public struct Query: RequestBuildable {
         case encodable(any Encodable)
     }
 
-    /// A bare `nil` literal can't infer the value type — pass a typed optional (`nil as String?`). Non-lossless values convert explicitly (`uuid.uuidString`).
+    /// A `nil` value renders a bare key (`?flag`) — wrap in `if let` to omit the item. Non-lossless values convert explicitly (`uuid.uuidString`).
     public init(_ name: String, _ value: (some LosslessStringConvertible)?) {
         source = .pair(name: name, value: value?.description)
     }

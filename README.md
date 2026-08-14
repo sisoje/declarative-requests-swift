@@ -149,7 +149,7 @@ Pick the factory or initializer that matches the data you have.
 |---|---|---|
 | `BaseURL(_:)` | Combines into what's built: scheme/host/port, and its path is always a **prefix**. Apply it **last** (or chain `.base(_:)` after the block). | `BaseURL("https://api.example.com/api")` |
 | `Endpoint(_:)` | Sets the path; applying `BaseURL` prefixes it with the base's path. | `Endpoint("users/\(id)/posts")` |
-| `Query(_ name:, _ value:)` | Append a single query item (accumulates). Value is any `LosslessStringConvertible?` (`String`, `Int`, `Double`, `Bool`…). | `Query("page", 2)` |
+| `Query(_ name:, _ value:)` | Append a single query item (accumulates). Value is any `LosslessStringConvertible?` (`String`, `Int`, `Double`, `Bool`…); `nil` renders a bare key. | `Query("page", 2)` |
 | `Query(_ encodable:)` | Flatten an `Encodable` model into query items. | `Query(filterModel)` |
 
 ### Method, headers, cookies, auth
