@@ -1,6 +1,14 @@
 import Foundation
 
 public extension RequestBuildable {
+    var request: URLRequest {
+        get throws {
+            let state = RequestState()
+            try transform(state)
+            return state.request
+        }
+    }
+
     func base(_ url: URL) -> some RequestBuildable {
         RequestBlock {
             self

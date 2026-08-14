@@ -1,16 +1,5 @@
 import Foundation
 
-extension Sequence<RequestStateTransformClosure> {
-    var reduced: RequestStateTransformClosure {
-        reduce({ _ in }) { partialResult, closure in
-            {
-                try partialResult($0)
-                try closure($0)
-            }
-        }
-    }
-}
-
 @_documentation(visibility: internal)
 @resultBuilder
 public struct RequestBuilder {}
@@ -22,7 +11,12 @@ public extension RequestBuilder {
     }
 
     static func buildBlock(_ components: any RequestBuildable...) -> RequestBlock {
-        RequestBlock(components.map(\.transform).reduced)
+        let transforms = components.map(\.transform)
+        return RequestBlock { state in
+            for transform in transforms {
+                try transform(state)
+            }
+        }
     }
 
     static func buildExpression(_ component: any RequestBuildable) -> RequestBlock {
@@ -42,10 +36,46 @@ public extension RequestBuilder {
     }
 
     static func buildArray(_ components: [any RequestBuildable]) -> RequestBlock {
-        RequestBlock(components.map(\.transform).reduced)
+        let transforms = components.map(\.transform)
+        return RequestBlock { state in
+            for transform in transforms {
+                try transform(state)
+            }
+        }
     }
 
     static func buildLimitedAvailability(_ component: any RequestBuildable) -> RequestBlock {
         RequestBlock(component.transform)
+    }
+}
+
+// MultipartPart content kind — same builder, contextual return type picks the family.
+public extension RequestBuilder {
+    static func buildExpression(_ part: MultipartPart) -> [MultipartPart] {
+        [part]
+    }
+
+    static func buildExpression(_ parts: [MultipartPart]) -> [MultipartPart] {
+        parts
+    }
+
+    static func buildBlock(_ parts: [MultipartPart]...) -> [MultipartPart] {
+        parts.flatMap { $0 }
+    }
+
+    static func buildOptional(_ parts: [MultipartPart]?) -> [MultipartPart] {
+        parts ?? []
+    }
+
+    static func buildEither(first parts: [MultipartPart]) -> [MultipartPart] {
+        parts
+    }
+
+    static func buildEither(second parts: [MultipartPart]) -> [MultipartPart] {
+        parts
+    }
+
+    static func buildArray(_ parts: [[MultipartPart]]) -> [MultipartPart] {
+        parts.flatMap { $0 }
     }
 }

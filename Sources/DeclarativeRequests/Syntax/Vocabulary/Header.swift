@@ -12,10 +12,8 @@ public enum Header {
     case acceptLanguage
     case acceptEncoding
     case custom(String)
-}
 
-public extension Header {
-    var rawValue: String {
+    public var rawValue: String {
         switch self {
         case .contentType: "Content-Type"
         case .accept: "Accept"
@@ -31,13 +29,13 @@ public extension Header {
         }
     }
 
-    func addValue(_ value: String) -> some RequestBuildable {
+    public func addValue(_ value: String) -> some RequestBuildable {
         RequestBlock { state in
             state.request.addValue(value, forHTTPHeaderField: rawValue)
         }
     }
 
-    func setValue(_ value: String) -> some RequestBuildable {
+    public func setValue(_ value: String) -> some RequestBuildable {
         RequestBlock { state in
             state.request.setValue(value, forHTTPHeaderField: rawValue)
         }

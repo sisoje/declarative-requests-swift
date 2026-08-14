@@ -1,21 +1,14 @@
 import Foundation
 
+@_documentation(visibility: internal)
+public typealias RequestStateTransformClosure = (RequestState) throws -> Void
+
 public protocol RequestBuildable {
     associatedtype Body: RequestBuildable
     @RequestBuilder var body: Body { get }
 }
 
-public extension RequestBuildable {
-    var request: URLRequest {
-        get throws {
-            let state = RequestState()
-            try transform(state)
-            return state.request
-        }
-    }
-}
-
-public extension RequestBuildable {
+extension RequestBuildable {
     var transform: RequestStateTransformClosure {
         if let leaf = self as? RequestBlock {
             leaf.transform

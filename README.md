@@ -124,17 +124,17 @@ directly, each has exactly one typed block over it:
 
 | Raw `URLRequest` field | Block |
 |---|---|
-| `httpMethod` | `Method.GET` … `Method.QUERY` |
+| `httpMethod` | `Method.GET` … `.custom(_)` |
 | `url` | `BaseURL` / `Endpoint` / `Query` |
 | `allHTTPHeaderFields` | `Header.<field>.setValue/addValue`, `MIMEType.<case>.accept/.contentType`, `Cookie`, `Authorization` |
 | `httpBody` / `httpBodyStream` | `RequestBody.*` encoders; raw bytes and streams via `RequestMutation` |
 | `timeoutInterval` | `Timeout(5)` |
-| `cachePolicy` | `RequestMutation[\.cachePolicy, .returnCacheDataElseLoad]` |
-| `networkServiceType` | `RequestMutation[\.networkServiceType, .background]` |
-| `httpShouldHandleCookies` | `RequestMutation[\.httpShouldHandleCookies, false]` |
-| `allowsCellularAccess` etc. | `RequestMutation[\.allowsCellularAccess, false]` etc. |
+| `cachePolicy` | `RequestMutation(\.cachePolicy, .returnCacheDataElseLoad)` |
+| `networkServiceType` | `RequestMutation(\.networkServiceType, .background)` |
+| `httpShouldHandleCookies` | `RequestMutation(\.httpShouldHandleCookies, false)` |
+| `allowsCellularAccess` etc. | `RequestMutation(\.allowsCellularAccess, false)` etc. |
 
-For a field without a block, `RequestMutation[\.keyPath, value]` is the
+For a field without a block, `RequestMutation(\.keyPath, value)` is the
 one-line escape hatch, and a raw `RequestBlock { state in … }` closure is the
 last resort.
 
@@ -153,15 +153,15 @@ Pick the factory or initializer that matches the data you have.
 
 | Block | What it does | Example |
 |---|---|---|
-| `Method.GET` / `.POST` / `.PUT` / … | Sets the HTTP method. Nonstandard verb: `RequestMutation[\.httpMethod, "LINK"]`. | `Method.POST` |
+| `Method.GET` / `.POST` / … / `.custom("LINK")` | Sets the HTTP method. | `Method.POST` |
 | `Header.<field>.setValue(_:)` | Sets a header field, replacing any previous value. | `Header.accept.setValue("application/json")` |
 | `Header.<field>.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
 | `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
 | `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
-| `MIMEType.<case>.contentType` | Sets `Content-Type` (replaces). Arbitrary values: `Header.contentType.setValue(...)`. | `MIMEType.json.contentType` |
-| `MIMEType.<case>.accept` | Accumulates `Accept` header values. Arbitrary values: `Header.accept.addValue(...)`. | `MIMEType.json.accept` |
+| `MIMEType.<case>.contentType` | Sets `Content-Type` (replaces). | `MIMEType.json.contentType` |
+| `MIMEType.<case>.accept` | Accumulates `Accept` header values. | `MIMEType.custom("application/vnd.x").accept` |
 
 They go directly in the request — `setValue` replaces, `addValue` accumulates:
 
@@ -205,7 +205,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
 | `RequestBody.multipart { parts }` | `MultipartPart`s | `multipart/form-data; boundary=…` |
 
-Raw bytes: `RequestMutation[\.httpBody, data]`; streams: `RequestMutation[\.httpBodyStream, InputStream(data: data)]` (the subscript's autoclosure re-creates the single-use stream per build). Pair with `MIMEType.<case>.contentType` if needed.
+Raw bytes: `RequestMutation(\.httpBody, data)`; streams: `RequestMutation(\.httpBodyStream, InputStream(data: data))` (RequestMutation's autoclosure value re-creates the single-use stream per build). Pair with `MIMEType.<case>.contentType` if needed.
 
 Each `RequestBody.*` block replaces the body — except `urlEncoded`, which
 merges its items into an existing form body, so form fields can accumulate
@@ -313,6 +313,7 @@ flowchart LR
     %% Method
     RB --> MethodGroup["Method"]
     MethodGroup --> MSTD[".GET  .POST  .PUT<br/>.DELETE  .PATCH  .HEAD<br/>.OPTIONS  .TRACE  .CONNECT  .QUERY"]
+    MethodGroup --> MCUSTOM[".custom(_ string)"]
 
     %% Headers
     RB --> HeaderGroup["Headers"]
@@ -325,7 +326,7 @@ flowchart LR
     HeaderGroup --> MIME["MIMEType (enum)"]
     MIME --> MIME1["MIMEType.json.contentType"]
     MIME --> MIME2["MIMEType.json.accept"]
-    MIME --> MIMEC["common types:<br/>.json  .xml  .png  .mp4  .pdf ...<br/>anything else: Header + string"]
+    MIME --> MIMEC["common types:<br/>.json  .xml  .png  .mp4  .pdf ...<br/>.custom(_ string)"]
 
     %% Auth
     RB --> AuthGroup["Authorization"]
@@ -347,7 +348,7 @@ flowchart LR
     %% Networking knobs
     RB --> NetGroup["Networking Knobs"]
     NetGroup --> Timeout["Timeout(_ seconds)"]
-    NetGroup --> RM["RequestMutation[\.cachePolicy, ...]<br/>RequestMutation[\.networkServiceType, ...]<br/>RequestMutation[\.httpShouldHandleCookies, ...]"]
+    NetGroup --> RM["RequestMutation(\.cachePolicy, ...)<br/>RequestMutation(\.networkServiceType, ...)<br/>RequestMutation(\.httpShouldHandleCookies, ...)"]
 ```
 
 ## Key concepts

@@ -3,7 +3,7 @@ import Foundation
 public extension RequestBody {
     static func multipart(
         boundary: String? = nil,
-        @MultipartBuilder _ parts: () -> [MultipartPart]
+        @RequestBuilder _ parts: () -> [MultipartPart]
     ) -> some RequestBuildable {
         let parts = parts()
         let boundary = boundary ?? "Boundary-\(UUID().uuidString)"
@@ -18,42 +18,6 @@ public enum MultipartPart {
     case field(name: String, value: String)
     case data(name: String, filename: String, data: Data, type: String = MIMEType.octetStream.rawValue)
     case file(name: String, fileURL: URL, type: String = MIMEType.octetStream.rawValue, filename: String? = nil)
-}
-
-@_documentation(visibility: internal)
-@resultBuilder
-public enum MultipartBuilder {
-    public static func buildBlock(_ components: [MultipartPart]...) -> [MultipartPart] {
-        components.flatMap { $0 }
-    }
-
-    public static func buildExpression(_ part: MultipartPart) -> [MultipartPart] {
-        [part]
-    }
-
-    public static func buildExpression(_ parts: [MultipartPart]) -> [MultipartPart] {
-        parts
-    }
-
-    public static func buildOptional(_ component: [MultipartPart]?) -> [MultipartPart] {
-        component ?? []
-    }
-
-    public static func buildEither(first component: [MultipartPart]) -> [MultipartPart] {
-        component
-    }
-
-    public static func buildEither(second component: [MultipartPart]) -> [MultipartPart] {
-        component
-    }
-
-    public static func buildArray(_ components: [[MultipartPart]]) -> [MultipartPart] {
-        components.flatMap { $0 }
-    }
-
-    public static func buildLimitedAvailability(_ component: [MultipartPart]) -> [MultipartPart] {
-        component
-    }
 }
 
 private func encode(parts: [MultipartPart], boundary: String) throws -> Data {

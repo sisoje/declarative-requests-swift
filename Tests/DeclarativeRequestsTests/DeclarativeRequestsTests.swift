@@ -4,9 +4,9 @@ import Testing
 
 @Test(arguments: [true, false]) func allowAccess(_ isAllowed: Bool) throws {
     let req = try RequestBlock {
-        RequestMutation[\.allowsCellularAccess, isAllowed]
-        RequestMutation[\.allowsConstrainedNetworkAccess, isAllowed]
-        RequestMutation[\.allowsExpensiveNetworkAccess, isAllowed]
+        RequestMutation(\.allowsCellularAccess, isAllowed)
+        RequestMutation(\.allowsConstrainedNetworkAccess, isAllowed)
+        RequestMutation(\.allowsExpensiveNetworkAccess, isAllowed)
     }.request
     #expect(req.allowsCellularAccess == isAllowed)
     #expect(req.allowsExpensiveNetworkAccess == isAllowed)
@@ -61,7 +61,7 @@ import Testing
 
 @Test func httpMethodTest() throws {
     let request = try URLRequest {
-        RequestMutation[\.httpMethod, "sisoje"]
+        Method.custom("sisoje")
     }
     #expect(request.httpMethod == "sisoje")
 }
@@ -256,7 +256,7 @@ import Testing
 @Test func stream() throws {
     let data = Data("sisoje".utf8)
     let request = try RequestBlock {
-        RequestMutation[\.httpBodyStream, InputStream(data: data)]
+        RequestMutation(\.httpBodyStream, InputStream(data: data))
     }.request
     #expect(request.httpBodyStream != nil)
     request.httpBodyStream?.open()
@@ -405,7 +405,7 @@ import Testing
 
 @Test func rawBodyViaMutation() throws {
     let request = try URLRequest {
-        RequestMutation[\.httpBody, Data("hello".utf8)]
+        RequestMutation(\.httpBody, Data("hello".utf8))
     }
     #expect(request.httpBody == Data("hello".utf8))
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == nil)
@@ -624,14 +624,14 @@ import Testing
 
 @Test func networkServiceTypeApplied() throws {
     let request = try URLRequest {
-        RequestMutation[\.networkServiceType, .background]
+        RequestMutation(\.networkServiceType, .background)
     }
     #expect(request.networkServiceType == .background)
 }
 
 @Test(arguments: [true, false]) func httpShouldHandleCookiesApplied(_ flag: Bool) throws {
     let request = try URLRequest {
-        RequestMutation[\.httpShouldHandleCookies, flag]
+        RequestMutation(\.httpShouldHandleCookies, flag)
     }
     #expect(request.httpShouldHandleCookies == flag)
 }
@@ -657,7 +657,7 @@ import Testing
 @Test func timeoutAndCachePolicyApplied() throws {
     let request = try URLRequest {
         BaseURL("https://api.example.com")
-        RequestMutation[\.cachePolicy, .reloadIgnoringLocalCacheData]
+        RequestMutation(\.cachePolicy, .reloadIgnoringLocalCacheData)
         Timeout(5)
         Method.GET
     }
@@ -716,7 +716,7 @@ import Testing
 // MARK: - Method (every standard case)
 
 @Test func methodAppliesRawValueForAllStandardCases() throws {
-    let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .CONNECT, .OPTIONS, .TRACE, .PATCH, .QUERY]
+    let cases: [DeclarativeRequests.Method] = [.HEAD, .PUT, .DELETE, .CONNECT, .OPTIONS, .TRACE, .PATCH, .QUERY, .custom("LINK")]
     for method in cases {
         let request = try URLRequest { method }
         #expect(request.httpMethod == method.rawValue)
@@ -764,6 +764,7 @@ import Testing
         (.formURLEncoded, "application/x-www-form-urlencoded"),
         (.jsonPatch, "application/json-patch+json"),
         (.mergePatch, "application/merge-patch+json"),
+        (.custom("application/vnd.myapp+json"), "application/vnd.myapp+json"),
     ]
     for (mime, raw) in pairs {
         #expect(mime.rawValue == raw)
