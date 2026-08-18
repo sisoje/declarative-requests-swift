@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Header {
+public enum Header: Sendable {
     case contentType
     case accept
     case authorization

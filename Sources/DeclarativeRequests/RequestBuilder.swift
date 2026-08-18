@@ -32,7 +32,7 @@ public extension RequestBuilder {
     }
 
     static func buildOptional(_ component: (any RequestBuildable)?) -> RequestBlock {
-        RequestBlock(component?.transform ?? { _ in })
+        RequestBlock(component?.transform ?? { @Sendable _ in })
     }
 
     static func buildArray(_ components: [any RequestBuildable]) -> RequestBlock {

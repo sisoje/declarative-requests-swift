@@ -4,7 +4,13 @@ import Foundation
 ///
 /// Holds a single `URLRequest` as the only source of truth — every other
 /// property is a projection that reads and writes through it.
-public final class RequestState {
+///
+/// Confined by construction, which is what the unchecked conformance
+/// asserts: an instance is created inside `request(initialRequest:)`,
+/// mutated synchronously by that one call's block transforms, and dropped
+/// when the `URLRequest` is returned. It is never handed across an
+/// isolation boundary, so there is no concurrent access to guard.
+public final class RequestState: @unchecked Sendable {
     public var request: URLRequest
     public var encoder: JSONEncoder
 

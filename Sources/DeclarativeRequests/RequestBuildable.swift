@@ -1,9 +1,9 @@
 import Foundation
 
 @_documentation(visibility: internal)
-public typealias RequestStateTransformClosure = (RequestState) throws -> Void
+public typealias RequestStateTransformClosure = @Sendable (RequestState) throws -> Void
 
-public protocol RequestBuildable {
+public protocol RequestBuildable: Sendable {
     associatedtype Body: RequestBuildable
     @RequestBuilder var body: Body { get }
 }

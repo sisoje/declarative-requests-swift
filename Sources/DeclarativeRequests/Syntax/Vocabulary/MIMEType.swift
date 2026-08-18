@@ -1,6 +1,6 @@
 import Foundation
 
-public enum MIMEType {
+public enum MIMEType: Sendable {
     case json
     case xml
     case formURLEncoded

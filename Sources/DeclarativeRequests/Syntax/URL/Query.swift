@@ -4,7 +4,7 @@ import Foundation
 public struct Query: RequestBuildable {
     enum Source {
         case pair(name: String, value: String?)
-        case encodable(any Encodable)
+        case encodable(any Encodable & Sendable)
     }
 
     /// A `nil` value renders a bare key (`?flag`) — wrap in `if let` to omit the item. Non-lossless values convert explicitly (`uuid.uuidString`).
@@ -12,7 +12,7 @@ public struct Query: RequestBuildable {
         source = .pair(name: name, value: value?.description)
     }
 
-    public init(_ encodable: any Encodable) {
+    public init(_ encodable: any Encodable & Sendable) {
         source = .encodable(encodable)
     }
 

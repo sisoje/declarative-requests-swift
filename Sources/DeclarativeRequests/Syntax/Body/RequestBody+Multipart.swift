@@ -14,7 +14,7 @@ public extension RequestBody {
     }
 }
 
-public enum MultipartPart {
+public enum MultipartPart: Sendable {
     case field(name: String, value: String)
     case data(name: String, filename: String, data: Data, type: String = MIMEType.octetStream.rawValue)
     case file(name: String, fileURL: URL, type: String = MIMEType.octetStream.rawValue, filename: String? = nil)
