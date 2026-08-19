@@ -332,6 +332,54 @@ import Testing
     #expect(tok == "Basic eDp5")
 }
 
+@Test func authSchemeRawValues() {
+    #expect(Authorization.bearer.rawValue == "Bearer")
+    #expect(Authorization.digest.rawValue == "Digest")
+    #expect(Authorization.negotiate.rawValue == "Negotiate")
+}
+
+@Test func authPreEncodedBasic() throws {
+    let request = try RequestBlock {
+        Authorization.custom("Basic", "eDp5")
+    }.request()
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "Basic eDp5")
+}
+
+@Test func authCustomScheme() throws {
+    let request = try RequestBlock {
+        Authorization.custom("GenieKey", "abc123")
+    }.request()
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "GenieKey abc123")
+}
+
+@Test func authStoredSchemeApplies() throws {
+    let scheme = Authorization.bearer
+    let request = try RequestBlock {
+        scheme("t")
+    }.request()
+    #expect(request.value(forHTTPHeaderField: Header.authorization.rawValue) == "Bearer t")
+}
+
+@Test func authDigestCredentialsVerbatim() throws {
+    let credentials = #"username="alice", realm="api", nonce="dcd98b", response="6629fae""#
+    let request = try RequestBlock {
+        Authorization.digest(credentials)
+    }.request()
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "Digest \(credentials)")
+}
+
+@Test func authLastSchemeWins() throws {
+    let request = try RequestBlock {
+        Authorization.basic(username: "x", password: "y")
+        Authorization.bearer("t")
+    }.request()
+    let tok = request.value(forHTTPHeaderField: Header.authorization.rawValue)
+    #expect(tok == "Bearer t")
+}
+
 @Test func computedAuthOverBuiltRequest() throws {
     let request = try RequestBlock {
         Method.POST
@@ -419,6 +467,21 @@ import Testing
     #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/plain")
 }
 
+@Test func bodyStringExplicitMIMEType() throws {
+    let request = try RequestBlock {
+        RequestBody.string("<x/>", type: .xml)
+    }.request()
+    #expect(request.httpBody == Data("<x/>".utf8))
+    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "application/xml")
+}
+
+@Test func bodyStringCustomMIMEType() throws {
+    let request = try RequestBlock {
+        RequestBody.string("x", type: .custom("text/vnd.foo; charset=utf-8"))
+    }.request()
+    #expect(request.value(forHTTPHeaderField: Header.contentType.rawValue) == "text/vnd.foo; charset=utf-8")
+}
+
 // MARK: - Header
 
 @Test func headerSingleStringPair() throws {
@@ -487,7 +550,7 @@ import Testing
     let payload = Data([0x89, 0x50, 0x4E, 0x47])
     let request = try RequestBlock {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: "image/png")
+            MultipartPart.data(name: "avatar", filename: "a.png", data: payload, type: .png)
         }
     }.request()
     let body = request.httpBody ?? Data()
@@ -524,7 +587,7 @@ import Testing
 
     let request = try RequestBlock {
         RequestBody.multipart(boundary: "TEST") {
-            MultipartPart.file(name: "doc", fileURL: tmp, type: "application/octet-stream")
+            MultipartPart.file(name: "doc", fileURL: tmp, type: .octetStream)
         }
     }.request()
     let body = request.httpBody ?? Data()

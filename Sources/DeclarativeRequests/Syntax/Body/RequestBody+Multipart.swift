@@ -16,8 +16,8 @@ public extension RequestBody {
 
 public enum MultipartPart: Sendable {
     case field(name: String, value: String)
-    case data(name: String, filename: String, data: Data, type: String = MIMEType.octetStream.rawValue)
-    case file(name: String, fileURL: URL, type: String = MIMEType.octetStream.rawValue, filename: String? = nil)
+    case data(name: String, filename: String, data: Data, type: MIMEType = .octetStream)
+    case file(name: String, filename: String? = nil, fileURL: URL, type: MIMEType = .octetStream)
 }
 
 private func encode(parts: [MultipartPart], boundary: String) throws -> Data {
@@ -29,7 +29,7 @@ private func encode(parts: [MultipartPart], boundary: String) throws -> Data {
             body.append(Data(value.utf8))
         case let .data(_, _, payload, _):
             body.append(payload)
-        case let .file(_, url, _, _):
+        case let .file(_, _, url, _):
             try body.append(Data(contentsOf: url))
         }
         body.append(Data("\r\n".utf8))
@@ -44,15 +44,15 @@ private func partHeader(_ part: MultipartPart, boundary: String) -> String {
         "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(quoteParam(name))\"\r\n\r\n"
     case let .data(name, filename, _, type):
         fileHeader(name: name, filename: filename, type: type, boundary: boundary)
-    case let .file(name, url, type, filename):
+    case let .file(name, filename, url, type):
         fileHeader(name: name, filename: filename ?? url.lastPathComponent, type: type, boundary: boundary)
     }
 }
 
-private func fileHeader(name: String, filename: String, type: String, boundary: String) -> String {
+private func fileHeader(name: String, filename: String, type: MIMEType, boundary: String) -> String {
     "--\(boundary)\r\n" +
         "Content-Disposition: form-data; name=\"\(quoteParam(name))\"; filename=\"\(quoteParam(filename))\"\r\n" +
-        "Content-Type: \(type)\r\n\r\n"
+        "Content-Type: \(type.rawValue)\r\n\r\n"
 }
 
 private func quoteParam(_ s: String) -> String {

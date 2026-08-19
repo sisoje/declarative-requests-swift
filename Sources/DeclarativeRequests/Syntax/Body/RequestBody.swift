@@ -3,10 +3,10 @@ import Foundation
 public enum RequestBody {}
 
 public extension RequestBody {
-    static func string(_ string: String, type: String = MIMEType.plainText.rawValue) -> some RequestBuildable {
+    static func string(_ string: String, type: MIMEType = .plainText) -> some RequestBuildable {
         RequestBlock { state in
             state.request.httpBody = Data(string.utf8)
-            state.request.setValue(type, forHTTPHeaderField: Header.contentType.rawValue)
+            state.request.setValue(type.rawValue, forHTTPHeaderField: Header.contentType.rawValue)
         }
     }
 

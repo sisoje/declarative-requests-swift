@@ -173,8 +173,9 @@ Pick the factory or initializer that matches the data you have.
 | `Header.<field>.addValue(_:)` | Appends a value without removing existing ones. | `Header.accept.addValue("text/html")` |
 | `Header.custom(_:).setValue(_:)` | Sets a header by raw string name. | `Header.custom("X-Trace-Id").setValue("abc123")` |
 | `Cookie(_ name:, _ value:)` | Adds one cookie to the `Cookie` header (accumulates). | `Cookie("session", token)` |
-| `Authorization.bearer(_:)` | `Authorization: Bearer …` (RFC 6750) | `Authorization.bearer(token)` |
-| `Authorization.basic(username:password:)` | `Authorization: Basic …` (RFC 7617, Base64-encoded) | `Authorization.basic(username: u, password: p)` |
+| `Authorization.<scheme>(_:)` | `Authorization: <scheme> <credentials>` (RFC 9110 §11.6.2) — scheme is `.bearer` / `.digest` / `.negotiate`; credentials go on the wire verbatim. | `Authorization.bearer(token)` |
+| `Authorization.custom(_:_:)` | Any other scheme, in wire order. | `Authorization.custom("token", key)` |
+| `Authorization.basic(username:password:)` | The one scheme whose credentials the package encodes — RFC 7617, Base64 of `user:password`. Pre-encoded ones go through `.custom("Basic")`. | `Authorization.basic(username: u, password: p)` |
 | `MIMEType.<case>.contentType` | Sets `Content-Type` (replaces). | `MIMEType.json.contentType` |
 | `MIMEType.<case>.accept` | Accumulates `Accept` header values. | `MIMEType.custom("application/vnd.x").accept` |
 
@@ -214,7 +215,7 @@ bytes are produced and what (if any) `Content-Type` is set:
 
 | Factory | What you supply | Sets `Content-Type` |
 |---|---|---|
-| `RequestBody.string(_ s:type:)` | `String` (UTF-8) + content-type string | yes (defaults `text/plain`) |
+| `RequestBody.string(_ s:type:)` | `String` (UTF-8) + a `MIMEType` | yes (defaults `.plainText`) |
 | `RequestBody.json(_ value:)` | `Encodable` value | `application/json` |
 | `RequestBody.urlEncoded(_ name:, _ value:)` | one form field, value contract same as `Query` (accumulates across blocks/loops) | `application/x-www-form-urlencoded` |
 | `RequestBody.urlEncoded(_ encodable:)` | `Encodable` (incl. `[String:String]`) | `application/x-www-form-urlencoded` |
@@ -250,9 +251,9 @@ let request = try RequestBlock {
     Endpoint("upload")
     RequestBody.multipart {
         MultipartPart.field(name: "user", value: "alice")
-        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: "image/png")
+        MultipartPart.data(name: "avatar", filename: "a.png", data: pngBytes, type: .png)
         for url in fileURLs {
-            MultipartPart.file(name: "files", fileURL: url, type: "application/octet-stream")
+            MultipartPart.file(name: "files", fileURL: url, type: .octetStream)
         }
     }
     BaseURL("https://api.example.com")
@@ -347,8 +348,9 @@ flowchart LR
 
     %% Auth
     RB --> AuthGroup["Authorization"]
-    AuthGroup --> A1["Authorization.bearer(token)"]
+    AuthGroup --> A1["Authorization.&lt;scheme&gt;(credentials)"]
     AuthGroup --> A2["Authorization.basic(username:password:)"]
+    AuthGroup --> A3["schemes:<br/>.bearer  .digest  .negotiate<br/>.custom(_ scheme, _ credentials)"]
 
     %% Body
     RB --> BodyGroup["RequestBody"]
@@ -360,7 +362,7 @@ flowchart LR
     B7 --> MP["MultipartPart"]
     MP --> MP1[".field(name:value:)"]
     MP --> MP2[".data(name:filename:data:type:)"]
-    MP --> MP3[".file(name:fileURL:type:)"]
+    MP --> MP3[".file(name:filename:fileURL:type:)"]
 
     %% Networking knobs
     RB --> NetGroup["Networking Knobs"]
